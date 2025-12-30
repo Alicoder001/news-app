@@ -113,40 +113,188 @@ async function main() {
   }
   console.log(`✅ Created ${tags.length} tags`);
 
-  // Update existing article with category and metadata
-  const aiCategory = await prisma.category.findUnique({
-    where: { slug: 'ai' },
+  // Create NewsSource
+  const newsSource = await prisma.newsSource.upsert({
+    where: { url: 'https://techcrunch.com' },
+    update: {},
+    create: {
+      name: 'TechCrunch',
+      url: 'https://techcrunch.com',
+      type: 'NEWS_API',
+      isActive: true,
+    },
   });
+  console.log('✅ Created news source');
 
-  const openaiTag = await prisma.tag.findUnique({
-    where: { slug: 'openai' },
-  });
+  // Sample articles data
+  const sampleArticles = [
+    {
+      slug: 'openai-gpt-5-yangi-model',
+      title: "OpenAI GPT-5 ni taqdim etdi - Sun'iy intellekt rivojlanishida yangi bosqich",
+      summary: "OpenAI kompaniyasi o'zining eng kuchli til modeli GPT-5 ni e'lon qildi. Yangi model mantiqiy fikrlash, matematik muammolarni yechish va ijodiy vazifalarni bajarishda oldingi modellardan ancha ustun.",
+      content: `<h3>GPT-5 ning yangi imkoniyatlari</h3>
+<p>OpenAI kompaniyasi bugun GPT-5 modelini rasmiy ravishda taqdim etdi. Yangi model sun'iy intellekt sohasida inqilobiy o'zgarishlarni va'da qilmoqda.</p>
+<p>GPT-5 o'zining oldingi versiyasiga nisbatan 10 barobar ko'proq kontekst oynasiga ega bo'lib, bu uzoq muloqotlarni saqlash va murakkab vazifalarni bajarishda katta afzallik beradi.</p>
+<h3>Asosiy yangiliklar</h3>
+<p>Model multimodal qobiliyatlarga ega - u matn, rasm, audio va video bilan ishlash imkoniyatiga ega. Bundan tashqari, real vaqt rejimida internetdan ma'lumot olish funksiyasi ham qo'shilgan.</p>`,
+      categorySlug: 'ai',
+      tagSlugs: ['openai', 'gpt'],
+      difficulty: Difficulty.INTERMEDIATE,
+      importance: Importance.CRITICAL,
+      readingTime: 7,
+    },
+    {
+      slug: 'kubernetes-2-0-yangi-versiya',
+      title: 'Kubernetes 2.0 chiqdi - Konteyner orkestatsiyasida yangi davr',
+      summary: "Kubernetes jamiyati uzoq kutilgan 2.0 versiyasini e'lon qildi. Yangi versiya avtomatik masshtablash, xavfsizlik va resurslarni boshqarish bo'yicha katta yaxshilanishlar olib keldi.",
+      content: `<h3>Kubernetes 2.0 nima yangiliklar olib keldi?</h3>
+<p>Kubernetes 2.0 konteyner orkestatsiyasida yangi standartlarni belgilaydi. Yangi versiya cloud-native ilovalarni boshqarishni yanada osonlashtiradi.</p>
+<p>Asosiy o'zgarishlardan biri - bu yangi "Smart Scheduler" funksiyasi bo'lib, u mashinali o'rganish algoritmlaridan foydalanib, resurslarni optimal taqsimlaydi.</p>`,
+      categorySlug: 'devops',
+      tagSlugs: ['kubernetes', 'docker'],
+      difficulty: Difficulty.ADVANCED,
+      importance: Importance.HIGH,
+      readingTime: 5,
+    },
+    {
+      slug: 'react-19-yangi-xususiyatlar',
+      title: 'React 19 rasmiy ravishda chiqdi - Server Components va yangi Hooks',
+      summary: "Meta kompaniyasi React 19 ni rasmiy ravishda e'lon qildi. Yangi versiya Server Components, yangi use() hook va ishlash tezligini sezilarli darajada oshiradi.",
+      content: `<h3>React 19 ning asosiy yangiliklari</h3>
+<p>React 19 frontend rivojlantirishda katta qadam bo'lib, u Server Components ni to'liq qo'llab-quvvatlaydi.</p>
+<p>Yangi use() hook Promise va Context bilan ishlashni soddalashtirib, kod yozishni osonlashtiradi.</p>`,
+      categorySlug: 'web',
+      tagSlugs: ['react', 'javascript'],
+      difficulty: Difficulty.INTERMEDIATE,
+      importance: Importance.HIGH,
+      readingTime: 6,
+    },
+    {
+      slug: 'aws-lambda-yangi-runtime',
+      title: "AWS Lambda Node.js 22 runtime ni qo'llab-quvvatlaydi",
+      summary: "Amazon Web Services Lambda funksiyalari uchun Node.js 22 runtime ni qo'shdi. Bu yangilik serverless arxitekturalar uchun yangi imkoniyatlar ochadi.",
+      content: `<h3>Node.js 22 Lambda da</h3>
+<p>AWS Lambda endi Node.js 22 ni to'liq qo'llab-quvvatlaydi, bu esa eng yangi JavaScript xususiyatlaridan foydalanish imkonini beradi.</p>
+<p>Yangi runtime 40% gacha tezroq cold start vaqtini ta'minlaydi.</p>`,
+      categorySlug: 'cloud',
+      tagSlugs: ['aws', 'javascript'],
+      difficulty: Difficulty.INTERMEDIATE,
+      importance: Importance.MEDIUM,
+      readingTime: 4,
+    },
+    {
+      slug: 'flutter-4-mobile-development',
+      title: "Flutter 4.0 e'lon qilindi - Cross-platform rivojlantirishda yangi imkoniyatlar",
+      summary: "Google Flutter 4.0 ni taqdim etdi. Yangi versiya Impeller rendering engine, yangi Material 3 komponentlari va desktop ilovalar uchun yaxshilanishlar olib keldi.",
+      content: `<h3>Flutter 4.0 yangiliklari</h3>
+<p>Flutter 4.0 cross-platform mobil rivojlantirishda yangi standartlarni belgilaydi. Impeller rendering engine barcha platformalarda 120fps animatsiyalarni ta'minlaydi.</p>
+<p>Dart 3.2 integratsiyasi pattern matching va sealed class larni qo'llab-quvvatlaydi.</p>`,
+      categorySlug: 'mobile',
+      tagSlugs: ['google', 'innovation'],
+      difficulty: Difficulty.INTERMEDIATE,
+      importance: Importance.MEDIUM,
+      readingTime: 5,
+    },
+    {
+      slug: 'python-3-13-yangi-versiya',
+      title: 'Python 3.13 chiqdi - GIL ni optional qilish va yangi xususiyatlar',
+      summary: "Python 3.13 Global Interpreter Lock (GIL) ni ixtiyoriy qilish imkoniyatini taqdim etdi. Bu multi-threaded ilovalar uchun katta yutuq hisoblanadi.",
+      content: `<h3>Python 3.13 inqilobi</h3>
+<p>Python 3.13 eng muhim o'zgarish - bu GIL ni o'chirish imkoniyati. Bu multi-core protsessorlardan to'liq foydalanish imkonini beradi.</p>
+<p>Yangi JIT compiler eksperimental rejimda mavjud bo'lib, ba'zi holatlarda 5x tezlikni oshiradi.</p>`,
+      categorySlug: 'data',
+      tagSlugs: ['python', 'innovation'],
+      difficulty: Difficulty.ADVANCED,
+      importance: Importance.HIGH,
+      readingTime: 8,
+    },
+    {
+      slug: 'ethereum-layer2-scaling',
+      title: 'Ethereum Layer 2 yechimlari - Polygon va Arbitrum tahlili',
+      summary: "Ethereum tarmoqidagi layer 2 yechimlar kriptovalyuta ekotizimida muhim rol o'ynaydi. Polygon va Arbitrum eng mashhur yechimlar sifatida tahlil qilinadi.",
+      content: `<h3>Layer 2 nima?</h3>
+<p>Layer 2 yechimlar Ethereum asosiy tarmog'idan tashqarida tranzaksiyalarni qayta ishlaydi, keyin ularni asosiy tarmoqqa birlashtiradi.</p>
+<p>Bu yondashuv gaz narxlarini 100 barobar kamaytirishi mumkin.</p>`,
+      categorySlug: 'blockchain',
+      tagSlugs: ['startup', 'innovation'],
+      difficulty: Difficulty.ADVANCED,
+      importance: Importance.MEDIUM,
+      readingTime: 10,
+    },
+    {
+      slug: 'zero-trust-security-model',
+      title: "Zero Trust xavfsizlik modeli - Zamonaviy kiberxavfsizlik yondashuvi",
+      summary: "Zero Trust modeli 'hech kimga ishonma, hammasini tekshir' prinsipi asosida qurilgan. Bu yondashuv zamonaviy tashkilotlar uchun eng samarali himoya usuli hisoblanadi.",
+      content: `<h3>Zero Trust nima?</h3>
+<p>Zero Trust xavfsizlik modeli an'anaviy perimetr asosidagi xavfsizlikdan tubdan farq qiladi. Bu modelda har bir so'rov, foydalanuvchi va qurilma doimiy tekshiriladi.</p>
+<p>Asosiy tamoyillar: minimal imtiyozlar, mikrosegmentatsiya va doimiy tekshirish.</p>`,
+      categorySlug: 'security',
+      tagSlugs: ['microsoft', 'google'],
+      difficulty: Difficulty.EXPERT,
+      importance: Importance.HIGH,
+      readingTime: 12,
+    },
+  ];
 
-  const gptTag = await prisma.tag.findUnique({
-    where: { slug: 'gpt' },
-  });
+  console.log('📝 Creating sample articles...');
 
-  if (aiCategory && openaiTag && gptTag) {
-    const firstArticle = await prisma.article.findFirst();
+  for (const articleData of sampleArticles) {
+    const category = await prisma.category.findUnique({
+      where: { slug: articleData.categorySlug },
+    });
 
-    if (firstArticle) {
-      await prisma.article.update({
-        where: { id: firstArticle.id },
-        data: {
-          categoryId: aiCategory.id,
-          tags: {
-            connect: [{ id: openaiTag.id }, { id: gptTag.id }],
-          },
-          readingTime: 7,
-          wordCount: 850,
-          difficulty: Difficulty.INTERMEDIATE,
-          importance: Importance.HIGH,
-        },
-      });
-      console.log('✅ Updated first article with category and tags');
-    }
+    const tags = await prisma.tag.findMany({
+      where: { slug: { in: articleData.tagSlugs } },
+    });
+
+    // Create RawArticle first
+    const rawArticle = await prisma.rawArticle.upsert({
+      where: { url: `https://example.com/${articleData.slug}` },
+      update: {},
+      create: {
+        title: articleData.title,
+        description: articleData.summary,
+        content: articleData.content,
+        url: `https://example.com/${articleData.slug}`,
+        publishedAt: new Date(),
+        sourceId: newsSource.id,
+        isProcessed: true,
+        processedAt: new Date(),
+      },
+    });
+
+    // Create Article
+    await prisma.article.upsert({
+      where: { slug: articleData.slug },
+      update: {
+        title: articleData.title,
+        summary: articleData.summary,
+        content: articleData.content,
+        categoryId: category?.id,
+        tags: { set: tags.map(t => ({ id: t.id })) },
+        readingTime: articleData.readingTime,
+        wordCount: articleData.content.length / 5,
+        difficulty: articleData.difficulty,
+        importance: articleData.importance,
+      },
+      create: {
+        slug: articleData.slug,
+        title: articleData.title,
+        summary: articleData.summary,
+        content: articleData.content,
+        originalUrl: `https://example.com/${articleData.slug}`,
+        rawArticleId: rawArticle.id,
+        categoryId: category?.id,
+        tags: { connect: tags.map(t => ({ id: t.id })) },
+        readingTime: articleData.readingTime,
+        wordCount: Math.round(articleData.content.length / 5),
+        difficulty: articleData.difficulty,
+        importance: articleData.importance,
+      },
+    });
   }
 
+  console.log(`✅ Created ${sampleArticles.length} sample articles`);
   console.log('🎉 Seeding completed!');
 }
 
