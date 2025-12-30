@@ -1,12 +1,16 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
+import { CategoryBadge } from '@/components/category-badge';
+import { Tag } from '@/components/tag';
 
-import { Article } from '@prisma/client';
-
-async function getArticles(): Promise<Article[]> {
+async function getArticles() {
   return await prisma.article.findMany({
     orderBy: { createdAt: 'desc' },
     take: 10,
+    include: {
+      category: true,
+      tags: true,
+    },
   });
 }
 
@@ -34,22 +38,53 @@ export default async function Home() {
       <main className="flex-grow container px-4 mx-auto pb-24 max-w-4xl">
         <div className="space-y-12">
           {articles.length > 0 ? (
-            articles.map((article: Article) => (
+            articles.map((article) => (
               <article key={article.id} className="group cursor-pointer">
                 <Link href={`/articles/${article.slug}`}>
                   <div className="flex flex-col md:flex-row gap-8 items-start p-6 rounded-2xl transition-all duration-300 hover:bg-white/5 border border-transparent hover:border-white/10">
                     <div className="flex-1 space-y-4">
-                      <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-widest text-foreground/40">
-                        <span>IT TRENDS</span>
-                        <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
-                        <span>{new Date(article.createdAt).toLocaleDateString()}</span>
+                      {/* Metadata Row */}
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {article.category && (
+                          <CategoryBadge category={article.category} size="sm" />
+                        )}
+                        <div className="flex items-center gap-2 text-xs text-foreground/40">
+                          <span>{new Date(article.createdAt).toLocaleDateString()}</span>
+                          {article.readingTime && (
+                            <>
+                              <span>•</span>
+                              <span>⏱️ {article.readingTime} daqiqa</span>
+                            </>
+                          )}
+                          {article.viewCount > 0 && (
+                            <>
+                              <span>•</span>
+                              <span>👁️ {article.viewCount}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Title */}
                       <h2 className="text-2xl font-bold group-hover:text-blue-400 transition-colors tracking-tight leading-snug">
                         {article.title}
                       </h2>
+
+                      {/* Summary */}
                       <p className="text-lg text-foreground/60 leading-relaxed font-light line-clamp-3">
                         {article.summary}
                       </p>
+
+                      {/* Tags */}
+                      {article.tags.length > 0 && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {article.tags.slice(0, 3).map((tag) => (
+                            <Tag key={tag.id} tag={tag} variant="subtle" />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Read More */}
                       <div className="pt-2 flex items-center gap-2 text-sm font-medium text-blue-400 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover:translate-x-0">
                         Read Analysis <span>→</span>
                       </div>

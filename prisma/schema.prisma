@@ -41,6 +41,31 @@ model RawArticle {
   createdAt       DateTime    @default(now())
 }
 
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String    // "Sun'iy Intellekt"
+  nameEn      String?   // For future i18n
+  description String?   @db.Text
+  icon        String?   // Emoji or icon name
+  color       String?   // Hex color
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([slug])
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  articles  Article[]
+  createdAt DateTime  @default(now())
+  
+  @@index([slug])
+}
+
 model Article {
   id              String      @id @default(cuid())
   slug            String      @unique
@@ -50,12 +75,47 @@ model Article {
   originalUrl     String
   rawArticleId    String      @unique
   rawArticle      RawArticle  @relation(fields: [rawArticleId], references: [id])
+  
+  // Category & Tags
+  categoryId      String?
+  category        Category?   @relation(fields: [categoryId], references: [id])
+  tags            Tag[]
+  
+  // Content Metadata
+  readingTime     Int?        // minutes
+  wordCount       Int?
+  difficulty      Difficulty  @default(INTERMEDIATE)
+  importance      Importance  @default(MEDIUM)
+  
+  // Engagement Metrics
+  viewCount       Int         @default(0)
+  shareCount      Int         @default(0)
+  
+  // Telegram
   telegramPosted  Boolean     @default(false)
   telegramPostId  String?
+  
+  // Meta
   language        String      @default("uz")
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   
   @@index([slug])
   @@index([createdAt])
+  @@index([categoryId])
+  @@index([viewCount])
+}
+
+enum Difficulty {
+  BEGINNER      // Boshlovchilar uchun
+  INTERMEDIATE  // O'rta
+  ADVANCED      // Murakkab
+  EXPERT        // Ekspertlar uchun
+}
+
+enum Importance {
+  LOW           // Ma'lumot uchun
+  MEDIUM        // Bilish kerak
+  HIGH          // Juda muhim
+  CRITICAL      // Game-changer
 }
