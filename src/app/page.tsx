@@ -108,7 +108,7 @@ export default async function HomePage() {
                         <span>{new Date(article.createdAt).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}</span>
                     </div>
 
-                    <Link href={`/article/${article.slug}`} className="block space-y-1.5">
+                    <Link href={`/articles/${article.slug}`} className="block space-y-1.5">
                       <h3 className="text-base font-serif font-bold leading-snug group-hover:text-foreground/70 transition-colors line-clamp-2">
                         {article.title}
                       </h3>

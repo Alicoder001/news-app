@@ -28,7 +28,7 @@ export async function TrendingSection() {
             {trendingArticles.map((article, index) => (
           <Link
             key={article.id}
-            href={`/article/${article.slug}`}
+            href={`/articles/${article.slug}`}
             className="group block"
           >
             <div className="flex gap-3 items-start min-h-[72px]">

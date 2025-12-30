@@ -85,7 +85,7 @@ export function HeroCarousel({ articles }: HeroCarouselProps) {
                       <span>{new Date(article.createdAt).toLocaleDateString('uz-UZ')}</span>
                    </div>
 
-                   <Link href={`/article/${article.slug}`} className="block group-hover/carousel:opacity-95 transition-opacity">
+                   <Link href={`/articles/${article.slug}`} className="block group-hover/carousel:opacity-95 transition-opacity">
                       <h2 className="text-2xl md:text-3xl font-serif font-bold leading-tight tracking-tight text-foreground mb-2">
                         {article.title}
                       </h2>
