@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model NewsSource {
+  id          String   @id @default(cuid())
+  name        String
+  url         String   @unique
+  type        SourceType @default(NEWS_API)
+  isActive    Boolean  @default(true)
+  lastFetched DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  RawArticle  RawArticle[]
+}
+
+enum SourceType {
+  NEWS_API
+  RSS
+  SCRAPER
+}
+
+model RawArticle {
+  id              String      @id @default(cuid())
+  externalId      String?     @unique // ID from the original source
+  title           String
+  description     String?     @db.Text
+  content         String?     @db.Text
+  url             String      @unique
+  publishedAt     DateTime?
+  sourceId        String
+  source          NewsSource  @relation(fields: [sourceId], references: [id])
+  isProcessed     Boolean     @default(false)
+  processedAt     DateTime?
+  Article         Article?
+  createdAt       DateTime    @default(now())
+}
+
+model Article {
+  id              String      @id @default(cuid())
+  slug            String      @unique
+  title           String      // AI processed title
+  summary         String?     @db.Text // AI generated summary
+  content         String      @db.Text // AI generated canonical content
+  originalUrl     String
+  rawArticleId    String      @unique
+  rawArticle      RawArticle  @relation(fields: [rawArticleId], references: [id])
+  telegramPosted  Boolean     @default(false)
+  telegramPostId  String?
+  language        String      @default("uz")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@index([slug])
+  @@index([createdAt])
+}

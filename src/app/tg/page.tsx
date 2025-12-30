@@ -1,6 +1,5 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
-
 import { Article } from '@prisma/client';
 
 async function getArticles(): Promise<Article[]> {
@@ -10,12 +9,12 @@ async function getArticles(): Promise<Article[]> {
   });
 }
 
-export default async function Home() {
+export default async function TelegramMiniApp() {
   const articles = await getArticles();
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
+      {/* Hero Section - same as main website */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="container px-4 mx-auto text-center">
           <div className="inline-block px-4 py-1.5 mb-6 text-sm font-medium tracking-wide uppercase rounded-full bg-white/5 border border-white/10 backdrop-blur-sm animate-fade-in text-blue-400">
@@ -30,13 +29,13 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Articles Feed */}
+      {/* Articles Feed - same as main website */}
       <main className="flex-grow container px-4 mx-auto pb-24 max-w-4xl">
         <div className="space-y-12">
           {articles.length > 0 ? (
             articles.map((article: Article) => (
               <article key={article.id} className="group cursor-pointer">
-                <Link href={`/articles/${article.slug}`}>
+                <Link href={`/tg/article/${article.slug}`}>
                   <div className="flex flex-col md:flex-row gap-8 items-start p-6 rounded-2xl transition-all duration-300 hover:bg-white/5 border border-transparent hover:border-white/10">
                     <div className="flex-1 space-y-4">
                       <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-widest text-foreground/40">
@@ -66,7 +65,7 @@ export default async function Home() {
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Footer - same as main website */}
       <footer className="py-12 border-t border-white/5">
         <div className="container px-4 mx-auto flex flex-col md:flex-row justify-between items-center gap-8 opacity-40">
           <div className="text-sm font-medium tracking-tight">© 2024 ANTIGRAVITY NEWS</div>

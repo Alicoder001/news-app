@@ -1,36 +1,175 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 AI-Powered IT News Platform
 
-## Getting Started
+AI yordamida IT yangiliklarini avtomatik yig'uvchi, tahlil qiluvchi va o'zbek tiliga tarjima qiluvchi platforma.
 
-First, run the development server:
+## ✨ Xususiyatlar
 
+- 🤖 **AI-Powered**: OpenAI/Gemini yordamida maqolalarni tahlil qilish va tarjima qilish
+- 📱 **Telegram Mini App**: Telegram ichida to'g'ridan-to'g'ri ishlaydi
+- 🎨 **Premium UI**: Glassmorphism va dark mode
+- 🔄 **Auto Pipeline**: Yangiliklarni avtomatik yig'ish, filtrlash va post qilish
+- 🌐 **Multi-Source**: NewsAPI, RSS, va boshqa manbalar
+- 📊 **Database**: PostgreSQL + Prisma ORM
+
+## 🛠 Tech Stack
+
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS 4
+- **Backend**: Next.js API Routes, Prisma
+- **Database**: PostgreSQL
+- **AI**: OpenAI GPT / Google Gemini
+- **Telegram**: Bot API + Mini App SDK
+- **Deployment**: Vercel/Railway
+
+## 📦 Installation
+
+1. **Clone repository:**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repo-url>
+cd news-app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install dependencies:**
+```bash
+pnpm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Setup environment variables:**
+```bash
+cp env.example .env
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.env` fayliga quyidagilarni kiriting:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/news_db"
+NEWS_API_KEY="your_newsapi_key"
+OPENAI_API_KEY="your_openai_key"
+TELEGRAM_BOT_TOKEN="your_bot_token"
+TELEGRAM_CHAT_ID="@your_channel"
+```
 
-## Learn More
+4. **Setup database:**
+```bash
+pnpm prisma generate
+pnpm prisma migrate dev
+pnpm prisma db seed
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. **Run development server:**
+```bash
+pnpm dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📱 Telegram Mini App
 
-## Deploy on Vercel
+Telegram Mini App sozlash uchun: [TELEGRAM_MINI_APP.md](./docs/TELEGRAM_MINI_APP.md)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🏗 Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+news-app/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── api/               # API routes
+│   │   ├── articles/[slug]/   # Article detail page
+│   │   └── page.tsx           # Home page
+│   ├── components/            # React components
+│   │   ├── telegram-provider.tsx
+│   │   └── telegram-back-button.tsx
+│   └── lib/
+│       ├── prisma.ts          # Prisma client
+│       ├── telegram/          # Telegram utilities
+│       └── news/              # News services
+│           ├── providers/     # News providers (NewsAPI, RSS)
+│           ├── services/      # Business logic
+│           │   ├── ai.service.ts
+│           │   ├── telegram.service.ts
+│           │   ├── filtering.service.ts
+│           │   └── news-pipeline.service.ts
+│           └── repositories/  # Database operations
+├── prisma/
+│   ├── schema.prisma          # Database schema
+│   ├── seed.ts                # Seed data
+│   └── migrations/            # Database migrations
+└── docs/                      # Documentation
+```
+
+## 🔄 News Pipeline
+
+```
+1. Fetch     → NewsAPI/RSS'dan yangiliklarni olish
+2. Filter    → Clickbait/spam'ni filtrlash
+3. AI        → Tahlil qilish va o'zbek tiliga tarjima
+4. Save      → Database'ga saqlash
+5. Telegram  → Kanalga avtomatik post qilish
+```
+
+## 🎯 API Endpoints
+
+- `GET /api/news/sync` - Yangiliklarni fetch qilish
+- `POST /api/news/process` - Pipeline'ni ishga tushirish
+
+## 🧪 Testing
+
+```bash
+# Type checking
+pnpm tsc --noEmit
+
+# Linting
+pnpm lint
+
+# Database studio
+pnpm prisma studio
+```
+
+## 📊 Database Schema
+
+- **NewsSource**: Yangilik manbalari (NewsAPI, TechCrunch, etc.)
+- **RawArticle**: Xom maqolalar (original)
+- **Article**: AI tomonidan qayta ishlangan maqolalar
+
+## 🚀 Deployment
+
+### Vercel
+
+```bash
+vercel deploy
+```
+
+### Railway
+
+```bash
+railway up
+```
+
+Environment variables'ni production'da ham sozlang!
+
+## 📝 TODO
+
+- [ ] Real AI integration (OpenAI/Gemini)
+- [ ] Real Telegram Bot API
+- [ ] Admin Dashboard
+- [ ] RSS Provider
+- [ ] Cron job for auto-sync
+- [ ] Analytics
+- [ ] User authentication
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) first.
+
+## 📄 License
+
+MIT License - see [LICENSE](./LICENSE)
+
+## 🙏 Acknowledgments
+
+- [Next.js](https://nextjs.org)
+- [Prisma](https://prisma.io)
+- [Telegram](https://telegram.org)
+- [NewsAPI](https://newsapi.org)
+
+---
+
+Made with ❤️ by Antigravity
