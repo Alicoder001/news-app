@@ -71,50 +71,53 @@ export default async function TelegramCategoryPage({ params }: CategoryPageProps
                 href={`/tg/article/${article.slug}`}
                 className="group block"
               >
-                  <article className="flex gap-4 items-center pb-4 border-b border-foreground/5 last:border-0 relative">
-                     {/* Content */}
-                     <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex items-center gap-2 text-[9px] uppercase tracking-wider font-bold text-foreground/40">
-                            {article.category && (
-                                <span style={{ color: article.category.color || 'inherit' }} className="brightness-90">
-                                   {article.category.name}
-                                </span>
-                            )}
-                            <span className="opacity-30">•</span>
-                            <span>{new Date(article.createdAt).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}</span>
-                        </div>
-
-                        <h2 className="text-base font-serif font-bold leading-snug group-hover:text-foreground/70 transition-colors line-clamp-3">
-                           {article.title}
-                        </h2>
-
-                        {article.summary && (
-                           <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-2">
-                              {article.summary}
-                           </p>
-                        )}
-                        
-                         <div className="flex items-center justify-between pt-1">
-                            <div className="flex items-center gap-2">
-                                <span className="text-[9px] text-muted-foreground">{article.readingTime || 4} min</span>
-                                {article.difficulty && <DifficultyBadge difficulty={article.difficulty} />}
+                  <article className="flex flex-col gap-3 pb-4 border-b border-foreground/5 last:border-0 relative">
+                     {/* Top Row: Content & Image */}
+                     <div className="flex gap-4 items-center">
+                         <div className="flex-1 min-w-0 space-y-2">
+                            <div className="flex items-center gap-2 text-[9px] uppercase tracking-wider font-bold text-foreground/40">
+                                {article.category && (
+                                    <span style={{ color: article.category.color || 'inherit' }} className="brightness-90">
+                                       {article.category.name}
+                                    </span>
+                                )}
+                                <span className="opacity-30">•</span>
+                                <span>{new Date(article.createdAt).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}</span>
                             </div>
-                            <ArticleActions title={article.title} slug={article.slug} />
+
+                            <h2 className="text-base font-serif font-bold leading-snug group-hover:text-foreground/70 transition-colors line-clamp-3">
+                               {article.title}
+                            </h2>
+
+                            {article.summary && (
+                               <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-2">
+                                  {article.summary}
+                               </p>
+                            )}
                          </div>
+
+                         {/* Thumbnail */}
+                         {article.imageUrl && (
+                            <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-muted shrink-0 border border-foreground/5">
+                                <Image
+                                    src={article.imageUrl}
+                                    alt={article.title}
+                                    fill
+                                    className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
+                                    sizes="80px"
+                                />
+                            </div>
+                         )}
                      </div>
 
-                     {/* Thumbnail */}
-                     {article.imageUrl && (
-                        <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-muted shrink-0 border border-foreground/5">
-                            <Image
-                                src={article.imageUrl}
-                                alt={article.title}
-                                fill
-                                className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
-                                sizes="80px"
-                            />
+                     {/* Bottom Row: Actions */}
+                     <div className="flex items-center justify-between pt-1">
+                        <div className="flex items-center gap-2">
+                            <span className="text-[9px] text-muted-foreground">{article.readingTime || 4} min</span>
+                            {article.difficulty && <DifficultyBadge difficulty={article.difficulty} />}
                         </div>
-                     )}
+                        <ArticleActions title={article.title} slug={article.slug} />
+                     </div>
                   </article>
               </Link>
             ))

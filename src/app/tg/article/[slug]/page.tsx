@@ -2,8 +2,10 @@ import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Globe } from 'lucide-react';
 import { TelegramBackButton } from '@/components/telegram-back-button';
 import { DifficultyBadge } from '@/components/badges';
+import { ArticleActions } from '@/components/article-actions';
 
 interface ArticlePageProps {
   params: Promise<{
@@ -53,7 +55,7 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
       <TelegramBackButton />
       
       {/* Navigation */}
-      <div className="container px-4 mx-auto pt-6 mb-6">
+      <div className="container px-8 mx-auto pt-6 mb-6">
         <Link
           href="/tg"
           className="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest font-bold text-foreground/40 hover:text-foreground transition-colors"
@@ -62,25 +64,40 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
         </Link>
       </div>
 
-      <article className="container px-4 mx-auto max-w-2xl">
+      <article className="container px-8 mx-auto max-w-2xl">
+
+
         {/* Header Section */}
         <header className="mb-8 space-y-4">
-          <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-wider font-bold text-foreground/40">
-            {article.category && (
-              <span style={{ color: article.category.color || 'inherit' }} className="text-foreground/80">
-                {article.category.name}
-              </span>
-            )}
-            <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
-            <span>{publishedDate}</span>
-            <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
-            <span>{article.readingTime || 4} min o'qish</span>
-            {article.difficulty && (
-               <>
-                 <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
-                 <DifficultyBadge difficulty={article.difficulty} />
-               </>
-            )}
+          <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-wider font-bold text-foreground/40">
+                {article.category && (
+                  <span style={{ color: article.category.color || 'inherit' }} className="text-foreground/80">
+                    {article.category.name}
+                  </span>
+                )}
+                <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
+                <span>{publishedDate}</span>
+                <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
+                <span>{article.readingTime || 4} min o'qish</span>
+                {article.difficulty && (
+                   <>
+                     <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
+                     <DifficultyBadge difficulty={article.difficulty} />
+                   </>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                 <Link 
+                    href={`/article/${article.slug}`}
+                    target="_blank" 
+                    className="p-1.5 rounded-full hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Webda o'qish"
+                 >
+                    <Globe className="w-4 h-4" />
+                 </Link>
+                 <ArticleActions title={article.title} slug={article.slug} />
+              </div>
           </div>
 
           <h1 className="text-2xl md:text-3xl font-serif font-bold leading-tight tracking-tight text-foreground">
@@ -150,6 +167,18 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
             </a>
         </div>
       </article>
+      
+      {/* Bottom Actions */}
+      <div className="container px-8 mx-auto mt-12 border-t border-foreground/5 pt-8 text-center">
+            <Link 
+                href={`/article/${article.slug}`}
+                target="_blank"
+                className="inline-flex items-center gap-2 text-xs font-medium text-foreground/40 hover:text-foreground transition-colors uppercase tracking-widest bg-foreground/[0.02] px-4 py-2 rounded-full"
+            >
+                <Globe className="w-3 h-3" />
+                <span>Saytda o'qish</span>
+            </Link>
+      </div>
       
       {/* Spacer for bottom safe area if needed */}
       <div className="h-8" />
