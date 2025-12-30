@@ -8,6 +8,7 @@ import { CategoryNav } from '@/components/category-nav';
 import { TrendingSection } from '@/components/trending-section';
 import { NewsletterSignup } from '@/components/newsletter-signup';
 import { AboutWidget } from '@/components/about-widget';
+import { HeroCarousel } from '@/components/hero-carousel';
 
 async function getArticles() {
   return await prisma.article.findMany({
@@ -20,8 +21,9 @@ async function getArticles() {
   });
 }
 
-async function getFeaturedArticle() {
-  return await prisma.article.findFirst({
+// Fetch top 3 critical/featured articles
+async function getFeaturedArticles() {
+  return await prisma.article.findMany({
     where: {
       importance: 'CRITICAL',
     },
@@ -31,18 +33,33 @@ async function getFeaturedArticle() {
       rawArticle: { include: { source: true } }
     },
     orderBy: { createdAt: 'desc' },
+    take: 3,
   });
 }
 
 export default async function HomePage() {
-  const [allArticles, featuredArticle] = await Promise.all([
+  const [allArticles, featuredArticles] = await Promise.all([
     getArticles(),
-    getFeaturedArticle(),
+    getFeaturedArticles(),
   ]);
 
-  const regularArticles = featuredArticle 
-    ? allArticles.filter(a => a.id !== featuredArticle.id)
-    : allArticles;
+  // Ensure we have at least 3 featured articles for the carousel
+  let finalFeaturedArticles = [...featuredArticles];
+  
+  if (finalFeaturedArticles.length < 3) {
+    const existingIds = new Set(finalFeaturedArticles.map(a => a.id));
+    const remainingNeeded = 3 - finalFeaturedArticles.length;
+    
+    const fillArticles = allArticles
+        .filter(a => !existingIds.has(a.id))
+        .slice(0, remainingNeeded);
+        
+    finalFeaturedArticles = [...finalFeaturedArticles, ...fillArticles];
+  }
+  
+  // Exclude featured articles from the regular list
+  const featuredIds = new Set(finalFeaturedArticles.map(a => a.id));
+  const regularArticles = allArticles.filter(a => !featuredIds.has(a.id));
 
   return (
     <div className="space-y-8">
@@ -51,50 +68,9 @@ export default async function HomePage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <main className="lg:col-span-9 space-y-10">
           
-          {/* COMPACT HERO SECTION */}
-          {featuredArticle && (
-            <article className="group relative grid grid-cols-1 md:grid-cols-2 gap-6 items-start border-b border-border pb-8">
-               <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-muted">
-                  {featuredArticle.imageUrl && (
-                    <Image 
-                      src={featuredArticle.imageUrl} 
-                      alt={featuredArticle.title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      priority
-                    />
-                  )}
-               </div>
-
-               <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
-                    {featuredArticle.category && (
-                      <span style={{ color: featuredArticle.category.color || 'inherit' }} className="brightness-90">
-                        {featuredArticle.category.name}
-                      </span>
-                    )}
-                    <span className="w-0.5 h-0.5 rounded-full bg-foreground/20"></span>
-                    <span>{new Date(featuredArticle.createdAt).toLocaleDateString('uz-UZ')}</span>
-                  </div>
-
-                  <Link href={`/article/${featuredArticle.slug}`} className="block group-hover:opacity-95 transition-opacity">
-                    <h2 className="text-2xl md:text-3xl font-serif font-bold leading-tight tracking-tight text-foreground mb-2">
-                      {featuredArticle.title}
-                    </h2>
-                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-3">
-                      {featuredArticle.summary}
-                    </p>
-                  </Link>
-
-                  <div className="flex items-center gap-3 pt-1">
-                     {/* Removed large author info for compactness */}
-                     <span className="text-xs text-muted-foreground font-medium">Antigravity Team</span>
-                     <span className="text-muted-foreground text-xs">•</span>
-                     <span className="text-xs text-muted-foreground">{featuredArticle.readingTime || 5} min read</span>
-                  </div>
-               </div>
-            </article>
+          {/* HERO CAROUSEL SECTION */}
+          {finalFeaturedArticles.length > 0 && (
+             <HeroCarousel articles={finalFeaturedArticles} />
           )}
 
           {/* DENSE ARTICLE GRID (3 Columns) */}
