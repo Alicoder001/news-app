@@ -1,12 +1,32 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
 import { DifficultyBadge } from '@/components/badges';
 import { TGCategoryNav } from '@/components/tg-category-nav';
 import { ArticleActions } from '@/components/article-actions';
 
-async function getArticles() {
-  return await prisma.article.findMany({
+interface CategoryPageProps {
+  params: Promise<{
+    slug: string;
+  }>;
+}
+
+async function getCategoryArticles(slug: string) {
+  const category = await prisma.category.findUnique({
+    where: { slug },
+  });
+
+  if (!category) {
+    return null;
+  }
+
+  const articles = await prisma.article.findMany({
+    where: {
+      category: {
+        slug: slug,
+      },
+    },
     orderBy: { createdAt: 'desc' },
     take: 20,
     include: {
@@ -14,19 +34,28 @@ async function getArticles() {
       rawArticle: { include: { source: true } }
     },
   });
+
+  return { category, articles };
 }
 
-export default async function TelegramMiniApp() {
-  const articles = await getArticles();
+export default async function TelegramCategoryPage({ params }: CategoryPageProps) {
+  const { slug } = await params;
+  const data = await getCategoryArticles(slug);
+
+  if (!data) {
+    notFound();
+  }
+
+  const { category, articles } = data;
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
        {/* Mobile Header */}
-       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-foreground/5 px-8 py-5 mb-8">
+       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-foreground/5 px-4 py-3">
           <div className="flex items-center justify-between">
              <h1 className="text-xl font-serif font-black tracking-tight">Antigravity.</h1>
              <div className="text-[10px] font-medium uppercase tracking-wider opacity-60">
-                Latest Updates
+                {category.name}
              </div>
           </div>
        </header>
@@ -91,7 +120,7 @@ export default async function TelegramMiniApp() {
             ))
           ) : (
             <div className="text-center py-12">
-              <p className="text-foreground/40 text-sm">Hozircha yangiliklar yo'q.</p>
+              <p className="text-foreground/40 text-sm">Bu kategoriyada yangiliklar yo'q.</p>
             </div>
           )}
       </main>

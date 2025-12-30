@@ -32,7 +32,7 @@ async function getArticle(slug: string) {
   return article;
 }
 
-export default async function TelegramArticlePage({ params }: ArticlePageProps) {
+export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
   const article = await getArticle(slug);
 
@@ -49,23 +49,23 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
     : 'Noma\'lum sana';
 
   return (
-    <div className="min-h-screen pb-20 bg-background text-foreground">
+    <div className="min-h-screen pb-20">
       <TelegramBackButton />
       
       {/* Navigation */}
-      <div className="container px-4 mx-auto pt-6 mb-6">
+      <div className="max-w-3xl mx-auto mb-8">
         <Link
-          href="/tg"
+          href="/"
           className="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest font-bold text-foreground/40 hover:text-foreground transition-colors"
         >
-          <span>←</span> Orqaga
+          <span>←</span> Bosh sahifa
         </Link>
       </div>
 
-      <article className="container px-4 mx-auto max-w-2xl">
+      <article className="max-w-3xl mx-auto">
         {/* Header Section */}
-        <header className="mb-8 space-y-4">
-          <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-wider font-bold text-foreground/40">
+        <header className="mb-10 space-y-6">
+          <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-wider font-bold text-foreground/40">
             {article.category && (
               <span style={{ color: article.category.color || 'inherit' }} className="text-foreground/80">
                 {article.category.name}
@@ -83,36 +83,36 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
             )}
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-serif font-bold leading-tight tracking-tight text-foreground">
+          <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-serif font-bold leading-[1.1] tracking-tight text-foreground">
             {article.title}
           </h1>
 
           {article.summary && (
-            <p className="text-base leading-relaxed text-muted-foreground font-light border-l-[1.5px] border-foreground/10 pl-4 italic">
+            <p className="text-lg md:text-xl leading-relaxed text-muted-foreground font-light border-l-2 border-foreground/10 pl-5 italic">
               {article.summary}
             </p>
           )}
 
            {/* Hero Image */}
            {article.imageUrl && (
-            <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden bg-muted mt-6 shadow-sm border border-foreground/5">
+            <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden bg-muted mt-8 shadow-sm border border-foreground/5">
               <Image
                 src={article.imageUrl}
                 alt={article.title}
                 fill
                 className="object-cover"
                 priority
-                sizes="(max-width: 768px) 100vw, 600px"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 800px"
               />
             </div>
           )}
         </header>
 
         {/* Separator */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-8" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-12" />
 
         {/* Content */}
-        <div className="prose prose-base prose-headings:font-serif prose-headings:font-bold prose-p:text-foreground/80 prose-p:leading-7 prose-li:text-foreground/80 prose-strong:text-foreground max-w-none">
+        <div className="prose prose-lg prose-headings:font-serif prose-headings:font-bold prose-p:text-foreground/80 prose-p:leading-8 prose-li:text-foreground/80 prose-strong:text-foreground max-w-none">
           <div
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
@@ -120,12 +120,12 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
 
         {/* Tags */}
         {article.tags.length > 0 && (
-          <div className="mt-10 pt-6 border-t border-foreground/5">
+          <div className="mt-16 pt-8 border-t border-foreground/5">
             <div className="flex flex-wrap gap-2">
               {article.tags.map((tag) => (
                 <span 
                   key={tag.id}
-                  className="px-2.5 py-1 bg-foreground/5 text-foreground/60 text-[10px] rounded-full font-medium"
+                  className="px-3 py-1 bg-foreground/5 text-foreground/60 text-xs rounded-full font-medium hover:bg-foreground/10 transition-colors cursor-pointer"
                 >
                   #{tag.name}
                 </span>
@@ -135,8 +135,8 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
         )}
 
         {/* Source Link */}
-        <div className="mt-6 flex items-center justify-between text-xs text-foreground/40 border-t border-foreground/5 pt-4">
-            <div className="flex items-center gap-1.5">
+        <div className="mt-8 flex items-center justify-between text-xs text-foreground/40 border-t border-foreground/5 pt-6">
+            <div className="flex items-center gap-2">
                 <span>Manba:</span>
                 <span className="font-medium text-foreground/60">{article.rawArticle.source.name}</span>
             </div>
@@ -150,9 +150,6 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
             </a>
         </div>
       </article>
-      
-      {/* Spacer for bottom safe area if needed */}
-      <div className="h-8" />
     </div>
   );
 }
