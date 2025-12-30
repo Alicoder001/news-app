@@ -148,6 +148,17 @@ body {
   font-style: italic;
 }
 
+/* Hide scrollbar utilities */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
 .title-gradient {
   background: linear-gradient(to right, hsl(var(--foreground)), hsl(var(--foreground) / 0.6));
   -webkit-background-clip: text;

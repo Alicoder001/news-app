@@ -21,26 +21,26 @@ export async function TrendingSection() {
 
   return (
     <section>
-      <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/40 mb-6">
+      <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/40 mb-4">
         Trending Now
       </h3>
-      <div className="space-y-6">
+      <div className="space-y-4">
             {trendingArticles.map((article, index) => (
           <Link
             key={article.id}
             href={`/article/${article.slug}`}
             className="group block"
           >
-            <div className="flex gap-4 items-start">
-              <span className="text-xl font-light text-foreground/10 group-hover:text-foreground/20 transition-colors font-serif italic w-6 text-center mt-1">
+            <div className="flex gap-3 items-start">
+              <span className="text-lg font-light text-foreground/10 group-hover:text-foreground/20 transition-colors font-serif italic w-4 text-center mt-0.5">
                 {index + 1}
               </span>
               
-              <div className="space-y-2 grow">
+              <div className="space-y-1 grow">
                 <h4 className="text-sm font-medium leading-snug group-hover:text-foreground/80 transition-colors line-clamp-2">
                   {article.title}
                 </h4>
-                <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider font-bold text-foreground/30">
+                <div className="flex items-center gap-2 text-[9px] uppercase tracking-wider font-bold text-foreground/30">
                   <span>{article.category?.name}</span>
                   <span className="opacity-30">•</span>
                   <span>{article.viewCount} views</span>
@@ -48,13 +48,13 @@ export async function TrendingSection() {
               </div>
 
               {article.imageUrl && (
-                 <div className="w-16 h-12 relative rounded bg-muted overflow-hidden shrink-0">
+                 <div className="w-12 h-10 relative rounded bg-muted overflow-hidden shrink-0">
                     <Image
                        src={article.imageUrl}
                        alt=""
                        fill
                        className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                       sizes="64px"
+                       sizes="48px"
                     />
                  </div>
               )}
