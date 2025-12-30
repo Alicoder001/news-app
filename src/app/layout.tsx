@@ -37,7 +37,7 @@ export default function RootLayout({
             
             <Header />
             
-            <main className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-12 pt-28">
+            <main className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-12 pt-20">
               {children}
             </main>
           </div>

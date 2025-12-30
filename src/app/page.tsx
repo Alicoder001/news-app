@@ -66,7 +66,7 @@ export default async function HomePage() {
       <CategoryNav />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <main className="lg:col-span-9 space-y-10">
+        <main className="lg:col-span-9 space-y-6">
           
           {/* HERO CAROUSEL SECTION */}
           {finalFeaturedArticles.length > 0 && (
@@ -108,10 +108,15 @@ export default async function HomePage() {
                         <span>{new Date(article.createdAt).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}</span>
                     </div>
 
-                    <Link href={`/article/${article.slug}`} className="block space-y-1">
-                      <h3 className="text-lg font-serif font-bold leading-snug group-hover:text-foreground/70 transition-colors line-clamp-2">
+                    <Link href={`/article/${article.slug}`} className="block space-y-1.5">
+                      <h3 className="text-base font-serif font-bold leading-snug group-hover:text-foreground/70 transition-colors line-clamp-2">
                         {article.title}
                       </h3>
+                      {article.summary && (
+                        <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2">
+                          {article.summary}
+                        </p>
+                      )}
                     </Link>
                     
                     <div className="flex items-center gap-2 pt-1 border-t border-foreground/5 mt-2">

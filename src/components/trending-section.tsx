@@ -31,12 +31,12 @@ export async function TrendingSection() {
             href={`/article/${article.slug}`}
             className="group block"
           >
-            <div className="flex gap-3 items-start">
-              <span className="text-lg font-light text-foreground/10 group-hover:text-foreground/20 transition-colors font-serif italic w-4 text-center mt-0.5">
+            <div className="flex gap-3 items-start min-h-[72px]">
+              <span className="text-lg font-light text-foreground/10 group-hover:text-foreground/20 transition-colors font-serif italic w-4 text-center mt-0.5 shrink-0">
                 {index + 1}
               </span>
               
-              <div className="space-y-1 grow">
+              <div className="space-y-2 flex-1 min-w-0">
                 <h4 className="text-sm font-medium leading-snug group-hover:text-foreground/80 transition-colors line-clamp-2">
                   {article.title}
                 </h4>
@@ -48,7 +48,7 @@ export async function TrendingSection() {
               </div>
 
               {article.imageUrl && (
-                 <div className="w-12 h-10 relative rounded bg-muted overflow-hidden shrink-0">
+                 <div className="w-12 h-12 relative rounded bg-muted overflow-hidden shrink-0">
                     <Image
                        src={article.imageUrl}
                        alt=""

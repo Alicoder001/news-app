@@ -18,7 +18,7 @@ export async function CategoryNav() {
   });
 
   return (
-    <nav className="w-full border-b border-foreground/5 bg-background/50 backdrop-blur-sm sticky top-[52px] z-40 mb-6">
+    <nav className="w-full border-b border-foreground/5 bg-background/50 backdrop-blur-sm sticky top-[60px] z-40 mb-6">
       <div className="flex items-center gap-1 overflow-x-auto py-2 no-scrollbar mask-gradient-x">
         <Link 
             href="/"
