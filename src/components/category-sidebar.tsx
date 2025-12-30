@@ -39,7 +39,7 @@ export async function CategorySidebar() {
       </section>
 
       {/* About Platform */}
-      <section className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+      <section className="glass-card p-6 rounded-2xl">
         <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/40 mb-4">
           Platforma Haqida
         </h3>

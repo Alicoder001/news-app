@@ -36,7 +36,7 @@ export function NewsletterSignup() {
   }
 
   return (
-    <section className="p-8 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+    <section className="glass-card p-8 rounded-2xl">
       <h3 className="text-lg font-medium mb-2">Newsletter</h3>
       <p className="text-xs text-foreground/50 mb-6 leading-relaxed">
         Haftalik eng muhim tahliliy maqolalarni birinchilardan bo'lib oling.
@@ -49,7 +49,7 @@ export function NewsletterSignup() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-500/30 focus:outline-none transition-all text-sm"
+          className="w-full px-4 py-3 rounded-xl bg-foreground/[0.03] border border-foreground/[0.06] focus:border-primary/20 focus:outline-none transition-all text-sm"
           disabled={status === 'loading'}
         />
         <button

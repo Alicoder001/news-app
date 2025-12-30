@@ -1,19 +1,81 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-border: hsl(var(--border));
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  
+  --shadow-premium: 0 20px 50px -12px rgba(0, 0, 0, 0.08), 0 10px 20px -10px rgba(0, 0, 0, 0.03);
+  --shadow-premium-dark: 0 20px 50px -12px rgba(0, 0, 0, 0.4), 0 10px 20px -10px rgba(0, 0, 0, 0.2);
+}
+
 :root {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 4.9%;
-  --card-foreground: 0 0% 98%;
-  --primary: 263.4 70% 50.4%;
+  /* Vibrant Light Mode: Ice white background with a hint of blue */
+  --background: 220 33% 98%;
+  /* Darker Navy/Black for maximum contrast and sharpness */
+  --foreground: 222 47% 5%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 5%;
+  
+  --primary: 222 47% 5%;
   --primary-foreground: 210 40% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --border: 240 3.7% 15.9%;
-  --ring: 263.4 70% 50.4%;
-  --radius: 1rem;
+  
+  --secondary: 210 40% 95%;
+  --secondary-foreground: 222 47% 5%;
+  
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 40%;
+  
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 5%;
+  
+  /* Borders are barely there, letting the glass and shadows do the work */
+  --border: 224 30% 90%;
+  --radius: 2rem;
+  
+  color-scheme: light;
+}
+
+.dark {
+  /* Deep Cosmic Dark Mode */
+  --background: 224 47% 3%;
+  --foreground: 210 40% 98%;
+  
+  --card: 224 47% 4%;
+  --card-foreground: 210 40% 98%;
+  
+  --primary: 210 40% 98%;
+  --primary-foreground: 224 47% 12%;
+  
+  --secondary: 222 47% 11%;
+  --secondary-foreground: 210 40% 98%;
+  
+  --muted: 222 47% 11%;
+  --muted-foreground: 215 20% 65%;
+  
+  --accent: 222 47% 11%;
+  --accent-foreground: 210 40% 98%;
+  
+  --border: 222 47% 11%;
+  
+  color-scheme: dark;
 }
 
 body {
@@ -21,63 +83,77 @@ body {
   color: hsl(var(--foreground));
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
+/* Premium Glassmorphism */
 .glass-card {
-  transition: opacity 0.2s ease;
+  @apply backdrop-blur-2xl transition-all duration-500;
+  background: linear-gradient(
+    135deg, 
+    hsl(var(--foreground) / 0.02), 
+    hsl(var(--foreground) / 0.01)
+  );
+  border: 1px solid hsl(var(--foreground) / 0.05);
+  box-shadow: var(--shadow-premium);
+}
+
+.dark .glass-card {
+  background: linear-gradient(
+    135deg, 
+    hsl(var(--foreground) / 0.05), 
+    hsl(var(--foreground) / 0.02)
+  );
+  border: 1px solid hsl(var(--foreground) / 0.08);
+  box-shadow: var(--shadow-premium-dark);
 }
 
 .glass-card:hover {
-  opacity: 0.7;
-}
-
-.gradient-text {
-  color: #fff;
+  @apply -translate-y-1 shadow-2xl;
+  background: linear-gradient(
+    135deg, 
+    hsl(var(--foreground) / 0.04), 
+    hsl(var(--foreground) / 0.02)
+  );
+  border-color: hsl(var(--foreground) / 0.1);
 }
 
 /* Article Content Styling */
 .article-content h3 {
   font-size: 1.5rem;
   font-weight: 700;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
   color: hsl(var(--foreground));
+  font-family: var(--font-serif, serif);
 }
 
 .article-content p {
   font-size: 1.125rem;
-  line-height: 1.8;
-  margin-bottom: 1.5rem;
-  color: hsl(var(--foreground) / 0.8);
-}
-
-.article-content ul,
-.article-content ol {
-  margin: 1.5rem 0;
-  padding-left: 2rem;
-}
-
-.article-content li {
-  font-size: 1.125rem;
-  line-height: 1.8;
-  margin-bottom: 0.75rem;
-  color: hsl(var(--foreground) / 0.8);
+  line-height: 1.85;
+  margin-bottom: 1.75rem;
+  color: hsl(var(--foreground) / 0.95);
+  font-weight: 400;
 }
 
 .article-content a {
-  color: #60a5fa;
-  text-decoration: underline;
-  transition: color 0.2s;
-}
-
-.article-content a:hover {
-  color: #93c5fd;
+  @apply text-primary underline underline-offset-4 decoration-primary/20 hover:decoration-primary transition-all duration-300;
 }
 
 .article-content code {
-  background-color: hsl(var(--muted));
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.9em;
+  @apply bg-muted px-1.5 py-0.5 rounded text-[0.9em] font-mono;
+}
+
+/* Vibrant Typography */
+.font-serif-italic {
+  font-family: var(--font-serif, serif);
+  font-style: italic;
+}
+
+.title-gradient {
+  background: linear-gradient(to right, hsl(var(--foreground)), hsl(var(--foreground) / 0.6));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

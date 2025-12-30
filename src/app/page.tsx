@@ -6,6 +6,7 @@ import { ImportanceBadge, DifficultyBadge } from '@/components/badges';
 import { CategorySidebar } from '@/components/category-sidebar';
 import { TrendingSection } from '@/components/trending-section';
 import { NewsletterSignup } from '@/components/newsletter-signup';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 async function getArticles() {
   return await prisma.article.findMany({
@@ -45,13 +46,14 @@ export default async function HomePage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-7xl">
       {/* Hero Header */}
-      <header className="mb-20">
+      <header className="mb-20 flex justify-between items-start gap-8">
         <div className="max-w-3xl">
-          <h1 className="text-5xl font-serif italic mb-4 tracking-tight">Antigravity News</h1>
-          <p className="text-xl text-foreground/50 font-light leading-relaxed">
+          <h1 className="text-6xl font-serif italic mb-6 tracking-tighter title-gradient">Antigravity News</h1>
+          <p className="text-xl text-foreground/60 font-light leading-relaxed">
             Axborot shovqinidan tashqari. Biz sizga dunyoni tushunish uchun kerak bo'lgan kontekst va chuqur tahlilni yetkazamiz.
           </p>
         </div>
+        <ThemeToggle />
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
@@ -62,7 +64,7 @@ export default async function HomePage() {
           {featuredArticle && (
             <section>
               <Link href={`/article/${featuredArticle.slug}`} className="group block">
-                <article className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.02] border border-white/[0.05] p-10 lg:p-14 hover:bg-white/[0.04] transition-all duration-700">
+                <article className="glass-card relative overflow-hidden rounded-[2.5rem] p-10 lg:p-14">
                   <div className="space-y-8">
                     {/* Featured Badge */}
                     <div className="flex items-center gap-4 flex-wrap">
@@ -176,7 +178,7 @@ export default async function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="mt-24 pt-12 border-t border-white/[0.05] text-center">
+      <footer className="mt-24 pt-12 border-t border-foreground/[0.05] text-center">
         <p className="text-xs text-foreground/30 uppercase tracking-[0.2em] font-medium">
           &copy; {new Date().getFullYear()} Antigravity. Barcha huquqlar himoyalangan.
         </p>
