@@ -20,20 +20,32 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-transparent",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out border-b border-transparent",
         scrolled
-          ? "bg-background/80 backdrop-blur-xl border-foreground/5 shadow-sm py-2"
+          ? "bg-background/80 backdrop-blur-xl border-border/40 shadow-sm py-3"
           : "bg-transparent py-6"
       )}
     >
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between">
-        <Link 
-          href="/" 
-          className="text-2xl font-serif font-bold tracking-tight text-foreground hover:opacity-80 transition-opacity"
-        >
-          Antigravity.
-        </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-12">
+          <Link 
+            href="/" 
+            className="text-2xl font-serif font-black tracking-tight text-foreground hover:opacity-80 transition-opacity"
+          >
+            Antigravity.
+          </Link>
+          
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
+            <Link href="#" className="hover:text-foreground transition-colors">News</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">Analysis</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">Podcasts</Link>
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-4">
+           {/* Placeholder for Search or other actions */}
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

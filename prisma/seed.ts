@@ -142,6 +142,7 @@ async function main() {
       difficulty: Difficulty.INTERMEDIATE,
       importance: Importance.CRITICAL,
       readingTime: 7,
+      imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1200&q=80',
     },
     {
       slug: 'kubernetes-2-0-yangi-versiya',
@@ -155,6 +156,7 @@ async function main() {
       difficulty: Difficulty.ADVANCED,
       importance: Importance.HIGH,
       readingTime: 5,
+      imageUrl: 'https://images.unsplash.com/photo-1667372393119-c81c0c60cf32?auto=format&fit=crop&w=1200&q=80',
     },
     {
       slug: 'react-19-yangi-xususiyatlar',
@@ -168,6 +170,7 @@ async function main() {
       difficulty: Difficulty.INTERMEDIATE,
       importance: Importance.HIGH,
       readingTime: 6,
+      imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=1200&q=80',
     },
     {
       slug: 'aws-lambda-yangi-runtime',
@@ -181,6 +184,7 @@ async function main() {
       difficulty: Difficulty.INTERMEDIATE,
       importance: Importance.MEDIUM,
       readingTime: 4,
+      imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
     },
     {
       slug: 'flutter-4-mobile-development',
@@ -194,6 +198,7 @@ async function main() {
       difficulty: Difficulty.INTERMEDIATE,
       importance: Importance.MEDIUM,
       readingTime: 5,
+      imageUrl: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=80',
     },
     {
       slug: 'python-3-13-yangi-versiya',
@@ -207,6 +212,7 @@ async function main() {
       difficulty: Difficulty.ADVANCED,
       importance: Importance.HIGH,
       readingTime: 8,
+      imageUrl: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=1200&q=80',
     },
     {
       slug: 'ethereum-layer2-scaling',
@@ -220,6 +226,7 @@ async function main() {
       difficulty: Difficulty.ADVANCED,
       importance: Importance.MEDIUM,
       readingTime: 10,
+      imageUrl: 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&w=1200&q=80',
     },
     {
       slug: 'zero-trust-security-model',
@@ -233,6 +240,7 @@ async function main() {
       difficulty: Difficulty.EXPERT,
       importance: Importance.HIGH,
       readingTime: 12,
+      imageUrl: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&w=1200&q=80',
     },
   ];
 
@@ -276,6 +284,7 @@ async function main() {
         wordCount: articleData.content.length / 5,
         difficulty: articleData.difficulty,
         importance: articleData.importance,
+        imageUrl: articleData.imageUrl,
       },
       create: {
         slug: articleData.slug,
@@ -290,6 +299,7 @@ async function main() {
         wordCount: Math.round(articleData.content.length / 5),
         difficulty: articleData.difficulty,
         importance: articleData.importance,
+        imageUrl: articleData.imageUrl,
       },
     });
   }

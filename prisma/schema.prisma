@@ -72,6 +72,7 @@ model Article {
   title           String      // AI processed title
   summary         String?     @db.Text // AI generated summary
   content         String      @db.Text // AI generated canonical content
+  imageUrl        String?     // Featured image
   originalUrl     String
   rawArticleId    String      @unique
   rawArticle      RawArticle  @relation(fields: [rawArticleId], references: [id])

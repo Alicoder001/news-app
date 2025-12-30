@@ -17,18 +17,18 @@ export async function CategorySidebar() {
     <div className="space-y-10">
       {/* Categories */}
       <section>
-        <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/40 mb-6">
-          Kategoriyalar
-        </h3>
+      <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 mb-6">
+        Trending Now
+      </h3>
         <div className="space-y-1">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <Link
               key={category.id}
               href={`/category/${category.slug}`}
-              className="group flex items-center justify-between py-2 px-3 rounded-lg hover:bg-white/5 transition-all text-sm"
+              className="group flex items-center justify-between py-2.5 px-4 rounded-xl hover:bg-muted/50 transition-all duration-300 text-sm border border-transparent hover:border-border/50"
             >
-              <span className="text-foreground/70 group-hover:text-foreground transition-colors">
-                {category.name}
+              <span className="text-xl font-light text-foreground/10 group-hover:text-foreground/20 transition-colors font-serif italic w-6 text-center">
+                {index + 1}
               </span>
               <span className="text-[10px] font-mono text-foreground/30 group-hover:text-foreground/50">
                 {String(category._count.articles).padStart(2, '0')}

@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export async function TrendingSection() {
   const trendingArticles = await prisma.article.findMany({
@@ -24,17 +25,18 @@ export async function TrendingSection() {
         Trending Now
       </h3>
       <div className="space-y-6">
-        {trendingArticles.map((article, index) => (
+            {trendingArticles.map((article, index) => (
           <Link
             key={article.id}
             href={`/article/${article.slug}`}
             className="group block"
           >
-            <div className="flex gap-4">
-              <span className="text-xl font-light text-foreground/10 group-hover:text-foreground/20 transition-colors font-serif italic">
+            <div className="flex gap-4 items-start">
+              <span className="text-xl font-light text-foreground/10 group-hover:text-foreground/20 transition-colors font-serif italic w-6 text-center mt-1">
                 {index + 1}
               </span>
-              <div className="space-y-2">
+              
+              <div className="space-y-2 grow">
                 <h4 className="text-sm font-medium leading-snug group-hover:text-foreground/80 transition-colors line-clamp-2">
                   {article.title}
                 </h4>
@@ -42,14 +44,20 @@ export async function TrendingSection() {
                   <span>{article.category?.name}</span>
                   <span className="opacity-30">•</span>
                   <span>{article.viewCount} views</span>
-                  {article.readingTime && (
-                    <>
-                      <span className="opacity-30">•</span>
-                      <span>{article.readingTime} min</span>
-                    </>
-                  )}
                 </div>
               </div>
+
+              {article.imageUrl && (
+                 <div className="w-16 h-12 relative rounded bg-muted overflow-hidden shrink-0">
+                    <Image
+                       src={article.imageUrl}
+                       alt=""
+                       fill
+                       className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                       sizes="64px"
+                    />
+                 </div>
+              )}
             </div>
           </Link>
         ))}
