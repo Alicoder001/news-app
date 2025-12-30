@@ -48,8 +48,8 @@ export default async function HomePage() {
       {/* Hero Header */}
       <header className="mb-20 flex justify-between items-start gap-8">
         <div className="max-w-3xl">
-          <h1 className="text-6xl font-serif italic mb-6 tracking-tighter title-gradient">Antigravity News</h1>
-          <p className="text-xl text-foreground/60 font-light leading-relaxed">
+          <h1 className="text-6xl font-serif italic mb-6 tracking-tighter text-foreground">Antigravity News</h1>
+          <p className="text-xl text-muted-foreground font-light leading-relaxed">
             Axborot shovqinidan tashqari. Biz sizga dunyoni tushunish uchun kerak bo'lgan kontekst va chuqur tahlilni yetkazamiz.
           </p>
         </div>
@@ -64,11 +64,11 @@ export default async function HomePage() {
           {featuredArticle && (
             <section>
               <Link href={`/article/${featuredArticle.slug}`} className="group block">
-                <article className="glass-card relative overflow-hidden rounded-[2.5rem] p-10 lg:p-14">
-                  <div className="space-y-8">
+                <article className="glass-card relative overflow-hidden rounded-[1.5rem] p-8 lg:p-12">
+                  <div className="space-y-6">
                     {/* Featured Badge */}
                     <div className="flex items-center gap-4 flex-wrap">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-foreground/10 text-foreground/40">
+                      <span className="text-[11px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-foreground/10 text-foreground/60 bg-foreground/[0.02]">
                         Featured
                       </span>
                       {featuredArticle.category && (
@@ -77,28 +77,27 @@ export default async function HomePage() {
                       <ImportanceBadge importance={featuredArticle.importance} />
                     </div>
 
-                    <h2 className="text-4xl lg:text-5xl font-medium leading-[1.15] tracking-tight group-hover:text-foreground/90 transition-colors">
+                    <h2 className="text-3xl lg:text-4xl font-serif font-medium leading-[1.2] tracking-tight group-hover:text-foreground/80 transition-colors">
                       {featuredArticle.title}
                     </h2>
 
-                    <p className="text-lg text-foreground/50 line-clamp-3 font-light leading-relaxed max-w-2xl">
+                    <p className="text-lg text-muted-foreground line-clamp-3 leading-relaxed max-w-2xl">
                       {featuredArticle.summary}
                     </p>
 
                     {/* Metadata */}
-                    <div className="flex items-center gap-6 flex-wrap text-xs font-bold uppercase tracking-widest text-foreground/30">
-                      <span>{featuredArticle.rawArticle.source.name}</span>
-                      <span className="opacity-30">/</span>
+                    <div className="flex items-center gap-4 flex-wrap text-xs font-medium uppercase tracking-wider text-muted-foreground/80 pt-2">
+                      <span className="font-bold text-foreground/80">{featuredArticle.rawArticle.source.name}</span>
+                      <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
                       <span>{new Date(featuredArticle.createdAt).toLocaleDateString('uz-UZ')}</span>
                       {featuredArticle.readingTime && (
                         <>
-                          <span className="opacity-30">/</span>
+                          <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
                           <span>{featuredArticle.readingTime} min read</span>
                         </>
                       )}
-                      <span className="opacity-30">/</span>
-                      <DifficultyBadge difficulty={featuredArticle.difficulty} />
                     </div>
+
 
                     {/* Tags */}
                     {featuredArticle.tags.length > 0 && (

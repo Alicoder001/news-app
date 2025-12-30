@@ -29,10 +29,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="min-h-screen relative overflow-hidden bg-background text-foreground transition-colors duration-1000">
-            {/* Background decoration - Vibrant and deep to provide the "wow" factor */}
-            <div className="fixed top-[-15%] left-[-15%] w-[60%] h-[60%] bg-purple-600/[0.1] dark:bg-purple-600/[0.2] rounded-full blur-[160px] pointer-events-none animate-pulse" style={{ animationDuration: '8s' }} />
-            <div className="fixed bottom-[-15%] right-[-15%] w-[60%] h-[60%] bg-blue-600/[0.1] dark:bg-blue-600/[0.2] rounded-full blur-[160px] pointer-events-none animate-pulse" style={{ animationDuration: '12s' }} />
-            <div className="fixed top-[20%] right-[10%] w-[30%] h-[30%] bg-pink-500/[0.05] dark:bg-pink-500/[0.1] rounded-full blur-[120px] pointer-events-none" />
+            {/* Background decoration - Subtler, deep atmospheric glow */}
+            <div className="fixed top-[-20%] left-[-20%] w-[70%] h-[70%] bg-purple-900/[0.03] dark:bg-purple-900/[0.08] rounded-full blur-[180px] pointer-events-none" />
+            <div className="fixed bottom-[-20%] right-[-20%] w-[70%] h-[70%] bg-blue-900/[0.03] dark:bg-blue-900/[0.08] rounded-full blur-[180px] pointer-events-none" />
             
             <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
               {children}
