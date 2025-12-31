@@ -7,7 +7,16 @@
     "loading": "Yuklanmoqda...",
     "error": "Xatolik yuz berdi",
     "notFound": "Topilmadi",
-    "copyright": "© {year} Antigravity. Barcha huquqlar himoyalangan."
+    "copyright": "© {year} Antigravity. Barcha huquqlar himoyalangan.",
+    "community": {
+      "telegramTitle": "Hamjamiyatga qo'shiling",
+      "channelTitle": "Telegram Kanal",
+      "channelDesc": "Eng so'nggi tahlillar, yangiliklar va sun'iy intellekt olamidagi muhim voqealarni birinchi bo'lib kuzatib boring.",
+      "channelBtn": "Obuna bo'lish",
+      "botTitle": "Mini App & Bot",
+      "botDesc": "Telegramni tark etmasdan maqolalarni o'qing, saqlang va muhim yangiliklar haqida xabarnomalarni oling.",
+      "botBtn": "Botni ishga tushirish"
+    }
   },
   "nav": {
     "news": "Yangiliklar",
@@ -49,6 +58,8 @@
     "critical": "O'ta muhim"
   },
   "home": {
+    "seoTitle": "Antigravity - O'zbekiston IT Yangiliklar Portali",
+    "seoKeywords": "IT yangiliklar, sun'iy intellekt, dasturlash, texnologiya, AI, O'zbekiston",
     "latestAnalysis": "So'nggi Tahlillar",
     "trending": "Trendda",
     "newsletter": {

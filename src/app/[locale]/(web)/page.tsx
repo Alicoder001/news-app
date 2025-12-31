@@ -9,6 +9,8 @@ import { TrendingSection } from '@/components/trending-section';
 import { NewsletterSignup } from '@/components/newsletter-signup';
 import { AboutWidget } from '@/components/about-widget';
 import { HeroCarousel } from '@/components/hero-carousel';
+import { TelegramCta } from '@/components/telegram-cta';
+import { FeaturesBanner } from '@/components/features-banner';
 import { getTranslations } from 'next-intl/server';
 
 async function getArticles() {
@@ -67,20 +69,30 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
+      {/* SEO: Main H1 with keywords - hidden visually but accessible */}
+      <h1 className="sr-only">
+        {t('seoTitle')} - IT Yangiliklar, Sun'iy Intellekt, Dasturlash, Texnologiya O'zbekistonda
+      </h1>
+      
       <CategoryNav />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <main className="lg:col-span-9 space-y-6">
+        <main className="lg:col-span-9 space-y-8">
           
           {/* HERO CAROUSEL SECTION */}
           {finalFeaturedArticles.length > 0 && (
              <HeroCarousel articles={finalFeaturedArticles} />
           )}
 
+          {/* FEATURES BANNER */}
+          <FeaturesBanner />
+
           {/* DENSE ARTICLE GRID (3 Columns) */}
           <section className="space-y-6">
             <div className="flex items-center justify-between border-b border-foreground/5 pb-3">
-              <h2 className="text-[11px] font-bold uppercase tracking-[0.3em] text-foreground/40">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.3em] text-foreground/70">
+                {/* SEO Keywords in H2 */}
+                <span className="sr-only">IT Yangiliklar va Texnologiya Tahlillari - </span>
                 {t('latestAnalysis')}
               </h2>
             </div>
@@ -90,9 +102,9 @@ export default async function HomePage() {
                 <article key={article.id} className="group flex flex-col gap-3">
                   {/* Thumbnail */}
                   <div className="relative aspect-[3/2] w-full rounded-lg overflow-hidden bg-muted">
-                    {article.imageUrl && (
+                    {(article as unknown as { imageUrl?: string }).imageUrl && (
                       <Image 
-                        src={article.imageUrl} 
+                        src={(article as unknown as { imageUrl: string }).imageUrl} 
                         alt={article.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -117,7 +129,7 @@ export default async function HomePage() {
                         {article.title}
                       </h3>
                       {article.summary && (
-                        <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2">
+                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
                           {article.summary}
                         </p>
                       )}
@@ -140,13 +152,17 @@ export default async function HomePage() {
           <AboutWidget />
           <NewsletterSignup />
         </aside>
-
-        <footer className="lg:col-span-12 mt-16 pt-8 border-t border-foreground/[0.05] text-center">
-          <p className="text-[10px] text-foreground/30 uppercase tracking-[0.2em] font-medium">
-            {tCommon('copyright', { year: new Date().getFullYear() })}
-          </p>
-        </footer>
       </div>
+
+      <div className="pt-16">
+        <TelegramCta />
+      </div>
+
+      <footer className="mt-16 pt-8 border-t border-foreground/[0.05] text-center">
+        <p className="text-[10px] text-foreground/60 uppercase tracking-[0.2em] font-medium">
+          {tCommon('copyright', { year: new Date().getFullYear() })}
+        </p>
+      </footer>
     </div>
   );
 }

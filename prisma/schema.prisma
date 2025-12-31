@@ -120,3 +120,84 @@ enum Importance {
   HIGH          // Juda muhim
   CRITICAL      // Game-changer
 }
+
+// ============================================
+// ADMIN PANEL MODELS
+// ============================================
+
+/// Pipeline execution history for monitoring
+model PipelineRun {
+  id            String         @id @default(cuid())
+  status        PipelineStatus @default(RUNNING)
+  startedAt     DateTime       @default(now())
+  completedAt   DateTime?
+  
+  // Metrics
+  articlesFound     Int @default(0)
+  articlesProcessed Int @default(0)
+  articlesSkipped   Int @default(0)
+  errors            Int @default(0)
+  
+  // AI Usage
+  tokensUsed    Int   @default(0)
+  aiCost        Float @default(0)
+  
+  // Duration in milliseconds
+  durationMs    Int?
+  
+  // Error details
+  errorLog      String? @db.Text
+  
+  @@index([startedAt])
+  @@index([status])
+}
+
+enum PipelineStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+/// AI API usage tracking for cost monitoring
+model AIUsage {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  
+  // Model info
+  model       String   // gpt-4o-mini, gpt-4o, etc.
+  operation   String   // article_process, summary, categorize
+  
+  // Token counts
+  promptTokens     Int
+  completionTokens Int
+  totalTokens      Int
+  
+  // Cost in USD
+  cost        Float
+  
+  // Reference to processed article (optional)
+  articleId   String?
+  
+  @@index([createdAt])
+  @@index([model])
+}
+
+/// System settings key-value store
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  type      SettingType @default(STRING)
+  updatedAt DateTime @updatedAt
+  
+  @@index([key])
+}
+
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+

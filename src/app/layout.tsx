@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" });
+const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-sans" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-serif" });
 
 export const metadata: Metadata = {
   title: "IT News | AI Powered Tech Media",
@@ -16,14 +16,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning>
+    <html lang="uz" suppressHydrationWarning className="bg-background">
       <head>
         {/* Telegram WebApp SDK */}
         <script src="https://telegram.org/js/telegram-web-app.js" async></script>
       </head>
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
+      <body className={`${plusJakarta.variable} ${outfit.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>
   );
 }
+

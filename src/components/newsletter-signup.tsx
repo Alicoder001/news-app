@@ -40,7 +40,7 @@ export function NewsletterSignup() {
   return (
     <section className="glass-card p-8 rounded-2xl">
       <h3 className="text-lg font-medium mb-2">{t('title')}</h3>
-      <p className="text-xs text-foreground/50 mb-6 leading-relaxed">
+      <p className="text-xs text-foreground/70 mb-6 leading-relaxed">
         {t('description')}
       </p>
 

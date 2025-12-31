@@ -1,118 +1,94 @@
 @import "tailwindcss";
 
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
+/* Light Mode Theme - Default values */
 @theme {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-border: hsl(var(--border));
+  --color-background: #f5f7fa;
+  --color-foreground: #0f172a;
   
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  
+  --color-primary: #0f172a;
+  --color-primary-foreground: #f5f7fa;
+  
+  --color-secondary: #e8ecf2;
+  --color-secondary-foreground: #0f172a;
+  
+  --color-muted: #e8ecf2;
+  --color-muted-foreground: #334155;
+  
+  --color-accent: #3b82f6;
+  --color-accent-foreground: #ffffff;
+  
+  --color-border: #d6dce6;
+  --color-input: #d6dce6;
+  --color-ring: #3b82f6;
+  
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
   
   --shadow-premium: 0 20px 50px -12px rgba(0, 0, 0, 0.08), 0 10px 20px -10px rgba(0, 0, 0, 0.03);
   --shadow-premium-dark: 0 20px 50px -12px rgba(0, 0, 0, 0.4), 0 10px 20px -10px rgba(0, 0, 0, 0.2);
 }
 
-:root {
-  /* Unified Slate Light Mode: Harmonizes with Dark Mode's slate palette */
-  --background: 215 25% 97%;     /* Slate-50: Soft slate-tinted white */
-  --foreground: 222 47% 11%;     /* Slate-900: Deep slate for text */
-  
-  --card: 0 0% 100%;             /* Pure white cards for contrast */
-  --card-foreground: 222 47% 11%;
-  
-  --primary: 222 47% 11%;        /* Slate-900 */
-  --primary-foreground: 215 25% 97%;
-  
-  --secondary: 215 20% 93%;      /* Slate-100 */
-  --secondary-foreground: 222 47% 11%;
-  
-  --muted: 215 20% 93%;          /* Slate-100: Visible but subtle */
-  --muted-foreground: 215 16% 47%; /* Slate-500: Good readability */
-  
-  --accent: 217 91% 60%;         /* Blue-500: Vivid accent for both modes */
-  --accent-foreground: 0 0% 100%;
-  
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-
-  --border: 215 20% 87%;         /* Slate-200: Clear borders */
-  --input: 215 20% 87%;
-  --ring: 217 91% 60%;           /* Blue ring for focus states */
-  
-  --radius: 1rem;
-  
-  color-scheme: light;
-}
-
+/* Dark Mode Overrides */
 .dark {
-  /* Professional Dark Mode: Deep, rich slate - unchanged */
-  --background: 224 71% 4%;
-  --foreground: 210 20% 98%;
+  --color-background: #030712;
+  --color-foreground: #f8fafc;
   
-  --card: 224 71% 4%;
-  --card-foreground: 210 20% 98%;
+  --color-card: #030712;
+  --color-card-foreground: #f8fafc;
   
-  --primary: 210 20% 98%;
-  --primary-foreground: 220.9 39.3% 11%;
+  --color-primary: #f8fafc;
+  --color-primary-foreground: #0f172a;
   
-  --secondary: 215 27.9% 16.9%;
-  --secondary-foreground: 210 20% 98%;
+  --color-secondary: #1e293b;
+  --color-secondary-foreground: #f8fafc;
   
-  --muted: 215 27.9% 16.9%;
-  --muted-foreground: 217.9 10.6% 64.9%;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
   
-  --accent: 217 91% 60%;         /* Same blue accent as light mode */
-  --accent-foreground: 0 0% 100%;
+  --color-accent: #3b82f6;
+  --color-accent-foreground: #ffffff;
   
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 20% 98%;
+  --color-border: #1e293b;
+  --color-input: #1e293b;
+  --color-ring: #3b82f6;
   
-  --border: 215 27.9% 16.9%;
-  --input: 215 27.9% 16.9%;
-  --ring: 217 91% 60%;           /* Blue ring for focus states */
-  
-  color-scheme: dark;
+  --color-destructive: #7f1d1d;
+  --color-destructive-foreground: #f8fafc;
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  color: var(--color-foreground);
   font-family: var(--font-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.01em;
-  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 /* Refined Glassmorphism - Cleaner, less "plastic" */
 .glass-card {
   @apply backdrop-blur-md transition-all duration-300;
-  background: hsl(var(--card) / 0.6);
-  border: 1px solid hsl(var(--border));
+  background: color-mix(in srgb, var(--color-card) 60%, transparent);
+  border: 1px solid var(--color-border);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
 }
 
 .dark .glass-card {
-  background: hsl(var(--card) / 0.4);
-  border: 1px solid hsl(var(--border) / 0.5);
+  background: color-mix(in srgb, var(--color-card) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
 .glass-card:hover {
   @apply -translate-y-[2px] shadow-lg;
-  border-color: hsl(var(--foreground) / 0.1);
+  border-color: color-mix(in srgb, var(--color-foreground) 10%, transparent);
 }
 
 /* Article Content Styling */
@@ -121,7 +97,7 @@ body {
   font-weight: 700;
   margin-top: 2.5rem;
   margin-bottom: 1.25rem;
-  color: hsl(var(--foreground));
+  color: var(--color-foreground);
   font-family: var(--font-serif, serif);
 }
 
@@ -129,7 +105,7 @@ body {
   font-size: 1.125rem;
   line-height: 1.85;
   margin-bottom: 1.75rem;
-  color: hsl(var(--foreground) / 0.95);
+  color: color-mix(in srgb, var(--color-foreground) 95%, transparent);
   font-weight: 400;
 }
 
@@ -157,9 +133,8 @@ body {
   scrollbar-width: none;
 }
 
-
 .title-gradient {
-  background: linear-gradient(to right, hsl(var(--foreground)), hsl(var(--foreground) / 0.6));
+  background: linear-gradient(to right, var(--color-foreground), color-mix(in srgb, var(--color-foreground) 60%, transparent));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

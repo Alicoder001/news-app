@@ -2,8 +2,17 @@ import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Metadata } from 'next';
 import { TelegramBackButton } from '@/components/telegram-back-button';
 import { DifficultyBadge } from '@/components/badges';
+import { 
+  generateArticleMetadata, 
+  generateArticleJsonLd,
+  generateBreadcrumbJsonLd 
+} from '@/lib/seo';
+import { ShareButtons } from '@/components/share-buttons';
+import { SITE_CONFIG } from '@/lib/config/social';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 interface ArticlePageProps {
   params: Promise<{
@@ -25,11 +34,48 @@ async function getArticle(slug: string) {
     },
   });
 
-  if (!article) {
-    return null;
-  }
-
   return article;
+}
+
+/**
+ * Generate Static Params for all articles
+ * This enables static generation at build time
+ */
+export async function generateStaticParams() {
+  const articles = await prisma.article.findMany({
+    select: { slug: true },
+    take: 100, // Limit to most recent 100 articles for build performance
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return articles.map((article) => ({
+    slug: article.slug,
+  }));
+}
+
+/**
+ * Generate SEO Metadata
+ */
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArticle(slug);
+  
+  if (!article) {
+    return {
+      title: 'Maqola topilmadi',
+    };
+  }
+  
+  return generateArticleMetadata({
+    title: article.title,
+    summary: article.summary,
+    slug: article.slug,
+    imageUrl: article.imageUrl,
+    category: article.category?.name,
+    tags: article.tags.map(t => t.name),
+    createdAt: article.createdAt,
+    updatedAt: article.updatedAt,
+  });
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
@@ -48,8 +94,39 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       })
     : 'Noma\'lum sana';
 
+  // Generate JSON-LD for SEO
+  const articleJsonLd = generateArticleJsonLd({
+    title: article.title,
+    summary: article.summary,
+    content: article.content,
+    slug: article.slug,
+    imageUrl: article.imageUrl,
+    category: article.category?.name,
+    createdAt: article.createdAt,
+    updatedAt: article.updatedAt,
+    readingTime: article.readingTime,
+    wordCount: article.wordCount,
+    source: article.rawArticle.source.name,
+  });
+
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: 'Bosh sahifa', url: 'https://news-app.uz' },
+    { name: article.category?.name || 'Maqolalar', url: `https://news-app.uz/category/${article.category?.slug || 'all'}` },
+    { name: article.title, url: `https://news-app.uz/articles/${article.slug}` },
+  ]);
+
   return (
     <div className="min-h-screen pb-20">
+      {/* JSON-LD Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: articleJsonLd }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }}
+      />
+      
       <TelegramBackButton />
       
       {/* Navigation */}
@@ -114,7 +191,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         {/* Content */}
         <div className="prose prose-lg prose-headings:font-serif prose-headings:font-bold prose-p:text-foreground/80 prose-p:leading-8 prose-li:text-foreground/80 prose-strong:text-foreground max-w-none">
           <div
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.content) }}
           />
         </div>
 
@@ -148,6 +225,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             >
                 Asl manbani o'qish <span>↗</span>
             </a>
+        </div>
+
+        {/* Share Section */}
+        <div className="mt-8 pt-6 border-t border-foreground/5">
+          <ShareButtons
+            url={`${SITE_CONFIG.url}/uz/articles/${article.slug}`}
+            title={article.title}
+            summary={article.summary || undefined}
+          />
         </div>
       </article>
     </div>

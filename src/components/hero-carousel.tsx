@@ -33,11 +33,9 @@ export function HeroCarousel({ articles }: HeroCarouselProps) {
     emblaApi.on('select', onSelect);
     emblaApi.on('reInit', onSelect);
     return () => {
-        if (emblaApi) {
-            // emblaApi.off('select', onSelect); // emblaApi.off is not a function in v8? checking docs... usually it is. 
-            // actually reInit logic handles cleanup internally mostly but let's stick to safe usage.
-            // If API differs, minimal cleanup:
-        }
+      // Cleanup event listeners to prevent memory leaks
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
     };
   }, [emblaApi, onSelect]);
 

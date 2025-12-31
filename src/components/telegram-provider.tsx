@@ -37,15 +37,21 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
           setUser(userData);
 
           // Enable haptic feedback on interactions
-          document.addEventListener('click', () => {
+          const handleClick = () => {
             webApp.HapticFeedback.selectionChanged();
-          });
+          };
+          document.addEventListener('click', handleClick);
 
           console.log('✅ Telegram Mini App initialized', {
             platform: webApp.platform,
             version: webApp.version,
             user: userData,
           });
+
+          // Cleanup function
+          return () => {
+            document.removeEventListener('click', handleClick);
+          };
         }
       }
 
@@ -53,15 +59,25 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
     };
 
     // Wait for Telegram SDK to load
+    let cleanup: (() => void) | undefined;
     if (typeof window !== 'undefined') {
       if (window.Telegram?.WebApp) {
-        checkTelegram();
+        cleanup = checkTelegram();
       } else {
         // Wait for script to load
-        const timer = setTimeout(checkTelegram, 500);
-        return () => clearTimeout(timer);
+        const timer = setTimeout(() => {
+          cleanup = checkTelegram();
+        }, 500);
+        return () => {
+          clearTimeout(timer);
+          cleanup?.();
+        };
       }
     }
+
+    return () => {
+      cleanup?.();
+    };
   }, []);
 
   // Show loading state while initializing

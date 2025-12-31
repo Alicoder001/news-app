@@ -49,6 +49,8 @@
     "critical": "Критично"
   },
   "home": {
+    "seoTitle": "Antigravity - IT Новости и Технологии",
+    "seoKeywords": "IT новости, искусственный интеллект, программирование, технологии, AI",
     "latestAnalysis": "Последние анализы",
     "trending": "В тренде",
     "newsletter": {

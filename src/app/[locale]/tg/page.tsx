@@ -2,10 +2,11 @@ import prisma from '@/lib/prisma';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { DifficultyBadge } from '@/components/badges';
-import { Bookmark, Settings, Globe } from 'lucide-react';
+import { Bookmark, Settings, Globe, Send } from 'lucide-react';
 import { TGCategoryNav } from '@/components/tg-category-nav';
 import { ArticleActions } from '@/components/article-actions';
 import { getTranslations } from 'next-intl/server';
+import { SITE_CONFIG } from '@/lib/config/social';
 
 async function getArticles() {
   return await prisma.article.findMany({
@@ -43,6 +44,15 @@ export default async function TelegramMiniApp() {
                  >
                     <Settings className="w-5 h-5" />
                  </Link>
+                 <a 
+                    href={SITE_CONFIG.social.telegram.channel} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Telegram Channel"
+                 >
+                    <Send className="w-5 h-5" />
+                 </a>
                  <Link 
                     href="/" 
                     target="_blank"
@@ -123,16 +133,27 @@ export default async function TelegramMiniApp() {
           )}
       </main>
 
-      {/* Footer Link */}
-      <div className="py-8 text-center">
-        <Link 
-            href="/"
-            target="_blank"
-            className="inline-flex items-center gap-2 text-xs font-medium text-foreground/40 hover:text-foreground transition-colors uppercase tracking-widest bg-foreground/[0.02] px-4 py-2 rounded-full"
-        >
-            <Globe className="w-3 h-3" />
-            <span>{t('openInWeb')}</span>
-        </Link>
+      {/* Footer Links */}
+      <div className="py-8 px-8">
+        <div className="flex items-center justify-center gap-3">
+          <a 
+              href={SITE_CONFIG.social.telegram.channel}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-medium text-foreground/40 hover:text-foreground transition-colors uppercase tracking-widest bg-foreground/[0.02] px-4 py-2 rounded-full"
+          >
+              <Send className="w-3 h-3" />
+              <span>Kanal</span>
+          </a>
+          <Link 
+              href="/"
+              target="_blank"
+              className="inline-flex items-center gap-2 text-xs font-medium text-foreground/40 hover:text-foreground transition-colors uppercase tracking-widest bg-foreground/[0.02] px-4 py-2 rounded-full"
+          >
+              <Globe className="w-3 h-3" />
+              <span>{t('openInWeb')}</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
