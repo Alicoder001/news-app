@@ -1,0 +1,100 @@
+{
+  "common": {
+    "siteName": "Antigravity",
+    "readMore": "Read more",
+    "back": "Back",
+    "home": "Home",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "notFound": "Not found",
+    "copyright": "© {year} Antigravity. All rights reserved."
+  },
+  "nav": {
+    "news": "News",
+    "analysis": "Analysis",
+    "podcasts": "Podcasts"
+  },
+  "article": {
+    "readTime": "{minutes} min read",
+    "minRead": "{minutes} min",
+    "source": "Source",
+    "originalSource": "Read original",
+    "publishedAt": "Published",
+    "share": "Share",
+    "save": "Save",
+    "saved": "Saved",
+    "unknownDate": "Unknown date",
+    "webRead": "Read on website"
+  },
+  "categories": {
+    "all": "All",
+    "ai": "Artificial Intelligence",
+    "mobile": "Mobile",
+    "web": "Web",
+    "security": "Security",
+    "startup": "Startups",
+    "programming": "Programming",
+    "gadgets": "Gadgets"
+  },
+  "difficulty": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "expert": "Expert"
+  },
+  "importance": {
+    "low": "Informational",
+    "medium": "Good to know",
+    "high": "Important",
+    "critical": "Critical"
+  },
+  "home": {
+    "seoTitle": "Antigravity - IT News & Technology Portal",
+    "seoKeywords": "IT news, artificial intelligence, programming, technology, AI, Uzbekistan",
+    "latestAnalysis": "Latest Analysis",
+    "trending": "Trending",
+    "newsletter": {
+      "title": "Stay updated",
+      "description": "Get weekly IT news delivered to your inbox",
+      "placeholder": "Your email",
+      "button": "Subscribe"
+    },
+    "about": {
+      "title": "About us",
+      "description": "Trusted news in IT and technology"
+    }
+  },
+  "tg": {
+    "header": {
+      "title": "Antigravity."
+    },
+    "settings": {
+      "title": "Settings",
+      "appearance": "Appearance",
+      "darkMode": "Dark mode",
+      "general": "General",
+      "language": "Change language",
+      "about": "About app",
+      "version": "Version"
+    },
+    "saved": {
+      "title": "Saved",
+      "empty": "No saved articles yet.",
+      "hint": "Tap the save button while reading articles and they will appear here."
+    },
+    "openInWeb": "Read on website",
+    "noNews": "No news yet."
+  },
+  "language": {
+    "uz": "O'zbekcha",
+    "ru": "Русский",
+    "en": "English",
+    "current": "English"
+  },
+  "metadata": {
+    "title": "IT News | AI Powered Tech Media",
+    "description": "Automated IT and technology news platform",
+    "tgTitle": "IT News | Telegram Mini App",
+    "tgDescription": "IT news - Telegram Mini App"
+  }
+}

@@ -19,7 +19,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@news-app/shared": ["../../packages/shared/src"],
+      "@news-app/api-types": ["../../packages/api-types/src"],
+      "@news-app/i18n": ["../../packages/i18n/src"]
     }
   },
   "include": [
