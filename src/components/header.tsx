@@ -1,11 +1,15 @@
 'use client';
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export function Header() {
+  const t = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -32,18 +36,18 @@ export function Header() {
             href="/" 
             className="text-2xl font-serif font-black tracking-tight text-foreground hover:opacity-80 transition-opacity"
           >
-            Antigravity.
+            {tCommon('siteName')}.
           </Link>
           
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <Link href="#" className="hover:text-foreground transition-colors">News</Link>
-            <Link href="#" className="hover:text-foreground transition-colors">Analysis</Link>
-            <Link href="#" className="hover:text-foreground transition-colors">Podcasts</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">{t('news')}</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">{t('analysis')}</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">{t('podcasts')}</Link>
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
-           {/* Placeholder for Search or other actions */}
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher variant="dropdown" />
           <ThemeToggle />
         </div>
       </div>

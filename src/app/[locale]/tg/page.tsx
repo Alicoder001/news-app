@@ -1,10 +1,11 @@
 import prisma from '@/lib/prisma';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { DifficultyBadge } from '@/components/badges';
 import { Bookmark, Settings, Globe } from 'lucide-react';
 import { TGCategoryNav } from '@/components/tg-category-nav';
 import { ArticleActions } from '@/components/article-actions';
+import { getTranslations } from 'next-intl/server';
 
 async function getArticles() {
   return await prisma.article.findMany({
@@ -12,12 +13,13 @@ async function getArticles() {
     take: 20,
     include: {
       category: true,
-      rawArticle: { include: { source: true } }
     },
   });
 }
 
 export default async function TelegramMiniApp() {
+  const t = await getTranslations('tg');
+  const tCommon = await getTranslations('common');
   const articles = await getArticles();
 
   return (
@@ -25,19 +27,19 @@ export default async function TelegramMiniApp() {
        {/* Mobile Header */}
        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-foreground/5 px-8 py-5 mb-8">
           <div className="flex items-center justify-between">
-             <h1 className="text-xl font-serif font-black tracking-tight">Antigravity.</h1>
+             <h1 className="text-xl font-serif font-black tracking-tight">{t('header.title')}</h1>
              <div className="flex items-center gap-1 -mr-2">
                  <Link 
                     href="/tg/saved" 
                     className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Saqlanganlar"
+                    aria-label={t('saved.title')}
                  >
                     <Bookmark className="w-5 h-5" />
                  </Link>
                  <Link 
                     href="/tg/settings" 
                     className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Sozlamalar"
+                    aria-label={t('settings.title')}
                  >
                     <Settings className="w-5 h-5" />
                  </Link>
@@ -45,7 +47,7 @@ export default async function TelegramMiniApp() {
                     href="/" 
                     target="_blank"
                     className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Saytga o'tish"
+                    aria-label={t('openInWeb')}
                  >
                     <Globe className="w-5 h-5" />
                  </Link>
@@ -116,7 +118,7 @@ export default async function TelegramMiniApp() {
             ))
           ) : (
             <div className="text-center py-12">
-              <p className="text-foreground/40 text-sm">Hozircha yangiliklar yo'q.</p>
+              <p className="text-foreground/40 text-sm">{t('noNews')}</p>
             </div>
           )}
       </main>
@@ -129,9 +131,10 @@ export default async function TelegramMiniApp() {
             className="inline-flex items-center gap-2 text-xs font-medium text-foreground/40 hover:text-foreground transition-colors uppercase tracking-widest bg-foreground/[0.02] px-4 py-2 rounded-full"
         >
             <Globe className="w-3 h-3" />
-            <span>Saytda o'qish</span>
+            <span>{t('openInWeb')}</span>
         </Link>
       </div>
     </div>
   );
 }
+

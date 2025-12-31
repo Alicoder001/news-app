@@ -1,0 +1,98 @@
+{
+  "common": {
+    "siteName": "Antigravity",
+    "readMore": "Batafsil o'qish",
+    "back": "Orqaga",
+    "home": "Bosh sahifa",
+    "loading": "Yuklanmoqda...",
+    "error": "Xatolik yuz berdi",
+    "notFound": "Topilmadi",
+    "copyright": "© {year} Antigravity. Barcha huquqlar himoyalangan."
+  },
+  "nav": {
+    "news": "Yangiliklar",
+    "analysis": "Tahlil",
+    "podcasts": "Podkastlar"
+  },
+  "article": {
+    "readTime": "{minutes} min o'qish",
+    "minRead": "{minutes} min",
+    "source": "Manba",
+    "originalSource": "Asl manbani o'qish",
+    "publishedAt": "Nashr qilingan",
+    "share": "Ulashish",
+    "save": "Saqlash",
+    "saved": "Saqlangan",
+    "unknownDate": "Noma'lum sana",
+    "webRead": "Saytda o'qish"
+  },
+  "categories": {
+    "all": "Barchasi",
+    "ai": "Sun'iy Intellekt",
+    "mobile": "Mobil",
+    "web": "Web",
+    "security": "Xavfsizlik",
+    "startup": "Startaplar",
+    "programming": "Dasturlash",
+    "gadgets": "Gadjetlar"
+  },
+  "difficulty": {
+    "beginner": "Boshlang'ich",
+    "intermediate": "O'rta",
+    "advanced": "Murakkab",
+    "expert": "Ekspert"
+  },
+  "importance": {
+    "low": "Ma'lumot",
+    "medium": "Bilish kerak",
+    "high": "Juda muhim",
+    "critical": "O'ta muhim"
+  },
+  "home": {
+    "latestAnalysis": "So'nggi Tahlillar",
+    "trending": "Trendda",
+    "newsletter": {
+      "title": "Yangiliklardan xabardor bo'ling",
+      "description": "Haftalik IT yangiliklarni elektron pochtangizga oling",
+      "placeholder": "Email manzilingiz",
+      "button": "Obuna bo'lish"
+    },
+    "about": {
+      "title": "Biz haqimizda",
+      "description": "IT va texnologiya sohasidagi ishonchli yangiliklar"
+    }
+  },
+  "tg": {
+    "header": {
+      "title": "Antigravity."
+    },
+    "settings": {
+      "title": "Sozlamalar",
+      "appearance": "Ko'rinish",
+      "darkMode": "Tungi rejim",
+      "general": "Umumiy",
+      "language": "Tilni o'zgartirish",
+      "about": "Ilova haqida",
+      "version": "Versiya"
+    },
+    "saved": {
+      "title": "Saqlanganlar",
+      "empty": "Hozircha saqlangan maqolalar yo'q.",
+      "hint": "Maqolalarni o'qish jarayonida saqlash tugmasini bossangiz, ular shu yerda paydo bo'ladi."
+    },
+    "openInWeb": "Saytda o'qish",
+    "noNews": "Hozircha yangiliklar yo'q."
+  },
+  "language": {
+    "uz": "O'zbekcha",
+    "ru": "Русский",
+    "en": "English",
+    "current": "O'zbekcha"
+  },
+  "metadata": {
+    "title": "IT News | AI Powered Tech Media",
+    "description": "Avtomatlashtirilgan IT va texnologiya sohasidagi yangiliklar platformasi",
+    "tgTitle": "IT News | Telegram Mini App",
+    "tgDescription": "IT yangiliklari - Telegram Mini App"
+  }
+}

@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { CategoryBadge } from '@/components/category-badge';
 import { Tag } from '@/components/tag';
@@ -9,6 +9,7 @@ import { TrendingSection } from '@/components/trending-section';
 import { NewsletterSignup } from '@/components/newsletter-signup';
 import { AboutWidget } from '@/components/about-widget';
 import { HeroCarousel } from '@/components/hero-carousel';
+import { getTranslations } from 'next-intl/server';
 
 async function getArticles() {
   return await prisma.article.findMany({
@@ -38,6 +39,9 @@ async function getFeaturedArticles() {
 }
 
 export default async function HomePage() {
+  const t = await getTranslations('home');
+  const tCommon = await getTranslations('common');
+  
   const [allArticles, featuredArticles] = await Promise.all([
     getArticles(),
     getFeaturedArticles(),
@@ -77,7 +81,7 @@ export default async function HomePage() {
           <section className="space-y-6">
             <div className="flex items-center justify-between border-b border-foreground/5 pb-3">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.3em] text-foreground/40">
-                So'nggi Tahlillar
+                {t('latestAnalysis')}
               </h2>
             </div>
             
@@ -139,7 +143,7 @@ export default async function HomePage() {
 
         <footer className="lg:col-span-12 mt-16 pt-8 border-t border-foreground/[0.05] text-center">
           <p className="text-[10px] text-foreground/30 uppercase tracking-[0.2em] font-medium">
-            &copy; {new Date().getFullYear()} Antigravity. Barcha huquqlar himoyalangan.
+            {tCommon('copyright', { year: new Date().getFullYear() })}
           </p>
         </footer>
       </div>

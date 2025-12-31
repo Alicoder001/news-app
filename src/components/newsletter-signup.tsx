@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle2 } from 'lucide-react'; // Success indicator is fine, it's functional
+import { CheckCircle2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function NewsletterSignup() {
+  const t = useTranslations('home.newsletter');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
@@ -24,12 +26,12 @@ export function NewsletterSignup() {
         <div className="flex justify-center">
           <CheckCircle2 className="w-8 h-8 text-emerald-500/50" />
         </div>
-        <p className="text-sm font-medium text-emerald-500/80">Rahmat! Obuna bo'ldingiz.</p>
+        <p className="text-sm font-medium text-emerald-500/80">✓</p>
         <button 
           onClick={() => setStatus('idle')}
           className="text-[10px] uppercase tracking-widest font-bold text-emerald-500/40 hover:text-emerald-500/60"
         >
-          Yana qo'shish
+          +
         </button>
       </div>
     );
@@ -37,15 +39,15 @@ export function NewsletterSignup() {
 
   return (
     <section className="glass-card p-8 rounded-2xl">
-      <h3 className="text-lg font-medium mb-2">Newsletter</h3>
+      <h3 className="text-lg font-medium mb-2">{t('title')}</h3>
       <p className="text-xs text-foreground/50 mb-6 leading-relaxed">
-        Haftalik eng muhim tahliliy maqolalarni birinchilardan bo'lib oling.
+        {t('description')}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           type="email"
-          placeholder="Email manzilingiz"
+          placeholder={t('placeholder')}
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -57,7 +59,7 @@ export function NewsletterSignup() {
           className="w-full py-3 rounded-xl bg-foreground text-background font-bold text-[11px] uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50"
           disabled={status === 'loading'}
         >
-          {status === 'loading' ? 'Yozilmoqda...' : 'Obuna bo\'lish'}
+          {status === 'loading' ? '...' : t('button')}
         </button>
       </form>
     </section>

@@ -1,0 +1,98 @@
+{
+  "common": {
+    "siteName": "Antigravity",
+    "readMore": "Читать далее",
+    "back": "Назад",
+    "home": "Главная",
+    "loading": "Загрузка...",
+    "error": "Произошла ошибка",
+    "notFound": "Не найдено",
+    "copyright": "© {year} Antigravity. Все права защищены."
+  },
+  "nav": {
+    "news": "Новости",
+    "analysis": "Анализ",
+    "podcasts": "Подкасты"
+  },
+  "article": {
+    "readTime": "{minutes} мин чтения",
+    "minRead": "{minutes} мин",
+    "source": "Источник",
+    "originalSource": "Читать оригинал",
+    "publishedAt": "Опубликовано",
+    "share": "Поделиться",
+    "save": "Сохранить",
+    "saved": "Сохранено",
+    "unknownDate": "Дата неизвестна",
+    "webRead": "Читать на сайте"
+  },
+  "categories": {
+    "all": "Все",
+    "ai": "Искусственный интеллект",
+    "mobile": "Мобильные",
+    "web": "Веб",
+    "security": "Безопасность",
+    "startup": "Стартапы",
+    "programming": "Программирование",
+    "gadgets": "Гаджеты"
+  },
+  "difficulty": {
+    "beginner": "Начальный",
+    "intermediate": "Средний",
+    "advanced": "Продвинутый",
+    "expert": "Эксперт"
+  },
+  "importance": {
+    "low": "Информация",
+    "medium": "Важно знать",
+    "high": "Очень важно",
+    "critical": "Критично"
+  },
+  "home": {
+    "latestAnalysis": "Последние анализы",
+    "trending": "В тренде",
+    "newsletter": {
+      "title": "Будьте в курсе новостей",
+      "description": "Получайте еженедельные IT-новости на email",
+      "placeholder": "Ваш email",
+      "button": "Подписаться"
+    },
+    "about": {
+      "title": "О нас",
+      "description": "Надёжные новости в сфере IT и технологий"
+    }
+  },
+  "tg": {
+    "header": {
+      "title": "Antigravity."
+    },
+    "settings": {
+      "title": "Настройки",
+      "appearance": "Внешний вид",
+      "darkMode": "Тёмная тема",
+      "general": "Общие",
+      "language": "Изменить язык",
+      "about": "О приложении",
+      "version": "Версия"
+    },
+    "saved": {
+      "title": "Сохранённые",
+      "empty": "Пока нет сохранённых статей.",
+      "hint": "Нажмите кнопку сохранения при чтении статей, и они появятся здесь."
+    },
+    "openInWeb": "Читать на сайте",
+    "noNews": "Пока нет новостей."
+  },
+  "language": {
+    "uz": "O'zbekcha",
+    "ru": "Русский",
+    "en": "English",
+    "current": "Русский"
+  },
+  "metadata": {
+    "title": "IT News | AI Powered Tech Media",
+    "description": "Автоматизированная платформа новостей в сфере IT и технологий",
+    "tgTitle": "IT News | Telegram Mini App",
+    "tgDescription": "IT новости - Telegram Mini App"
+  }
+}

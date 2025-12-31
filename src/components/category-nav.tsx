@@ -1,8 +1,10 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import prisma from '@/lib/prisma';
-import { Category } from '@prisma/client';
+import { getTranslations } from 'next-intl/server';
 
 export async function CategoryNav() {
+  const t = await getTranslations('common');
+  
   const categories = await prisma.category.findMany({
     include: {
       _count: {
@@ -24,7 +26,7 @@ export async function CategoryNav() {
             href="/"
             className="shrink-0 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-foreground hover:bg-foreground/5 rounded-full transition-colors"
         >
-            Bosh sahifa
+            {t('home')}
         </Link>
         <div className="w-px h-3 bg-foreground/10 mx-1 shrink-0" />
         {categories.map((category) => (

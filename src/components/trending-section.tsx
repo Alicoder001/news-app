@@ -1,8 +1,11 @@
 import prisma from '@/lib/prisma';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
+import { getTranslations } from 'next-intl/server';
 
 export async function TrendingSection() {
+  const t = await getTranslations('home');
+  
   const trendingArticles = await prisma.article.findMany({
     take: 5,
     orderBy: {
@@ -10,7 +13,6 @@ export async function TrendingSection() {
     },
     include: {
       category: true,
-      rawArticle: { include: { source: true } }
     },
     where: {
       createdAt: {
@@ -22,7 +24,7 @@ export async function TrendingSection() {
   return (
     <section>
       <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/40 mb-4">
-        Trending Now
+        {t('trending')}
       </h3>
       <div className="space-y-4">
             {trendingArticles.map((article, index) => (

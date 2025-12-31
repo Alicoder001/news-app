@@ -1,34 +1,22 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface ImportanceBadgeProps {
   importance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }
 
-const importanceConfig = {
-  LOW: {
-    label: "Ma'lumot",
-    color: '#6B7280',
-    bg: '#6B728010',
-  },
-  MEDIUM: {
-    label: 'Bilish kerak',
-    color: '#3B82F6',
-    bg: '#3B82F610',
-  },
-  HIGH: {
-    label: 'Juda muhim',
-    color: '#F59E0B',
-    bg: '#F59E0B10',
-  },
-  CRITICAL: {
-    label: 'Game-changer',
-    color: '#EF4444',
-    bg: '#EF444410',
-  },
+const importanceColors = {
+  LOW: { color: '#6B7280', bg: '#6B728010' },
+  MEDIUM: { color: '#3B82F6', bg: '#3B82F610' },
+  HIGH: { color: '#F59E0B', bg: '#F59E0B10' },
+  CRITICAL: { color: '#EF4444', bg: '#EF444410' },
 };
 
 export function ImportanceBadge({ importance }: ImportanceBadgeProps) {
-  const config = importanceConfig[importance];
+  const t = useTranslations('importance');
+  const config = importanceColors[importance];
+  const label = t(importance.toLowerCase() as 'low' | 'medium' | 'high' | 'critical');
 
   return (
     <span
@@ -43,7 +31,7 @@ export function ImportanceBadge({ importance }: ImportanceBadgeProps) {
         className="w-1.5 h-1.5 rounded-full" 
         style={{ backgroundColor: config.color }}
       />
-      {config.label}
+      {label}
     </span>
   );
 }
@@ -52,34 +40,24 @@ interface DifficultyBadgeProps {
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
 }
 
-const difficultyConfig = {
-  BEGINNER: {
-    label: 'Boshlovchi',
-    color: '#10B981',
-  },
-  INTERMEDIATE: {
-    label: "O'rta",
-    color: '#3B82F6',
-  },
-  ADVANCED: {
-    label: 'Murakkab',
-    color: '#F59E0B',
-  },
-  EXPERT: {
-    label: 'Ekspert',
-    color: '#8B5CF6',
-  },
+const difficultyColors = {
+  BEGINNER: '#10B981',
+  INTERMEDIATE: '#3B82F6',
+  ADVANCED: '#F59E0B',
+  EXPERT: '#8B5CF6',
 };
 
 export function DifficultyBadge({ difficulty }: DifficultyBadgeProps) {
-  const config = difficultyConfig[difficulty];
+  const t = useTranslations('difficulty');
+  const color = difficultyColors[difficulty];
+  const label = t(difficulty.toLowerCase() as 'beginner' | 'intermediate' | 'advanced' | 'expert');
 
   return (
     <span
       className="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70"
-      style={{ color: config.color }}
+      style={{ color }}
     >
-      {config.label}
+      {label}
     </span>
   );
 }

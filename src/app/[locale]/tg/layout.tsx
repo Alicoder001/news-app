@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { TelegramProvider } from "@/components/telegram-provider";
-import "../globals.css";
 
 export const metadata: Metadata = {
   title: "IT News | Telegram Mini App",

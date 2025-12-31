@@ -1,7 +1,10 @@
 import { TelegramBackButton } from '@/components/telegram-back-button';
 import { Bookmark } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
-export default function SavedArticlesPage() {
+export default async function SavedArticlesPage() {
+  const t = await getTranslations('tg.saved');
+
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
       <TelegramBackButton />
@@ -12,7 +15,7 @@ export default function SavedArticlesPage() {
              <div className="bg-foreground/5 p-2 rounded-full">
                 <Bookmark className="w-5 h-5 opacity-70" />
              </div>
-             <h1 className="text-xl font-serif font-bold tracking-tight">Saqlanganlar</h1>
+             <h1 className="text-xl font-serif font-bold tracking-tight">{t('title')}</h1>
           </div>
       </header>
 
@@ -22,12 +25,13 @@ export default function SavedArticlesPage() {
              <div className="w-16 h-16 bg-foreground/5 rounded-full flex items-center justify-center mb-4">
                 <Bookmark className="w-8 h-8 opacity-40" />
              </div>
-             <p className="text-sm">Hozircha saqlangan maqolalar yo'q.</p>
+             <p className="text-sm">{t('empty')}</p>
              <p className="text-xs text-muted-foreground mt-2 max-w-[200px]">
-                Maqolalarni o'qish jarayonida saqlash tugmasini bossangiz, ular shu yerda paydo bo'ladi.
+                {t('hint')}
              </p>
           </div>
       </main>
     </div>
   );
 }
+
