@@ -7,30 +7,30 @@
  */
 
 export const SITE_CONFIG = {
-  name: 'Antigravity',
+  name: 'Aishunos',
   tagline: "O'zbekiston IT Yangiliklar Portali",
   description: "Sun'iy intellekt yordamida tayyorlangan texnologiya yangiliklari",
   
   // Social Media Profiles
   social: {
     telegram: {
-      channel: 'https://t.me/antigravity_news',
-      bot: 'https://t.me/antigravity_bot',
-      username: '@antigravity_news',
+      channel: 'https://t.me/aishunos_uz',
+      bot: 'https://t.me/aishunos_bot',
+      username: '@aishunos_uz',
     },
-    instagram: 'https://instagram.com/antigravity_uz',
-    facebook: 'https://facebook.com/antigravity.uz',
-    twitter: 'https://x.com/antigravity_uz',
-    linkedin: 'https://linkedin.com/company/antigravity-uz',
-    youtube: 'https://youtube.com/@antigravity_uz',
-    github: 'https://github.com/antigravity-uz',
+    instagram: 'https://instagram.com/aishunos_uz',
+    facebook: 'https://facebook.com/aishunos.uz',
+    twitter: 'https://x.com/aishunos_uz',
+    linkedin: 'https://linkedin.com/company/aishunos-uz',
+    youtube: 'https://youtube.com/@aishunos_uz',
+    github: 'https://github.com/aishunos-uz',
   },
   
   // Default OG Image
   defaultImage: '/og-default.png',
   
   // Contact
-  email: 'info@antigravity.uz',
+  email: 'info@aishunos.uz',
   
   // SEO Keywords
   keywords: [
@@ -44,6 +44,7 @@ export const SITE_CONFIG = {
     'tech news',
     'kiberhavfsizlik',
     'startup',
+    'Aishunos',
   ],
 } as const;
 
@@ -54,14 +55,14 @@ export function getShareUrls(articleUrl: string, title: string, summary?: string
   const encodedUrl = encodeURIComponent(articleUrl);
   const encodedTitle = encodeURIComponent(title);
   const encodedSummary = encodeURIComponent(summary || title);
-  const hashtags = 'IT,Texnologiya,Antigravity';
+  const hashtags = 'IT,Texnologiya,Aishunos';
   
   return {
     // Telegram - Most important for Uzbek audience
     telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
     
     // Twitter/X
-    twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}&hashtags=${hashtags}&via=antigravity_uz`,
+    twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}&hashtags=${hashtags}&via=aishunos_uz`,
     
     // Facebook
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedTitle}`,

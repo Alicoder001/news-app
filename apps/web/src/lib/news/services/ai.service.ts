@@ -23,7 +23,7 @@ import { trackAIUsage } from '@/lib/admin/usage-tracker';
  * - Graceful error handling
  * - Fallback for missing API key (development mode)
  * 
- * @author Antigravity Team
+ * @author Aishunos Team
  * @version 2.0.0
  */
 

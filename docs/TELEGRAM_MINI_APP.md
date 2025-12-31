@@ -10,7 +10,7 @@ Telegram Mini App - bu Telegram ichida ishlaydigan web ilovalar. Foydalanuvchila
 
 1. Telegram'da [@BotFather](https://t.me/botfather) ga o'ting
 2. `/newbot` buyrug'ini yuboring
-3. Bot nomi va username kiriting (masalan: `IT News Bot` va `@itnews_uz_bot`)
+3. Bot nomi va username kiriting (masalan: `Aishunos Bot` va `@aishunos_uz_bot`)
 4. Bot tokenini saqlang (`.env` fayliga qo'shish kerak)
 
 ### 2. Mini App Sozlash
@@ -23,11 +23,11 @@ BotFather'da:
 
 Keyin:
 - Botingizni tanlang
-- App nomi: `IT News`
+- App nomi: `Aishunos`
 - Description: `AI-powered IT news platform`
 - Photo: App logotipi (640x360 yoki 1280x720)
 - GIF/Video: Demo video (ixtiyoriy)
-- Short name: `itnews` (URL uchun: `https://t.me/your_bot/itnews`)
+- Short name: `aishunos` (URL uchun: `https://t.me/your_bot/aishunos`)
 
 ### 3. Web App URL Sozlash
 

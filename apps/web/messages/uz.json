@@ -1,13 +1,13 @@
 {
   "common": {
-    "siteName": "Antigravity",
+    "siteName": "Aishunos",
     "readMore": "Batafsil o'qish",
     "back": "Orqaga",
     "home": "Bosh sahifa",
     "loading": "Yuklanmoqda...",
     "error": "Xatolik yuz berdi",
     "notFound": "Topilmadi",
-    "copyright": "© {year} Antigravity. Barcha huquqlar himoyalangan.",
+    "copyright": "© {year} Aishunos. Barcha huquqlar himoyalangan.",
     "community": {
       "telegramTitle": "Hamjamiyatga qo'shiling",
       "channelTitle": "Telegram Kanal",
@@ -58,7 +58,7 @@
     "critical": "O'ta muhim"
   },
   "home": {
-    "seoTitle": "Antigravity - O'zbekiston IT Yangiliklar Portali",
+    "seoTitle": "Aishunos - O'zbekiston IT Yangiliklar Portali",
     "seoKeywords": "IT yangiliklar, sun'iy intellekt, dasturlash, texnologiya, AI, O'zbekiston",
     "latestAnalysis": "So'nggi Tahlillar",
     "trending": "Trendda",
@@ -75,7 +75,7 @@
   },
   "tg": {
     "header": {
-      "title": "Antigravity."
+      "title": "Aishunos."
     },
     "settings": {
       "title": "Sozlamalar",
@@ -101,9 +101,9 @@
     "current": "O'zbekcha"
   },
   "metadata": {
-    "title": "IT News | AI Powered Tech Media",
+    "title": "Aishunos | AI Powered Tech Media",
     "description": "Avtomatlashtirilgan IT va texnologiya sohasidagi yangiliklar platformasi",
-    "tgTitle": "IT News | Telegram Mini App",
+    "tgTitle": "Aishunos | Telegram Mini App",
     "tgDescription": "IT yangiliklari - Telegram Mini App"
   }
 }

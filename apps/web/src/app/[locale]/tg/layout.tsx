@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { TelegramProvider } from "@/components/telegram-provider";
 
 export const metadata: Metadata = {
-  title: "IT News | Telegram Mini App",
+  title: "Aishunos | Telegram Mini App",
   description: "IT yangiliklari - Telegram Mini App",
 };
 

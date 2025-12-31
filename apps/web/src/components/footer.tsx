@@ -146,7 +146,7 @@ export function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Copyright */}
             <p className="text-xs text-muted-foreground text-center md:text-left">
-              © {currentYear} {SITE_CONFIG.name}. Barcha huquqlar himoyalangan.
+              © {currentYear} Aishunos. Barcha huquqlar himoyalangan.
             </p>
             
             {/* Legal Links (compact) */}

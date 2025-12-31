@@ -16,7 +16,7 @@ import {
  * - Retry logic
  * - Graceful fallback when credentials missing
  * 
- * @author Antigravity Team
+ * @author Aishunos Team
  * @version 2.0.0
  */
 

@@ -16,6 +16,7 @@ const envSchema = z.object({
 
   // News Sources
   NEWS_API_KEY: z.string().optional(),
+  GNEWS_API_KEY: z.string().optional(),
 
   // Telegram
   TELEGRAM_BOT_TOKEN: z.string().optional(),

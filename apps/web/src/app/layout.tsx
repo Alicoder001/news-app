@@ -6,7 +6,7 @@ const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-sa
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-serif" });
 
 export const metadata: Metadata = {
-  title: "IT News | AI Powered Tech Media",
+  title: "Aishunos | AI Powered Tech Media",
   description: "Avtomatlashtirilgan IT va texnologiya sohasidagi yangiliklar platformasi",
 };
 

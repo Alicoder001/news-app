@@ -1,6 +1,7 @@
 import { NewsProvider } from './types';
 import { NewsApiProvider } from './providers/news-api.provider';
 import { RSSProvider } from './providers/rss.provider';
+import { GNewsProvider } from './providers/gnews.provider';
 import { RawArticleRepository } from './repositories/raw-article.repository';
 
 /**
@@ -9,7 +10,7 @@ import { RawArticleRepository } from './repositories/raw-article.repository';
  * Orchestrates fetching from all news providers.
  * Handles provider registration and batch syncing.
  * 
- * @author Antigravity Team
+ * @author Aishunos Team
  * @version 2.0.0
  */
 export class NewsManager {
@@ -18,6 +19,7 @@ export class NewsManager {
   constructor() {
     // Register default providers
     this.registerProvider(new NewsApiProvider());
+    this.registerProvider(new GNewsProvider());
     this.registerProvider(new RSSProvider());
   }
 

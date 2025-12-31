@@ -3,7 +3,7 @@
  * 
  * Footer social media profile links
  * 
- * @author Antigravity Team
+ * @author Aishunos Team
  */
 
 import { 

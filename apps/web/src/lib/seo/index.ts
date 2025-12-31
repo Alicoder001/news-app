@@ -14,7 +14,7 @@
 import { Metadata } from 'next';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://news-app.uz';
-const SITE_NAME = 'Antigravity';
+const SITE_NAME = 'Aishunos';
 const DEFAULT_DESCRIPTION = "O'zbekiston IT hamjamiyati uchun sun'iy intellekt yordamida tayyorlangan texnologiya yangiliklari";
 
 /**

@@ -1,13 +1,13 @@
 {
   "common": {
-    "siteName": "Antigravity",
+    "siteName": "Aishunos",
     "readMore": "Читать далее",
     "back": "Назад",
     "home": "Главная",
     "loading": "Загрузка...",
     "error": "Произошла ошибка",
     "notFound": "Не найдено",
-    "copyright": "© {year} Antigravity. Все права защищены."
+    "copyright": "© {year} Aishunos. Все права защищены."
   },
   "nav": {
     "news": "Новости",

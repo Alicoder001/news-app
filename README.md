@@ -1,4 +1,4 @@
-# 🚀 AI-Powered IT News Platform
+# 🚀 Aishunos - AI-Powered IT News Platform
 
 AI yordamida IT yangiliklarini avtomatik yig'uvchi, tahlil qiluvchi va o'zbek tiliga tarjima qiluvchi platforma.
 
@@ -172,4 +172,4 @@ MIT License - see [LICENSE](./LICENSE)
 
 ---
 
-Made with ❤️ by Antigravity
+Made with ❤️ by Aishunos
