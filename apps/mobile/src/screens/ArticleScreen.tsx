@@ -26,7 +26,19 @@ import { formatDate } from '@news-app/shared';
 import type { RootStackParamList } from '../navigation';
 import { spacing, borderRadius, fonts } from '../theme';
 
+import { 
+  Calendar, 
+  Clock, 
+  Eye, 
+  Share2, 
+  Heart, 
+  ChevronLeft,
+  ChevronRight,
+  Hash
+} from 'lucide-react-native';
+
 type ArticleRouteProp = RouteProp<RootStackParamList, 'Article'>;
+
 
 export default function ArticleScreen() {
   const route = useRoute<ArticleRouteProp>();
@@ -83,29 +95,32 @@ export default function ArticleScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
     >
       {article.imageUrl && (
-        <Image source={{ uri: article.imageUrl }} style={styles.heroImage} />
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: article.imageUrl }} style={styles.heroImage} />
+          <View style={styles.imageOverlay} />
+        </View>
       )}
 
       <View style={styles.content}>
         {/* Category & Meta */}
         <View style={styles.metaRow}>
           {article.category && (
-            <View
-              style={[
-                styles.categoryBadge,
-                { backgroundColor: article.category.color || colors.primaryLight },
-              ]}
-            >
-              <Text style={[styles.categoryText, { color: colors.primary }]}>
-                {article.category.icon} {article.category.name}
+            <View style={styles.categoryBadge}>
+              <View style={[styles.categoryDot, { backgroundColor: colors.primary }]} />
+              <Text style={[styles.categoryText, { color: colors.textSecondary }]}>
+                {article.category.name.toUpperCase()}
               </Text>
             </View>
           )}
-          <Text style={[styles.date, { color: colors.textMuted }]}>
-            {formatDate(article.createdAt, 'long', 'uz')}
-          </Text>
+          <View style={styles.dateContainer}>
+            <Calendar size={12} color={colors.textMuted} />
+            <Text style={[styles.date, { color: colors.textMuted }]}>
+              {formatDate(article.createdAt, 'long', 'uz')}
+            </Text>
+          </View>
         </View>
 
         {/* Title */}
@@ -114,25 +129,35 @@ export default function ArticleScreen() {
         {/* Reading info */}
         <View style={styles.readingInfo}>
           {article.readingTime && (
-            <Text style={[styles.readingTime, { color: colors.textSecondary }]}>
-              ⏱ {article.readingTime} daqiqa o'qiladi
-            </Text>
+            <View style={styles.infoItem}>
+              <Clock size={14} color={colors.textSecondary} />
+              <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+                {article.readingTime} daqiqa
+              </Text>
+            </View>
           )}
-          <Text style={[styles.views, { color: colors.textSecondary }]}>
-            👁 {article.viewCount} ko'rildi
-          </Text>
+          <View style={styles.infoItem}>
+            <Eye size={14} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+              {article.viewCount} ko'rildi
+            </Text>
+          </View>
         </View>
 
         {/* Action buttons */}
-        <View style={[styles.actions, { borderColor: colors.border }]}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleSaveToggle}>
-            <Text style={{ fontSize: 20 }}>{isSaved ? '❤️' : '🤍'}</Text>
-            <Text style={[styles.actionText, { color: colors.textSecondary }]}>
+        <View style={[styles.actions, { borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: isSaved ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }]} 
+            onPress={handleSaveToggle}
+            activeOpacity={0.7}
+          >
+            <Heart size={20} color={isSaved ? '#EF4444' : colors.textSecondary} fill={isSaved ? '#EF4444' : 'transparent'} />
+            <Text style={[styles.actionText, { color: isSaved ? '#EF4444' : colors.textSecondary }]}>
               {isSaved ? 'Saqlangan' : 'Saqlash'}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-            <Text style={{ fontSize: 20 }}>📤</Text>
+          <TouchableOpacity style={styles.actionButton} onPress={handleShare} activeOpacity={0.7}>
+            <Share2 size={20} color={colors.textSecondary} />
             <Text style={[styles.actionText, { color: colors.textSecondary }]}>
               Ulashish
             </Text>
@@ -141,9 +166,11 @@ export default function ArticleScreen() {
 
         {/* Summary */}
         {article.summary && (
-          <Text style={[styles.summary, { color: colors.textSecondary }]}>
-            {article.summary}
-          </Text>
+          <View style={[styles.summaryContainer, { backgroundColor: colors.surface, borderLeftColor: colors.primary }]}>
+            <Text style={[styles.summary, { color: colors.textSecondary }]}>
+              {article.summary}
+            </Text>
+          </View>
         )}
 
         {/* Content */}
@@ -157,10 +184,11 @@ export default function ArticleScreen() {
             {article.tags.map((tag) => (
               <View
                 key={tag.id}
-                style={[styles.tag, { backgroundColor: colors.surface }]}
+                style={[styles.tag, { backgroundColor: colors.surface, borderColor: colors.border }]}
               >
+                <Hash size={12} color={colors.textMuted} style={{ marginRight: 4 }} />
                 <Text style={[styles.tagText, { color: colors.textSecondary }]}>
-                  #{tag.name}
+                  {tag.name}
                 </Text>
               </View>
             ))}
@@ -176,7 +204,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing['4xl'],
   },
   centerContainer: {
     flex: 1,
@@ -185,79 +213,117 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: fonts.sizes.lg,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 300,
   },
   heroImage: {
     width: '100%',
-    height: 240,
+    height: '100%',
     resizeMode: 'cover',
+  },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.02)',
   },
   content: {
     padding: spacing.base,
+    marginTop: -20,
+    backgroundColor: 'transparent',
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: spacing.md,
+    marginBottom: spacing.base,
+    backgroundColor: 'transparent',
+    paddingTop: 10,
   },
   categoryBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  categoryDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 6,
   },
   categoryText: {
-    fontSize: fonts.sizes.xs,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   date: {
-    fontSize: fonts.sizes.sm,
+    fontSize: 12,
+    fontWeight: '500',
   },
   title: {
     fontSize: fonts.sizes['3xl'],
-    fontWeight: '700',
-    lineHeight: 38,
-    marginBottom: spacing.md,
+    fontWeight: '800',
+    lineHeight: 40,
+    marginBottom: spacing.base,
+    letterSpacing: -0.5,
   },
   readingInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.base,
-    marginBottom: spacing.base,
+    gap: spacing.lg,
+    marginBottom: spacing.xl,
   },
-  readingTime: {
-    fontSize: fonts.sizes.sm,
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  views: {
-    fontSize: fonts.sizes.sm,
+  infoText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
   actions: {
     flexDirection: 'row',
     borderTopWidth: 1,
     borderBottomWidth: 1,
     paddingVertical: spacing.md,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
     gap: spacing.xl,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: borderRadius.md,
   },
   actionText: {
-    fontSize: fonts.sizes.sm,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  summaryContainer: {
+    padding: spacing.base,
+    borderRadius: borderRadius.lg,
+    borderLeftWidth: 4,
+    marginBottom: spacing.xl,
   },
   summary: {
     fontSize: fonts.sizes.lg,
-    fontStyle: 'italic',
+    fontWeight: '500',
     lineHeight: 28,
-    marginBottom: spacing.lg,
   },
   articleContent: {
-    fontSize: fonts.sizes.base,
-    lineHeight: 26,
-    marginBottom: spacing.lg,
+    fontSize: 17,
+    lineHeight: 30,
+    marginBottom: spacing['2xl'],
+    fontWeight: '400',
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -265,11 +331,15 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: 6,
     borderRadius: borderRadius.full,
+    borderWidth: 1,
   },
   tagText: {
-    fontSize: fonts.sizes.sm,
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

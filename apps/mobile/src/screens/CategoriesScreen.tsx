@@ -30,8 +30,6 @@ function CategoryCard({ category }: { category: Category }) {
   const navigation = useNavigation<NavigationProp>();
 
   const handlePress = () => {
-    // Navigate to Home with category filter
-    // For now, just show the category
     navigation.navigate('Home');
   };
 
@@ -40,25 +38,27 @@ function CategoryCard({ category }: { category: Category }) {
       style={[
         styles.categoryCard,
         {
-          backgroundColor: category.color || colors.primaryLight,
+          backgroundColor: colors.card,
           borderColor: colors.border,
         },
       ]}
       onPress={handlePress}
-      activeOpacity={0.7}
+      activeOpacity={0.8}
     >
-      <Text style={styles.categoryIcon}>{category.icon || '📁'}</Text>
-      <Text style={[styles.categoryName, { color: colors.text }]}>
-        {category.name}
-      </Text>
-      {category.description && (
-        <Text
-          style={[styles.categoryDescription, { color: colors.textSecondary }]}
-          numberOfLines={2}
-        >
-          {category.description}
+      <View style={[styles.categoryIndicator, { backgroundColor: colors.primary }]} />
+      <View style={styles.categoryInfo}>
+        <Text style={[styles.categoryName, { color: colors.text }]}>
+          {category.name}
         </Text>
-      )}
+        {category.description && (
+          <Text
+            style={[styles.categoryDescription, { color: colors.textSecondary }]}
+            numberOfLines={2}
+          >
+            {category.description}
+          </Text>
+        )}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -98,7 +98,7 @@ export default function CategoriesScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          📂 Kategoriyalar
+          Kategoriyalar
         </Text>
       </View>
 
@@ -106,9 +106,8 @@ export default function CategoriesScreen() {
         data={categories}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <CategoryCard category={item} />}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
@@ -127,41 +126,48 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: spacing.base,
-    paddingVertical: spacing.lg,
+    paddingTop: 60,
+    paddingBottom: spacing.base,
     borderBottomWidth: 1,
   },
   headerTitle: {
-    fontSize: fonts.sizes['2xl'],
-    fontWeight: '700',
+    fontSize: fonts.sizes['3xl'],
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   listContent: {
     padding: spacing.base,
   },
-  row: {
-    justifyContent: 'space-between',
-  },
   categoryCard: {
-    flex: 1,
-    marginHorizontal: spacing.xs,
-    marginBottom: spacing.base,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
     padding: spacing.base,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     borderWidth: 1,
-    minHeight: 120,
-    maxWidth: '48%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
   },
-  categoryIcon: {
-    fontSize: 32,
-    marginBottom: spacing.sm,
+  categoryIndicator: {
+    width: 4,
+    height: 40,
+    borderRadius: 2,
+    marginRight: spacing.base,
+  },
+  categoryInfo: {
+    flex: 1,
   },
   categoryName: {
-    fontSize: fonts.sizes.base,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
+    fontSize: fonts.sizes.lg,
+    fontWeight: '700',
+    marginBottom: 4,
   },
   categoryDescription: {
-    fontSize: fonts.sizes.xs,
-    lineHeight: 16,
+    fontSize: fonts.sizes.sm,
+    lineHeight: 18,
   },
   centerContainer: {
     flex: 1,

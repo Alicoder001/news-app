@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter @news-app/web dev",
+    "dev": "pnpm --filter @news-app/web --filter @news-app/mobile --parallel dev",
     "build": "pnpm --filter @news-app/web build",
     "start": "pnpm --filter @news-app/web start",
     "lint": "pnpm -r lint",

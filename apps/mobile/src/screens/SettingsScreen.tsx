@@ -20,6 +20,18 @@ import { useAppStore } from '../store/useAppStore';
 import { SUPPORTED_LOCALES, type Locale } from '@news-app/i18n';
 import { spacing, borderRadius, fonts } from '../theme';
 
+import { 
+  Moon, 
+  Sun, 
+  Smartphone, 
+  Globe, 
+  BookMarked, 
+  Info, 
+  User, 
+  ChevronRight,
+  Check
+} from 'lucide-react-native';
+
 const LOCALE_NAMES: Record<Locale, string> = {
   uz: "O'zbekcha",
   ru: 'Русский',
@@ -28,22 +40,35 @@ const LOCALE_NAMES: Record<Locale, string> = {
 
 interface SettingRowProps {
   label: string;
+  icon: React.ReactNode;
   value?: string;
   onPress?: () => void;
   rightElement?: React.ReactNode;
+  showChevron?: boolean;
 }
 
-function SettingRow({ label, value, onPress, rightElement }: SettingRowProps) {
+function SettingRow({ label, icon, value, onPress, rightElement, showChevron = true }: SettingRowProps) {
   const { colors } = useTheme();
 
   const content = (
     <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
-      <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
-      {rightElement || (
-        <Text style={[styles.settingValue, { color: colors.textSecondary }]}>
-          {value}
-        </Text>
-      )}
+      <View style={styles.settingLeft}>
+        <View style={[styles.iconContainer, { backgroundColor: colors.surface }]}>
+          {icon}
+        </View>
+        <Text style={[styles.settingLabel, { color: colors.text }]}>{label}</Text>
+      </View>
+      <View style={styles.settingRight}>
+        {value && (
+          <Text style={[styles.settingValue, { color: colors.textSecondary }]}>
+            {value}
+          </Text>
+        )}
+        {rightElement}
+        {onPress && showChevron && (
+          <ChevronRight size={18} color={colors.textMuted} style={{ marginLeft: 8 }} />
+        )}
+      </View>
     </View>
   );
 
@@ -72,7 +97,7 @@ function SettingSection({
       <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
         {title}
       </Text>
-      <View style={[styles.sectionContent, { backgroundColor: colors.card }]}>
+      <View style={[styles.sectionContent, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
         {children}
       </View>
     </View>
@@ -102,11 +127,22 @@ export default function SettingsScreen() {
   const getThemeLabel = () => {
     switch (theme) {
       case 'dark':
-        return "🌙 Qorong'i";
+        return "Qorong'i";
       case 'light':
-        return "☀️ Yorug'";
+        return "Yorug'";
       default:
-        return '📱 Sistema';
+        return 'Sistema';
+    }
+  };
+
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'dark':
+        return <Moon size={20} color={colors.primary} />;
+      case 'light':
+        return <Sun size={20} color={colors.primary} />;
+      default:
+        return <Smartphone size={20} color={colors.primary} />;
     }
   };
 
@@ -114,10 +150,11 @@ export default function SettingsScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
     >
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          ⚙️ Sozlamalar
+          Sozlamalar
         </Text>
       </View>
 
@@ -125,6 +162,7 @@ export default function SettingsScreen() {
       <SettingSection title="TASHQI KO'RINISH">
         <SettingRow
           label="Mavzu"
+          icon={getThemeIcon()}
           value={getThemeLabel()}
           onPress={handleThemeToggle}
         />
@@ -134,8 +172,10 @@ export default function SettingsScreen() {
       <SettingSection title="TIL">
         <SettingRow
           label="Ilova tili"
+          icon={<Globe size={20} color={colors.primary} />}
           value={LOCALE_NAMES[locale]}
           onPress={() => setShowLanguages(!showLanguages)}
+          showChevron={!showLanguages}
         />
         {showLanguages && (
           <View style={styles.languageOptions}>
@@ -144,7 +184,7 @@ export default function SettingsScreen() {
                 key={loc}
                 style={[
                   styles.languageOption,
-                  locale === loc && { backgroundColor: colors.primaryLight },
+                  locale === loc && { backgroundColor: 'rgba(59, 130, 246, 0.05)' },
                 ]}
                 onPress={() => {
                   setLocale(loc);
@@ -160,7 +200,7 @@ export default function SettingsScreen() {
                   {LOCALE_NAMES[loc]}
                 </Text>
                 {locale === loc && (
-                  <Text style={{ color: colors.primary }}>✓</Text>
+                  <Check size={18} color={colors.primary} />
                 )}
               </TouchableOpacity>
             ))}
@@ -172,14 +212,23 @@ export default function SettingsScreen() {
       <SettingSection title="MA'LUMOTLAR">
         <SettingRow
           label="Saqlangan maqolalar"
+          icon={<BookMarked size={20} color={colors.primary} />}
           value={`${savedArticles.length} ta`}
         />
       </SettingSection>
 
       {/* About */}
       <SettingSection title="ILOVA HAQIDA">
-        <SettingRow label="Versiya" value="1.0.0" />
-        <SettingRow label="Ishlab chiqaruvchi" value="News App Team" />
+        <SettingRow 
+          label="Versiya" 
+          icon={<Info size={20} color={colors.primary} />}
+          value="1.0.0" 
+        />
+        <SettingRow 
+          label="Ishlab chiqaruvchi" 
+          icon={<User size={20} color={colors.primary} />}
+          value="News App Team" 
+        />
       </SettingSection>
     </ScrollView>
   );
@@ -190,30 +239,38 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing['4xl'],
   },
   header: {
     paddingHorizontal: spacing.base,
-    paddingVertical: spacing.lg,
+    paddingTop: 60,
+    paddingBottom: spacing.base,
     borderBottomWidth: 1,
   },
   headerTitle: {
-    fontSize: fonts.sizes['2xl'],
-    fontWeight: '700',
+    fontSize: fonts.sizes['3xl'],
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   section: {
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
     paddingHorizontal: spacing.base,
   },
   sectionTitle: {
-    fontSize: fonts.sizes.xs,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
     marginBottom: spacing.sm,
     letterSpacing: 1,
+    paddingLeft: 4,
   },
   sectionContent: {
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
   },
   settingRow: {
     flexDirection: 'row',
@@ -223,15 +280,33 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
+  settingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settingRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   settingLabel: {
     fontSize: fonts.sizes.base,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   settingValue: {
-    fontSize: fonts.sizes.base,
+    fontSize: fonts.sizes.sm,
+    fontWeight: '500',
   },
   languageOptions: {
-    paddingVertical: spacing.sm,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.sm,
   },
   languageOption: {
     flexDirection: 'row',
@@ -239,8 +314,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,
+    marginLeft: 52, // Align with text, skipping icon
+    borderRadius: borderRadius.md,
+    marginRight: spacing.sm,
   },
   languageText: {
-    fontSize: fonts.sizes.base,
+    fontSize: fonts.sizes.sm,
+    fontWeight: '600',
   },
 });
