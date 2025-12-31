@@ -32,6 +32,7 @@ model RawArticle {
   description     String?     @db.Text
   content         String?     @db.Text
   url             String      @unique
+  imageUrl        String?     // Original image from source
   publishedAt     DateTime?
   sourceId        String
   source          NewsSource  @relation(fields: [sourceId], references: [id])

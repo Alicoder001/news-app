@@ -11,17 +11,33 @@ import { AboutWidget } from '@/components/about-widget';
 import { HeroCarousel } from '@/components/hero-carousel';
 import { TelegramCta } from '@/components/telegram-cta';
 import { FeaturesBanner } from '@/components/features-banner';
+import { Pagination } from '@/components/pagination';
 import { getTranslations } from 'next-intl/server';
 
-async function getArticles() {
-  return await prisma.article.findMany({
-    include: {
-      category: true,
-      tags: true,
-      rawArticle: { include: { source: true } }
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+const ARTICLES_PER_PAGE = 12;
+
+async function getArticles(page: number = 1) {
+  const skip = (page - 1) * ARTICLES_PER_PAGE;
+  
+  const [articles, totalCount] = await Promise.all([
+    prisma.article.findMany({
+      include: {
+        category: true,
+        tags: true,
+        rawArticle: { include: { source: true } }
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: ARTICLES_PER_PAGE,
+    }),
+    prisma.article.count(),
+  ]);
+  
+  return {
+    articles,
+    totalPages: Math.ceil(totalCount / ARTICLES_PER_PAGE),
+    currentPage: page,
+  };
 }
 
 // Fetch top 3 critical/featured articles
@@ -40,14 +56,23 @@ async function getFeaturedArticles() {
   });
 }
 
-export default async function HomePage() {
+interface HomePageProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+  const currentPage = Math.max(1, parseInt(params.page || '1', 10));
+  
   const t = await getTranslations('home');
   const tCommon = await getTranslations('common');
   
-  const [allArticles, featuredArticles] = await Promise.all([
-    getArticles(),
+  const [articlesData, featuredArticles] = await Promise.all([
+    getArticles(currentPage),
     getFeaturedArticles(),
   ]);
+  
+  const { articles: allArticles, totalPages } = articlesData;
 
   // Ensure we have at least 3 featured articles for the carousel
   let finalFeaturedArticles = [...featuredArticles];
@@ -63,9 +88,11 @@ export default async function HomePage() {
     finalFeaturedArticles = [...finalFeaturedArticles, ...fillArticles];
   }
   
-  // Exclude featured articles from the regular list
+  // Exclude featured articles from the regular list (only on first page)
   const featuredIds = new Set(finalFeaturedArticles.map(a => a.id));
-  const regularArticles = allArticles.filter(a => !featuredIds.has(a.id));
+  const regularArticles = currentPage === 1 
+    ? allArticles.filter(a => !featuredIds.has(a.id))
+    : allArticles;
 
   return (
     <div className="space-y-8">
@@ -143,6 +170,9 @@ export default async function HomePage() {
                 </article>
               ))}
             </div>
+            
+            {/* Pagination */}
+            <Pagination currentPage={currentPage} totalPages={totalPages} />
           </section>
         </main>
 

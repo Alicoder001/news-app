@@ -2,6 +2,7 @@ import { RawArticleRepository } from '../repositories/raw-article.repository';
 import { AIService } from './ai.service';
 import { TelegramService } from './telegram.service';
 import { FilteringService } from './filtering.service';
+import { getImageWithFallback } from '../utils/meta-image';
 import prisma from '@/lib/prisma';
 import { Difficulty, Importance } from '@prisma/client';
 
@@ -95,21 +96,22 @@ function validateImportance(value?: string): Importance {
  */
 export class NewsPipeline {
   /**
-   * Run the full processing pipeline
+   * Run the processing pipeline
+   * @param limit - Max articles to process (default: all unprocessed, use 1 for scheduled jobs)
    */
-  static async run(): Promise<{
+  static async run(limit?: number): Promise<{
     processed: number;
     skipped: number;
     errors: number;
   }> {
-    console.log('🚀 Pipeline started...');
+    console.log(`🚀 Pipeline started${limit ? ` (limit: ${limit})` : ''}...`);
     
     let processed = 0;
     let skipped = 0;
     let errors = 0;
 
-    // 1. Get unprocessed articles
-    const rawArticles = await RawArticleRepository.getUnprocessed();
+    // 1. Get unprocessed articles (with optional limit)
+    const rawArticles = await RawArticleRepository.getUnprocessed(limit);
     console.log(`📦 Found ${rawArticles.length} unprocessed articles`);
 
     for (const raw of rawArticles) {
@@ -143,6 +145,10 @@ export class NewsPipeline {
         const difficulty = validateDifficulty(aiResult.difficulty);
         const importance = validateImportance(aiResult.importance);
 
+        // 6.5. Get image (from API or fallback to meta tags)
+        const rawWithImage = raw as typeof raw & { imageUrl?: string | null };
+        const imageUrl = await getImageWithFallback(rawWithImage.imageUrl, raw.url);
+
         // 7. Save Canonical Article with ALL fields
         const article = await prisma.article.create({
           data: {
@@ -153,6 +159,8 @@ export class NewsPipeline {
             originalUrl: raw.url,
             rawArticleId: raw.id,
             language: 'uz',
+            // Image from source or meta fallback
+            imageUrl: imageUrl || null,
             // Metadata
             readingTime,
             wordCount,

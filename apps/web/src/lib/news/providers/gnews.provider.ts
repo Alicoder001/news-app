@@ -38,12 +38,13 @@ interface GNewsResponse {
 export class GNewsProvider extends BaseNewsProvider {
   name = 'GNews';
   
-  private apiKey: string | undefined;
   private baseUrl = 'https://gnews.io/api/v4';
 
-  constructor() {
-    super();
-    this.apiKey = process.env.GNEWS_API_KEY;
+  /**
+   * Get API key dynamically (ensures env is loaded)
+   */
+  private get apiKey(): string | undefined {
+    return process.env.GNEWS_API_KEY;
   }
 
   /**
@@ -57,41 +58,25 @@ export class GNewsProvider extends BaseNewsProvider {
    * Fetch articles from GNews
    */
   async fetchArticles(): Promise<RawArticleData[]> {
-    if (!this.apiKey) {
+    const currentKey = this.apiKey;
+    
+    if (!currentKey) {
       this.log('GNEWS_API_KEY not found. Skipping GNews fetch.', 'warn');
       return [];
     }
 
     this.log('Fetching technology news from Google News...');
     
-    const allArticles: RawArticleData[] = [];
-    const topics = ['artificial intelligence', 'programming', 'cybersecurity'];
-
-    // Fetch top headlines for technology
+    // Only fetch top headlines (1 request = 10 articles)
+    // This saves API quota: 100 requests/day = 100 syncs/day
     try {
       const topHeadlines = await this.fetchTopHeadlines();
-      allArticles.push(...topHeadlines);
-      this.log(`Fetched ${topHeadlines.length} top headlines`);
+      this.log(`Fetched ${topHeadlines.length} headlines from GNews`);
+      return topHeadlines.slice(0, PROVIDER_CONFIG.MAX_ARTICLES_PER_FETCH);
     } catch (error) {
-      this.log(`Failed to fetch top headlines: ${error}`, 'warn');
+      this.log(`Failed to fetch from GNews: ${error}`, 'warn');
+      return [];
     }
-
-    // Fetch specific topics (limited to save API quota)
-    for (const topic of topics.slice(0, 2)) {
-      try {
-        const articles = await this.fetchTopic(topic);
-        allArticles.push(...articles);
-        this.log(`Fetched ${articles.length} articles for "${topic}"`);
-      } catch (error) {
-        this.log(`Failed to fetch "${topic}": ${error}`, 'warn');
-      }
-    }
-
-    // Deduplicate by URL
-    const uniqueArticles = this.deduplicateByUrl(allArticles);
-    
-    this.log(`Total: ${uniqueArticles.length} unique articles`);
-    return uniqueArticles.slice(0, PROVIDER_CONFIG.MAX_ARTICLES_PER_FETCH);
   }
 
   /**
@@ -101,7 +86,7 @@ export class GNewsProvider extends BaseNewsProvider {
     const url = new URL(`${this.baseUrl}/top-headlines`);
     url.searchParams.set('category', 'technology');
     url.searchParams.set('lang', 'en');
-    url.searchParams.set('max', '10');
+    url.searchParams.set('max', '10'); // Fetch up to 10 articles per sync
     url.searchParams.set('token', this.apiKey!);
 
     return this.fetchFromEndpoint(url.toString(), 'top-headlines/technology');
@@ -150,6 +135,7 @@ export class GNewsProvider extends BaseNewsProvider {
         description: article.description || undefined,
         content: article.content || article.description || undefined,
         url: article.url,
+        imageUrl: article.image || undefined, // GNews image
         publishedAt: new Date(article.publishedAt),
         sourceId,
       }));

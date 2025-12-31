@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { newsManager } from '@/lib/news/news-manager';
-import { NewsPipeline } from '@/lib/news/services/news-pipeline.service';
 import { checkRateLimit, getClientIP, getRateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit';
+import { notifySyncResult, notifyError } from '@/lib/news/services/admin-notification.service';
 
 /**
  * Cron Job Endpoint
@@ -31,13 +31,12 @@ function verifyCronSecret(request: Request): boolean {
     return true;
   }
   
-  const cronSecret = process.env.CRON_SECRET;
-  
-  // Allow in development only if explicitly no secret is set
-  if (process.env.NODE_ENV === 'development' && !cronSecret) {
-    console.warn('⚠️ CRON_SECRET not set - allowing request in development mode');
+  // Development rejimda har doim ruxsat
+  if (process.env.NODE_ENV === 'development') {
     return true;
   }
+  
+  const cronSecret = process.env.CRON_SECRET;
   
   // Require secret in production
   if (!cronSecret) {
@@ -50,53 +49,63 @@ function verifyCronSecret(request: Request): boolean {
 }
 
 /**
- * Run the full news pipeline
+ * Run sync + process pipeline
+ * 1. Sync news from providers
+ * 2. Process new articles with AI
+ * 3. Approved articles become visible on site
  */
-async function runFullPipeline(): Promise<{
+async function runSyncPipeline(): Promise<{
   sync: { total: number; byProvider: Record<string, { fetched: number; saved: number }> };
-  process: { processed: number; errors: string[] };
+  process: { processed: number; skipped: number; errors: number };
   duration: number;
 }> {
   const startTime = Date.now();
-  const errors: string[] = [];
+  const prisma = (await import('@/lib/prisma')).default;
   
-  console.log('🚀 Starting full news pipeline...');
+  console.log('📥 Starting news sync + process...');
   console.log(`⏰ Time: ${new Date().toISOString()}`);
   
+  // DEBUG: Check env variables
+  console.log('🔑 ENV Debug:');
+  console.log(`   THENEWSAPI_KEY: ${process.env.THENEWSAPI_KEY ? 'SET (' + process.env.THENEWSAPI_KEY.slice(0, 8) + '...)' : 'NOT SET'}`);
+  console.log(`   NEWSAPI_AI_KEY: ${process.env.NEWSAPI_AI_KEY ? 'SET' : 'NOT SET'}`);
+  console.log(`   OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'SET' : 'NOT SET'}`);
+  
   // Step 1: Sync from all providers
-  console.log('\n📥 Step 1: Syncing from providers...');
   const syncResult = await newsManager.syncAll();
+  console.log(`✅ Sync: ${syncResult.total} new articles`);
   
-  // Step 2: Process raw articles
-  console.log('\n🤖 Step 2: Processing articles with AI...');
-  let processed = 0;
-  
-  try {
-    await NewsPipeline.run();
-    // Count would come from pipeline, simplified for now
-    processed = syncResult.total;
-  } catch (error) {
-    errors.push(`Pipeline error: ${error}`);
-  }
+  // Step 2: Process unprocessed articles with AI
+  // AI decides if article should be published (importance)
+  const { NewsPipeline } = await import('@/lib/news/services/news-pipeline.service');
+  const processResult = await NewsPipeline.run(10); // Process up to 10 articles
   
   const duration = Date.now() - startTime;
   
-  console.log(`\n✅ Pipeline complete in ${duration}ms`);
-  console.log(`   Synced: ${syncResult.total} articles`);
-  console.log(`   Processed: ${processed} articles`);
+  // Count published articles (visible on site)
+  const publishedCount = await prisma.article.count({ 
+    where: { 
+      createdAt: { 
+        gte: new Date(startTime) 
+      } 
+    } 
+  });
+  
+  console.log(`✅ Complete in ${duration}ms`);
+  console.log(`   Synced: ${syncResult.total}`);
+  console.log(`   Processed: ${processResult.processed}`);
+  console.log(`   Published to site: ${publishedCount}`);
   
   return {
     sync: {
       total: syncResult.total,
       byProvider: syncResult.byProvider,
     },
-    process: {
-      processed,
-      errors: [...syncResult.errors, ...errors],
-    },
+    process: processResult,
     duration,
   };
 }
+
 
 /**
  * GET handler - for Vercel Cron
@@ -125,7 +134,15 @@ export async function GET(request: Request) {
   }
   
   try {
-    const result = await runFullPipeline();
+    const result = await runSyncPipeline();
+    
+    // Notify admin about sync result
+    await notifySyncResult({
+      synced: result.sync.total,
+      processed: result.process.processed,
+      published: result.process.processed - result.process.skipped,
+      duration: result.duration,
+    });
     
     return NextResponse.json({
       success: true,
@@ -134,6 +151,9 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('❌ Cron job failed:', error);
+    
+    // Notify admin about error
+    await notifyError('News Sync', error instanceof Error ? error.message : 'Unknown error');
     
     return NextResponse.json(
       { 

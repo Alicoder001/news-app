@@ -4,6 +4,7 @@ export interface RawArticleData {
   description?: string;
   content?: string;
   url: string;
+  imageUrl?: string;  // Maqola rasmi
   publishedAt?: Date;
   sourceId: string;
 }

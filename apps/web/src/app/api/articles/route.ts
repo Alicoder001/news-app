@@ -33,8 +33,19 @@ export async function GET(request: Request) {
         } : {},
       }),
     ]);
-
-    return NextResponse.json({ articles, total }, {
+    const totalPages = Math.ceil(total / limit);
+    
+    return NextResponse.json({
+      articles,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      }
+    }, {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',

@@ -30,6 +30,7 @@ export class RawArticleRepository {
         description: a.description,
         content: a.content,
         url: a.url,
+        imageUrl: a.imageUrl,  // Re-enabled!
         publishedAt: a.publishedAt,
         sourceId: a.sourceId,
       })),
@@ -37,12 +38,12 @@ export class RawArticleRepository {
     });
   }
 
-  static async getUnprocessed() {
+  static async getUnprocessed(limit: number = 10) {
     return await prisma.rawArticle.findMany({
       where: { isProcessed: false },
       include: { source: true },
-      take: 10,
-      orderBy: { createdAt: 'desc' }
+      take: limit,
+      orderBy: { createdAt: 'asc' } // Oldest first (FIFO queue)
     });
   }
 
