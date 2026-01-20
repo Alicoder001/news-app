@@ -89,7 +89,11 @@
     "saved": {
       "title": "Saqlanganlar",
       "empty": "Hozircha saqlangan maqolalar yo'q.",
-      "hint": "Maqolalarni o'qish jarayonida saqlash tugmasini bossangiz, ular shu yerda paydo bo'ladi."
+      "hint": "Maqolalarni o'qish jarayonida saqlash tugmasini bossangiz, ular shu yerda paydo bo'ladi.",
+      "articles": "ta maqola",
+      "clearAll": "Hammasini o'chirish",
+      "clearConfirm": "Barcha saqlangan maqolalarni o'chirishni xohlaysizmi?",
+      "min": "min"
     },
     "openInWeb": "Saytda o'qish",
     "noNews": "Hozircha yangiliklar yo'q."

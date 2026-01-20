@@ -1,15 +1,29 @@
 "use client";
 
 import { Share2, Bookmark } from "lucide-react";
-import { useState } from "react";
+import { useSavedArticlesContext, SavedArticle } from "./saved-articles-provider";
 
 interface ArticleActionsProps {
   title: string;
   slug: string;
+  summary?: string;
+  imageUrl?: string;
+  categoryName?: string;
+  categoryColor?: string;
+  readingTime?: number;
 }
 
-export function ArticleActions({ title, slug }: ArticleActionsProps) {
-  const [isSaved, setIsSaved] = useState(false);
+export function ArticleActions({ 
+  title, 
+  slug,
+  summary,
+  imageUrl,
+  categoryName,
+  categoryColor,
+  readingTime,
+}: ArticleActionsProps) {
+  const { toggleSave, isArticleSaved, isLoaded } = useSavedArticlesContext();
+  const isSaved = isLoaded && isArticleSaved(slug);
 
   const handleShare = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -23,8 +37,6 @@ export function ArticleActions({ title, slug }: ArticleActionsProps) {
         url: url,
       }).catch(console.error);
     } else {
-      // Fallback or Telegram specific (if using Telegram WebApp SDK)
-      // For now just copy to clipboard or alert
       navigator.clipboard.writeText(url);
       alert("Havola nusxalandi!");
     }
@@ -33,8 +45,18 @@ export function ArticleActions({ title, slug }: ArticleActionsProps) {
   const handleSave = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsSaved(!isSaved);
-    // Request to backend to toggle save would go here
+    
+    const articleData: Omit<SavedArticle, 'savedAt'> = {
+      slug,
+      title,
+      summary,
+      imageUrl,
+      categoryName,
+      categoryColor,
+      readingTime,
+    };
+    
+    toggleSave(articleData);
   };
 
   return (
@@ -48,8 +70,8 @@ export function ArticleActions({ title, slug }: ArticleActionsProps) {
       </button>
       <button 
         onClick={handleSave}
-        className={`p-1.5 rounded-full hover:bg-foreground/5 transition-colors ${isSaved ? 'text-blue-500 fill-current' : 'text-muted-foreground hover:text-foreground'}`}
-        aria-label="Saqlash"
+        className={`p-1.5 rounded-full hover:bg-foreground/5 transition-colors ${isSaved ? 'text-blue-500' : 'text-muted-foreground hover:text-foreground'}`}
+        aria-label={isSaved ? "Saqlangandan o'chirish" : "Saqlash"}
       >
         <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
       </button>

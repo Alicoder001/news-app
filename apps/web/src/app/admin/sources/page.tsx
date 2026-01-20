@@ -1,7 +1,6 @@
 import prisma from '@/lib/prisma';
-import Link from 'next/link';
-import { DataCard, StatusBadge } from '@/components/admin/stats-card';
-import { Rss, Plus, ExternalLink, Power, PowerOff, Trash2, RefreshCw } from 'lucide-react';
+import { Rss, Plus, ExternalLink } from 'lucide-react';
+import { SourceActions } from './source-actions';
 
 async function getSources() {
   const sources = await prisma.newsSource.findMany({
@@ -93,31 +92,11 @@ export default async function SourcesPage() {
                 <ExternalLink className="w-3.5 h-3.5" />
                 Ochish
               </a>
-              <button
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors ${
-                  source.isActive 
-                    ? 'text-orange-500 hover:bg-orange-500/10'
-                    : 'text-green-500 hover:bg-green-500/10'
-                }`}
-              >
-                {source.isActive ? (
-                  <>
-                    <PowerOff className="w-3.5 h-3.5" />
-                    O'chirish
-                  </>
-                ) : (
-                  <>
-                    <Power className="w-3.5 h-3.5" />
-                    Yoqish
-                  </>
-                )}
-              </button>
-              <button
-                className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                title="O'chirish"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              <SourceActions 
+                sourceId={source.id} 
+                sourceName={source.name} 
+                isActive={source.isActive} 
+              />
             </div>
           </div>
         ))}

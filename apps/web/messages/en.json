@@ -80,7 +80,11 @@
     "saved": {
       "title": "Saved",
       "empty": "No saved articles yet.",
-      "hint": "Tap the save button while reading articles and they will appear here."
+      "hint": "Tap the save button while reading articles and they will appear here.",
+      "articles": "articles",
+      "clearAll": "Clear all",
+      "clearConfirm": "Are you sure you want to remove all saved articles?",
+      "min": "min"
     },
     "openInWeb": "Read on website",
     "noNews": "No news yet."

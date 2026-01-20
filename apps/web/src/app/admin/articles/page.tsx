@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
-import { DataCard } from '@/components/admin/stats-card';
-import { Search, Filter, Plus, ExternalLink, Edit2, Trash2, Eye } from 'lucide-react';
+import { Search, Filter, Edit2, Eye } from 'lucide-react';
+import { DeleteArticleButton } from './delete-article-button';
 
 async function getArticles(page: number = 1, limit: number = 20) {
   const skip = (page - 1) * limit;
@@ -136,12 +136,10 @@ export default async function ArticlesPage({
                     >
                       <Edit2 className="w-4 h-4" />
                     </Link>
-                    <button
-                      className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                      title="O'chirish"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <DeleteArticleButton 
+                      articleId={article.id} 
+                      articleTitle={article.title} 
+                    />
                   </div>
                 </td>
               </tr>

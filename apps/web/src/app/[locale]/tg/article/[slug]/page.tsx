@@ -96,7 +96,15 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
                  >
                     <Globe className="w-4 h-4" />
                  </Link>
-                 <ArticleActions title={article.title} slug={article.slug} />
+                 <ArticleActions 
+                   title={article.title} 
+                   slug={article.slug}
+                   summary={article.summary || undefined}
+                   imageUrl={article.imageUrl || undefined}
+                   categoryName={article.category?.name}
+                   categoryColor={article.category?.color || undefined}
+                   readingTime={article.readingTime || undefined}
+                 />
               </div>
           </div>
 
