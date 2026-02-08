@@ -92,43 +92,62 @@ export async function getUsageStats(
   byModel: Record<string, { tokens: number; cost: number }>;
   byOperation: Record<string, { tokens: number; cost: number; count: number }>;
 }> {
-  const usages = await prisma.aIUsage.findMany({
-    where: {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
+  const where = {
+    createdAt: {
+      gte: startDate,
+      lte: endDate,
     },
-  });
+  };
 
-  let totalTokens = 0;
-  let totalCost = 0;
+  const [totals, modelGroups, operationGroups] = await Promise.all([
+    prisma.aIUsage.aggregate({
+      where,
+      _sum: {
+        totalTokens: true,
+        cost: true,
+      },
+    }),
+    prisma.aIUsage.groupBy({
+      by: ['model'],
+      where,
+      _sum: {
+        totalTokens: true,
+        cost: true,
+      },
+    }),
+    prisma.aIUsage.groupBy({
+      by: ['operation'],
+      where,
+      _sum: {
+        totalTokens: true,
+        cost: true,
+      },
+      _count: {
+        _all: true,
+      },
+    }),
+  ]);
+
   const byModel: Record<string, { tokens: number; cost: number }> = {};
+  for (const group of modelGroups) {
+    byModel[group.model] = {
+      tokens: group._sum.totalTokens ?? 0,
+      cost: group._sum.cost ?? 0,
+    };
+  }
+
   const byOperation: Record<string, { tokens: number; cost: number; count: number }> = {};
-
-  for (const usage of usages) {
-    totalTokens += usage.totalTokens;
-    totalCost += usage.cost;
-
-    // By model
-    if (!byModel[usage.model]) {
-      byModel[usage.model] = { tokens: 0, cost: 0 };
-    }
-    byModel[usage.model].tokens += usage.totalTokens;
-    byModel[usage.model].cost += usage.cost;
-
-    // By operation
-    if (!byOperation[usage.operation]) {
-      byOperation[usage.operation] = { tokens: 0, cost: 0, count: 0 };
-    }
-    byOperation[usage.operation].tokens += usage.totalTokens;
-    byOperation[usage.operation].cost += usage.cost;
-    byOperation[usage.operation].count += 1;
+  for (const group of operationGroups) {
+    byOperation[group.operation] = {
+      tokens: group._sum.totalTokens ?? 0,
+      cost: group._sum.cost ?? 0,
+      count: group._count._all,
+    };
   }
 
   return {
-    totalTokens,
-    totalCost: Number(totalCost.toFixed(4)),
+    totalTokens: totals._sum.totalTokens ?? 0,
+    totalCost: Number((totals._sum.cost ?? 0).toFixed(4)),
     byModel,
     byOperation,
   };
@@ -149,16 +168,19 @@ export async function getDailyUsage(days: number = 30): Promise<
   startDate.setDate(startDate.getDate() - days);
   startDate.setHours(0, 0, 0, 0);
 
-  const usages = await prisma.aIUsage.findMany({
-    where: {
-      createdAt: {
-        gte: startDate,
-      },
-    },
-    orderBy: {
-      createdAt: 'asc',
-    },
-  });
+  const rows = await prisma.$queryRaw<
+    Array<{ date: Date | string; tokens: bigint | number; cost: number; count: bigint | number }>
+  >`
+    SELECT
+      DATE("createdAt") AS date,
+      COALESCE(SUM("totalTokens"), 0) AS tokens,
+      COALESCE(SUM("cost"), 0) AS cost,
+      COUNT(*) AS count
+    FROM "AIUsage"
+    WHERE "createdAt" >= ${startDate}
+    GROUP BY DATE("createdAt")
+    ORDER BY DATE("createdAt") ASC
+  `;
 
   const dailyMap = new Map<string, { tokens: number; cost: number; count: number }>();
 
@@ -170,14 +192,15 @@ export async function getDailyUsage(days: number = 30): Promise<
     dailyMap.set(dateStr, { tokens: 0, cost: 0, count: 0 });
   }
 
-  // Aggregate data
-  for (const usage of usages) {
-    const dateStr = usage.createdAt.toISOString().split('T')[0];
+  // Merge aggregated daily rows
+  for (const row of rows) {
+    const date = row.date instanceof Date ? row.date : new Date(row.date);
+    const dateStr = date.toISOString().split('T')[0];
     const existing = dailyMap.get(dateStr);
     if (existing) {
-      existing.tokens += usage.totalTokens;
-      existing.cost += usage.cost;
-      existing.count += 1;
+      existing.tokens += Number(row.tokens);
+      existing.cost += Number(row.cost);
+      existing.count += Number(row.count);
     }
   }
 

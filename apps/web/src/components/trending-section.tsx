@@ -3,6 +3,8 @@ import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 
+const ONE_WEEK_AGO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
 export async function TrendingSection() {
   const t = await getTranslations('home');
   
@@ -16,7 +18,7 @@ export async function TrendingSection() {
     },
     where: {
       createdAt: {
-        gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        gte: ONE_WEEK_AGO,
       }
     }
   });

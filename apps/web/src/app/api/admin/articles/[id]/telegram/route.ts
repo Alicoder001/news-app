@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { TelegramService } from '@/lib/news/services/telegram.service';
+import { requireAdminApiAuth } from '@/lib/admin/auth';
 
 // POST - Send article to Telegram
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await requireAdminApiAuth(request, { requireTrustedOrigin: true });
+  if (authError) return authError;
+
   try {
     const { id } = await params;
 

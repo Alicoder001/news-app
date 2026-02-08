@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 const STORAGE_KEY = 'aishunos_saved_articles';
 
@@ -15,26 +15,25 @@ export interface SavedArticle {
   savedAt: string;
 }
 
+function loadInitialSavedArticles(): SavedArticle[] {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as SavedArticle[]) : [];
+  } catch (error) {
+    console.error('Failed to load saved articles:', error);
+    return [];
+  }
+}
+
 /**
  * Hook for managing saved articles in localStorage
  * Used in Telegram Mini App for offline-first bookmarks
  */
 export function useSavedArticles() {
-  const [savedArticles, setSavedArticles] = useState<SavedArticle[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setSavedArticles(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.error('Failed to load saved articles:', error);
-    }
-    setIsLoaded(true);
-  }, []);
+  const [savedArticles, setSavedArticles] = useState<SavedArticle[]>(loadInitialSavedArticles);
+  const isLoaded = true;
 
   // Save article
   const saveArticle = useCallback((article: Omit<SavedArticle, 'savedAt'>) => {

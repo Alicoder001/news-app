@@ -17,16 +17,18 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
 import { useTheme } from '../theme/ThemeProvider';
 import { useArticles } from '../hooks/useQueries';
 import { formatDate, truncate } from '@news-app/shared';
 import type { ArticleListItem } from '@news-app/api-types';
-import type { RootStackParamList } from '../navigation';
+import type { MainTabParamList, RootStackParamList } from '../navigation';
 import { spacing, borderRadius, fonts } from '../theme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type HomeRouteProp = RouteProp<MainTabParamList, 'Home'>;
 
 import { Calendar, Clock, ChevronRight } from 'lucide-react-native';
 
@@ -105,6 +107,9 @@ function ArticleCard({ article }: { article: ArticleListItem }) {
 
 export default function HomeScreen() {
   const { colors, isDark } = useTheme();
+  const route = useRoute<HomeRouteProp>();
+  const categorySlug = route.params?.categorySlug;
+  const categoryName = route.params?.categoryName;
   const {
     data,
     isLoading,
@@ -114,7 +119,7 @@ export default function HomeScreen() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useArticles();
+  } = useArticles(categorySlug);
 
   const articles = data?.pages.flatMap((page) => page.articles) ?? [];
 
@@ -166,7 +171,9 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Yangiliklar</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>
+          {categoryName ? `${categoryName} yangiliklari` : 'Yangiliklar'}
+        </Text>
       </View>
       <FlatList
         data={articles}

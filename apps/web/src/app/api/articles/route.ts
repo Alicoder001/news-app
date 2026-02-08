@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getCorsHeaders } from '@/lib/security/cors';
+
+function parsePositiveInt(value: string | null, fallback: number): number {
+  const parsed = Number.parseInt(value ?? '', 10);
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+  return parsed;
+}
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = parsePositiveInt(searchParams.get('page'), 1);
+    const limit = Math.min(parsePositiveInt(searchParams.get('limit'), 10), 50);
     const category = searchParams.get('category');
     
     const skip = (page - 1) * limit;
@@ -36,41 +45,33 @@ export async function GET(request: Request) {
     const totalPages = Math.ceil(total / limit);
     
     return NextResponse.json({
-      articles,
+      data: articles,
       pagination: {
         page,
-        limit,
+        pageSize: limit,
         total,
         totalPages,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
       }
     }, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
+      headers: getCorsHeaders(request, 'GET, OPTIONS'),
     });
   } catch (error) {
     console.error('API Articles Error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' }, 
+      { error: { code: 'INTERNAL_SERVER_ERROR', message: 'Internal Server Error' } }, 
       { 
         status: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' }
+        headers: getCorsHeaders(request, 'GET, OPTIONS')
       }
     );
   }
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(request: Request) {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
+    headers: getCorsHeaders(request, 'GET, OPTIONS'),
   });
 }

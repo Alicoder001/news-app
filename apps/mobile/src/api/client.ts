@@ -10,7 +10,6 @@ import type {
   Article,
   ArticleListItem,
   Category,
-  PaginatedResponse,
 } from '@news-app/api-types';
 import { Platform } from 'react-native';
 
@@ -34,6 +33,121 @@ async function fetchApi<T>(endpoint: string): Promise<T> {
   return res.json();
 }
 
+interface LegacyPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+interface NewPagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+interface LegacyArticlesResponse {
+  articles: ArticleListItem[];
+  pagination: LegacyPagination;
+}
+
+interface NewArticlesResponse {
+  data: ArticleListItem[];
+  pagination: NewPagination;
+}
+
+interface ArticleDetailResponse {
+  data: Article;
+}
+
+interface ListResponse<T> {
+  data: T[];
+}
+
+export interface MobileArticlesPage {
+  articles: ArticleListItem[];
+  total: number;
+  hasNextPage: boolean;
+}
+
+function isLegacyResponse(payload: unknown): payload is LegacyArticlesResponse {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'articles' in payload &&
+    Array.isArray((payload as LegacyArticlesResponse).articles)
+  );
+}
+
+function isNewResponse(payload: unknown): payload is NewArticlesResponse {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'data' in payload &&
+    Array.isArray((payload as NewArticlesResponse).data)
+  );
+}
+
+function normalizeArticlesResponse(payload: unknown): MobileArticlesPage {
+  if (isLegacyResponse(payload)) {
+    return {
+      articles: payload.articles,
+      total: payload.pagination.total,
+      hasNextPage: payload.pagination.hasNextPage,
+    };
+  }
+
+  if (isNewResponse(payload)) {
+    return {
+      articles: payload.data,
+      total: payload.pagination.total,
+      hasNextPage: payload.pagination.hasNext,
+    };
+  }
+
+  throw new Error('API contract mismatch: articles list response formati noto\'g\'ri');
+}
+
+function normalizeArticleDetailResponse(payload: unknown): Article {
+  if (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'data' in payload &&
+    typeof (payload as ArticleDetailResponse).data === 'object' &&
+    (payload as ArticleDetailResponse).data !== null
+  ) {
+    return (payload as ArticleDetailResponse).data;
+  }
+
+  if (typeof payload === 'object' && payload !== null && 'id' in payload) {
+    return payload as Article;
+  }
+
+  throw new Error('API contract mismatch: article detail response formati noto\'g\'ri');
+}
+
+function normalizeListResponse<T>(payload: unknown): T[] {
+  if (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'data' in payload &&
+    Array.isArray((payload as ListResponse<T>).data)
+  ) {
+    return (payload as ListResponse<T>).data;
+  }
+
+  if (Array.isArray(payload)) {
+    return payload as T[];
+  }
+
+  throw new Error('API contract mismatch: list response formati noto\'g\'ri');
+}
+
 /**
  * API methods for articles, categories
  */
@@ -46,26 +160,29 @@ export const api = {
       page = 1,
       limit = 10,
       categorySlug?: string
-    ): Promise<{ articles: ArticleListItem[]; total: number }> => {
+    ): Promise<MobileArticlesPage> => {
       let url = `/api/articles?page=${page}&limit=${limit}`;
       if (categorySlug) {
         url += `&category=${categorySlug}`;
       }
-      return fetchApi(url);
+      const response = await fetchApi<unknown>(url);
+      return normalizeArticlesResponse(response);
     },
 
     /**
      * Get single article by slug
      */
     getBySlug: async (slug: string): Promise<Article> => {
-      return fetchApi(`/api/articles/${slug}`);
+      const response = await fetchApi<unknown>(`/api/articles/${slug}`);
+      return normalizeArticleDetailResponse(response);
     },
 
     /**
      * Get featured/hero articles
      */
     getFeatured: async (limit = 5): Promise<ArticleListItem[]> => {
-      return fetchApi(`/api/articles/featured?limit=${limit}`);
+      const response = await fetchApi<unknown>(`/api/articles/featured?limit=${limit}`);
+      return normalizeListResponse<ArticleListItem>(response);
     },
   },
 
@@ -74,7 +191,8 @@ export const api = {
      * Get all categories
      */
     list: async (): Promise<Category[]> => {
-      return fetchApi('/api/categories');
+      const response = await fetchApi<unknown>('/api/categories');
+      return normalizeListResponse<Category>(response);
     },
   },
 };

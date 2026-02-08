@@ -6,6 +6,7 @@ import { Bookmark, Trash2, Clock, ExternalLink } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 
 export default function SavedArticlesPage() {
   const t = useTranslations('tg.saved');
@@ -96,9 +97,11 @@ export default function SavedArticlesPage() {
                   {/* Thumbnail */}
                   {article.imageUrl && (
                     <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-foreground/5">
-                      <img
+                      <Image
                         src={article.imageUrl}
                         alt={article.title}
+                        width={80}
+                        height={80}
                         className="w-full h-full object-cover"
                       />
                     </div>

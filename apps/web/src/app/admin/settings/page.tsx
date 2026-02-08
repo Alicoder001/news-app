@@ -1,17 +1,6 @@
 import prisma from '@/lib/prisma';
 import { DataCard } from '@/components/admin/stats-card';
-import { Settings, Key, Globe, Bell, Database, RefreshCw } from 'lucide-react';
-
-async function getSettings() {
-  const settings = await prisma.systemSetting.findMany();
-  const settingsMap: Record<string, string> = {};
-  
-  for (const setting of settings) {
-    settingsMap[setting.key] = setting.value;
-  }
-  
-  return settingsMap;
-}
+import { Bell, Database, RefreshCw } from 'lucide-react';
 
 async function getSystemInfo() {
   const [articlesCount, sourcesCount, pipelineRuns] = await Promise.all([
@@ -30,7 +19,6 @@ async function getSystemInfo() {
 }
 
 export default async function SettingsPage() {
-  const settings = await getSettings();
   const systemInfo = await getSystemInfo();
 
   // Check which env vars are configured

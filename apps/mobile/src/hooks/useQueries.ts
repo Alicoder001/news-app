@@ -17,6 +17,10 @@ export function useArticles(categorySlug?: string) {
     queryKey: ['articles', categorySlug],
     queryFn: ({ pageParam = 1 }) => api.articles.list(pageParam, 10, categorySlug),
     getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage.hasNextPage) {
+        return undefined;
+      }
+
       const totalFetched = allPages.reduce((acc, page) => acc + page.articles.length, 0);
       if (totalFetched < lastPage.total) {
         return allPages.length + 1;

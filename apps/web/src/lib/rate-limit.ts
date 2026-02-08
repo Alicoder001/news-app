@@ -1,9 +1,10 @@
 /**
- * Simple Rate Limiter for API Routes
- * 
- * Uses in-memory storage (suitable for single-instance deployments)
- * For production with multiple instances, use Redis-based solution
- * 
+ * Rate Limiter for API Routes
+ *
+ * Strategy:
+ * - Preferred: Upstash Redis (distributed, multi-instance safe)
+ * - Fallback: in-memory (single-instance safe)
+ *
  * @author Antigravity Team
  */
 
@@ -12,10 +13,15 @@ interface RateLimitEntry {
   resetTime: number;
 }
 
-// In-memory store for rate limiting
+interface UpstashPipelineItem {
+  result?: unknown;
+  error?: string;
+}
+
+// In-memory store fallback
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Cleanup old entries periodically
+// Cleanup old in-memory entries periodically
 setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of rateLimitStore.entries()) {
@@ -23,7 +29,7 @@ setInterval(() => {
       rateLimitStore.delete(key);
     }
   }
-}, 60000); // Clean every minute
+}, 60_000);
 
 export interface RateLimitConfig {
   /** Maximum requests allowed in the window */
@@ -39,32 +45,15 @@ export interface RateLimitResult {
   reset: number;
 }
 
-/**
- * Check rate limit for a given identifier
- * 
- * @param identifier - Unique identifier (IP, user ID, API key)
- * @param config - Rate limit configuration
- * @returns Rate limit result
- * 
- * @example
- * const result = checkRateLimit(ip, { limit: 10, windowSeconds: 60 });
- * if (!result.success) {
- *   return new Response('Too Many Requests', { status: 429 });
- * }
- */
-export function checkRateLimit(
-  identifier: string,
-  config: RateLimitConfig
-): RateLimitResult {
+function checkRateLimitInMemory(identifier: string, config: RateLimitConfig): RateLimitResult {
   const now = Date.now();
-  const key = identifier;
-  const entry = rateLimitStore.get(key);
+  const entry = rateLimitStore.get(identifier);
 
-  // First request or window expired
+  // First request or expired window
   if (!entry || entry.resetTime < now) {
     const resetTime = now + config.windowSeconds * 1000;
-    rateLimitStore.set(key, { count: 1, resetTime });
-    
+    rateLimitStore.set(identifier, { count: 1, resetTime });
+
     return {
       success: true,
       limit: config.limit,
@@ -73,9 +62,9 @@ export function checkRateLimit(
     };
   }
 
-  // Within window
-  entry.count++;
-  
+  // Existing window
+  entry.count += 1;
+
   if (entry.count > config.limit) {
     return {
       success: false,
@@ -93,27 +82,128 @@ export function checkRateLimit(
   };
 }
 
+function getRedisConfig(): { url: string; token: string } | null {
+  // Redis rate limiting is production-only by policy.
+  if (process.env.NODE_ENV !== 'production') {
+    return null;
+  }
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) {
+    return null;
+  }
+
+  return { url, token };
+}
+
+function parseNumber(value: unknown, fallback = 0): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+async function checkRateLimitRedis(
+  identifier: string,
+  config: RateLimitConfig
+): Promise<RateLimitResult | null> {
+  const redis = getRedisConfig();
+  if (!redis) {
+    return null;
+  }
+
+  const key = `ratelimit:${identifier}`;
+
+  try {
+    const response = await fetch(`${redis.url}/pipeline`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${redis.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([
+        ['INCR', key],
+        ['PTTL', key],
+        ['EXPIRE', key, config.windowSeconds, 'NX'],
+      ]),
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upstash responded with ${response.status}`);
+    }
+
+    const payload = (await response.json()) as UpstashPipelineItem[];
+    if (!Array.isArray(payload) || payload.length < 2) {
+      throw new Error('Invalid Upstash pipeline payload');
+    }
+
+    if (payload.some((item) => item.error)) {
+      throw new Error(`Upstash pipeline error: ${payload.map((item) => item.error).filter(Boolean).join(', ')}`);
+    }
+
+    const count = parseNumber(payload[0]?.result, 0);
+    let ttlMs = parseNumber(payload[1]?.result, 0);
+
+    // PTTL can return -1/-2 in edge cases
+    if (ttlMs <= 0) {
+      ttlMs = config.windowSeconds * 1000;
+    }
+
+    const reset = Date.now() + ttlMs;
+    const success = count <= config.limit;
+
+    return {
+      success,
+      limit: config.limit,
+      remaining: success ? Math.max(config.limit - count, 0) : 0,
+      reset,
+    };
+  } catch (error) {
+    console.warn('[rate-limit] Redis unavailable, using in-memory fallback:', error);
+    return null;
+  }
+}
+
 /**
- * Get client IP from request headers
+ * Check rate limit for a given identifier.
+ *
+ * Distributed mode (Upstash Redis) is used when:
+ * - `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured.
+ *
+ * Otherwise in-memory fallback is used.
+ */
+export async function checkRateLimit(
+  identifier: string,
+  config: RateLimitConfig
+): Promise<RateLimitResult> {
+  const distributedResult = await checkRateLimitRedis(identifier, config);
+  if (distributedResult) {
+    return distributedResult;
+  }
+
+  return checkRateLimitInMemory(identifier, config);
+}
+
+/**
+ * Get client IP from request headers.
  */
 export function getClientIP(request: Request): string {
-  // Vercel/Cloudflare headers
   const forwarded = request.headers.get('x-forwarded-for');
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   const realIP = request.headers.get('x-real-ip');
   if (realIP) {
     return realIP;
   }
-  
-  // Fallback
+
   return 'unknown';
 }
 
 /**
- * Create rate limit headers for response
+ * Create rate limit headers for response.
  */
 export function getRateLimitHeaders(result: RateLimitResult): HeadersInit {
   return {
@@ -124,15 +214,15 @@ export function getRateLimitHeaders(result: RateLimitResult): HeadersInit {
 }
 
 /**
- * Predefined rate limit configs
+ * Predefined rate limit configs.
  */
 export const RATE_LIMITS = {
   // Strict: 10 requests per minute (for cron/admin endpoints)
   STRICT: { limit: 10, windowSeconds: 60 },
-  
+
   // Standard: 60 requests per minute (for public API)
   STANDARD: { limit: 60, windowSeconds: 60 },
-  
+
   // Relaxed: 100 requests per minute (for read-heavy endpoints)
   RELAXED: { limit: 100, windowSeconds: 60 },
 } as const;

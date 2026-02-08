@@ -6,7 +6,6 @@ import { TGLanguageSelector } from '@/components/tg-language-selector';
 
 export default async function SettingsPage() {
   const t = await getTranslations('tg.settings');
-  const tCommon = await getTranslations('common');
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">

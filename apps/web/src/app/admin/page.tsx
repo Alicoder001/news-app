@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
 import { StatsCard, DataCard, StatusBadge } from '@/components/admin/stats-card';
-import { FileText, Rss, Coins, Activity, TrendingUp, Clock } from 'lucide-react';
+import { FileText, Rss, Coins, Activity } from 'lucide-react';
 import { getUsageStats, getDailyUsage } from '@/lib/admin/usage-tracker';
 import Link from 'next/link';
 
@@ -14,7 +14,6 @@ async function getDashboardStats() {
   const now = new Date();
   const todayStart = new Date(now.setHours(0, 0, 0, 0));
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
   const [
     totalArticles,

@@ -6,6 +6,12 @@ import { TheNewsAPIProvider } from './providers/thenewsapi.provider';
 import { NewsAPIAiProvider } from './providers/newsapi-ai.provider';
 import { RawArticleRepository } from './repositories/raw-article.repository';
 
+type ProviderDebugInfo = { lastDebugInfo: unknown };
+
+function hasDebugInfo(provider: NewsProvider): provider is NewsProvider & ProviderDebugInfo {
+  return 'lastDebugInfo' in provider;
+}
+
 /**
  * News Manager
  * 
@@ -53,11 +59,11 @@ export class NewsManager {
   /**
    * Get debug info from all providers
    */
-  getDebugInfo(): Record<string, any> {
-    const debug: Record<string, any> = {};
+  getDebugInfo(): Record<string, unknown> {
+    const debug: Record<string, unknown> = {};
     for (const provider of this.providers) {
-      if ('lastDebugInfo' in provider) {
-        debug[provider.name] = (provider as any).lastDebugInfo;
+      if (hasDebugInfo(provider)) {
+        debug[provider.name] = provider.lastDebugInfo;
       }
     }
     return debug;
@@ -88,7 +94,7 @@ export class NewsManager {
         
         if (articles && articles.length > 0) {
           const result = await RawArticleRepository.createMany(articles);
-          const savedCount = typeof result === 'number' ? result : (result as any)?.count || 0;
+          const savedCount = typeof result === 'number' ? result : result.count;
           
           results[provider.name] = { 
             fetched: articles.length, 

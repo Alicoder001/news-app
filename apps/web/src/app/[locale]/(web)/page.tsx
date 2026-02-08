@@ -1,9 +1,7 @@
 import prisma from '@/lib/prisma';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
-import { CategoryBadge } from '@/components/category-badge';
-import { Tag } from '@/components/tag';
-import { ImportanceBadge, DifficultyBadge } from '@/components/badges';
+import { DifficultyBadge } from '@/components/badges';
 import { CategoryNav } from '@/components/category-nav';
 import { TrendingSection } from '@/components/trending-section';
 import { NewsletterSignup } from '@/components/newsletter-signup';

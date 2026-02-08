@@ -1,17 +1,26 @@
 import { NextResponse } from 'next/server';
-import { verifyAdminSecret, setAuthCookie } from '@/lib/admin/auth';
+import { verifyAdminSecret, setAuthCookie, isTrustedOrigin } from '@/lib/admin/auth';
+import { checkRateLimit, getClientIP, getRateLimitHeaders } from '@/lib/rate-limit';
+import { adminLoginSchema, parseJsonBody } from '@/lib/admin/validation';
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { secret } = body;
+  if (!isTrustedOrigin(request)) {
+    return NextResponse.json({ error: 'Forbidden origin' }, { status: 403 });
+  }
 
-    if (!secret) {
-      return NextResponse.json(
-        { error: 'Secret talab qilinadi' },
-        { status: 400 }
-      );
-    }
+  const ip = getClientIP(request);
+  const rateLimit = await checkRateLimit(`admin-login:${ip}`, { limit: 10, windowSeconds: 300 });
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: getRateLimitHeaders(rateLimit) }
+    );
+  }
+
+  try {
+    const parsed = await parseJsonBody(request, adminLoginSchema);
+    if (parsed.error) return parsed.error;
+    const { secret } = parsed.data;
 
     const isValid = verifyAdminSecret(secret);
 
@@ -23,7 +32,7 @@ export async function POST(request: Request) {
     }
 
     // Set auth cookie
-    await setAuthCookie(secret);
+    await setAuthCookie();
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,6 +1,8 @@
 "use client";
 
 import { Share2, Bookmark } from "lucide-react";
+import { useLocale } from 'next-intl';
+import { routing } from '@/i18n/routing';
 import { useSavedArticlesContext, SavedArticle } from "./saved-articles-provider";
 
 interface ArticleActionsProps {
@@ -22,6 +24,7 @@ export function ArticleActions({
   categoryColor,
   readingTime,
 }: ArticleActionsProps) {
+  const locale = useLocale();
   const { toggleSave, isArticleSaved, isLoaded } = useSavedArticlesContext();
   const isSaved = isLoaded && isArticleSaved(slug);
 
@@ -29,7 +32,8 @@ export function ArticleActions({
     e.preventDefault();
     e.stopPropagation();
     
-    const url = `${window.location.origin}/tg/article/${slug}`;
+    const localePrefix = locale === routing.defaultLocale ? '' : `/${locale}`;
+    const url = `${window.location.origin}${localePrefix}/tg/article/${slug}`;
     
     if (navigator.share) {
       navigator.share({

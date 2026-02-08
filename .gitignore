@@ -27,6 +27,7 @@ build/
 # Expo / React Native
 .expo/
 web-build/
+.ts-trace/
 android/
 ios/
 *.jks

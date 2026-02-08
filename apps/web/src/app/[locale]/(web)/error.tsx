@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { Link } from '@/i18n/navigation';
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -39,12 +40,12 @@ export default function Error({ error, reset }: ErrorProps) {
           >
             Qayta urinish
           </button>
-          <a
+          <Link
             href="/"
             className="px-6 py-2.5 border border-foreground/10 text-foreground text-sm font-medium rounded-lg hover:bg-foreground/5 transition-colors"
           >
             Bosh sahifaga qaytish
-          </a>
+          </Link>
         </div>
 
         {/* Error Details (Development only) */}

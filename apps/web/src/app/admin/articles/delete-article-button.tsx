@@ -25,7 +25,7 @@ export function DeleteArticleButton({ articleId, articleTitle }: DeleteArticleBu
       if (!res.ok) throw new Error('O\'chirishda xatolik');
 
       router.refresh();
-    } catch (error) {
+    } catch {
       alert('O\'chirishda xatolik yuz berdi');
       setIsDeleting(false);
     }

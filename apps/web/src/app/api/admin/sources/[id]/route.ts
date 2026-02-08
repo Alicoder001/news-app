@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { requireAdminApiAuth } from '@/lib/admin/auth';
+import { parseJsonBody, updateSourceSchema } from '@/lib/admin/validation';
 
 // PUT - Update source
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await requireAdminApiAuth(request, { requireTrustedOrigin: true });
+  if (authError) return authError;
+
   try {
     const { id } = await params;
-    const body = await request.json();
-    const { name, type, url, isActive } = body;
+    const parsed = await parseJsonBody(request, updateSourceSchema);
+    if (parsed.error) return parsed.error;
+    const { name, type, url, isActive } = parsed.data;
 
     const source = await prisma.newsSource.update({
       where: { id },
@@ -34,6 +40,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await requireAdminApiAuth(request, { requireTrustedOrigin: true });
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     
@@ -59,6 +68,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await requireAdminApiAuth(request, { requireTrustedOrigin: true });
+  if (authError) return authError;
+
   try {
     const { id } = await params;
 

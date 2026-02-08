@@ -11,7 +11,6 @@ import Link from 'next/link';
 import { 
   Send, 
   Bell, 
-  Rss, 
   Sparkles,
   Bot,
   ArrowRight,

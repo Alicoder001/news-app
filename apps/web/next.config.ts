@@ -6,6 +6,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  output: 'standalone',
   images: {
     remotePatterns: [
       // Allow all HTTPS images (for news articles from various sources)

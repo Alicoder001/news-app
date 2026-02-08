@@ -30,7 +30,10 @@ function CategoryCard({ category }: { category: Category }) {
   const navigation = useNavigation<NavigationProp>();
 
   const handlePress = () => {
-    navigation.navigate('Home');
+    navigation.navigate('Home', {
+      categorySlug: category.slug,
+      categoryName: category.name,
+    });
   };
 
   return (

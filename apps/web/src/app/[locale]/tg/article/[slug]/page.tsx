@@ -1,15 +1,17 @@
 import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Globe } from 'lucide-react';
 import { TelegramBackButton } from '@/components/telegram-back-button';
 import { DifficultyBadge } from '@/components/badges';
 import { ArticleActions } from '@/components/article-actions';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 interface ArticlePageProps {
   params: Promise<{
     slug: string;
+    locale: string;
   }>;
 }
 
@@ -50,6 +52,8 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
       })
     : 'Noma\'lum sana';
 
+  const safeContent = sanitizeHtml(article.content);
+
   return (
     <div className="min-h-screen pb-20 bg-background text-foreground">
       <TelegramBackButton />
@@ -88,8 +92,8 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
                 )}
               </div>
               <div className="flex items-center gap-2">
-                 <Link 
-                    href={`/article/${article.slug}`}
+                <Link 
+                    href={`/articles/${article.slug}`}
                     target="_blank" 
                     className="p-1.5 rounded-full hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-colors"
                     aria-label="Webda o'qish"
@@ -137,9 +141,9 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
         <div className="w-full h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-8" />
 
         {/* Content */}
-        <div className="prose prose-base prose-headings:font-serif prose-headings:font-bold prose-p:text-foreground/80 prose-p:leading-7 prose-li:text-foreground/80 prose-strong:text-foreground max-w-none">
+          <div className="prose prose-base prose-headings:font-serif prose-headings:font-bold prose-p:text-foreground/80 prose-p:leading-7 prose-li:text-foreground/80 prose-strong:text-foreground max-w-none">
           <div
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ __html: safeContent }}
           />
         </div>
 
@@ -179,7 +183,7 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
       {/* Bottom Actions */}
       <div className="container px-8 mx-auto mt-12 border-t border-foreground/5 pt-8 text-center">
             <Link 
-                href={`/article/${article.slug}`}
+                href={`/articles/${article.slug}`}
                 target="_blank"
                 className="inline-flex items-center gap-2 text-xs font-medium text-foreground/40 hover:text-foreground transition-colors uppercase tracking-widest bg-foreground/[0.02] px-4 py-2 rounded-full"
             >

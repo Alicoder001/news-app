@@ -15,15 +15,12 @@ interface TelegramProviderProps {
 }
 
 export function TelegramProvider({ children }: TelegramProviderProps) {
-  const [isMiniApp, setIsMiniApp] = useState(false);
-  const [user, setUser] = useState<TelegramUser | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     // Check if running in Telegram
     const checkTelegram = () => {
       const miniApp = isTelegramMiniApp();
-      setIsMiniApp(miniApp);
 
       if (miniApp) {
         // Initialize Telegram WebApp
@@ -34,7 +31,6 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
 
           // Get user data
           const userData = getTelegramUser();
-          setUser(userData);
 
           // Enable haptic feedback on interactions
           const handleClick = () => {
@@ -96,16 +92,9 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
  * Hook to access Telegram WebApp
  */
 export function useTelegramWebApp() {
-  const [webApp, setWebApp] = useState(getTelegramWebApp());
-  const [user, setUser] = useState<TelegramUser | null>(null);
-  const [isMiniApp, setIsMiniApp] = useState(false);
-
-  useEffect(() => {
-    const app = getTelegramWebApp();
-    setWebApp(app);
-    setIsMiniApp(!!app);
-    setUser(getTelegramUser());
-  }, []);
+  const [webApp] = useState(getTelegramWebApp);
+  const [user] = useState<TelegramUser | null>(getTelegramUser);
+  const [isMiniApp] = useState(() => !!getTelegramWebApp());
 
   return {
     webApp,

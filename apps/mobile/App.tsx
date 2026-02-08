@@ -8,6 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -25,27 +26,30 @@ const queryClient = new QueryClient({
   },
 });
 
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: any }> {
-  constructor(props: any) {
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: any, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('[ErrorBoundary] Caught crash:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: 20, backgroundColor: 'orange', color: 'black', height: '100vh' }}>
-          <h2>Something went wrong.</h2>
-          <pre>{this.state.error?.toString()}</pre>
-        </div>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorTitle}>Something went wrong.</Text>
+          <Text style={styles.errorMessage}>{this.state.error?.toString()}</Text>
+        </View>
       );
     }
     return this.props.children;
@@ -72,3 +76,21 @@ export default function App() {
     </ErrorBoundary>
   );
 }
+
+const styles = StyleSheet.create({
+  errorContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: 'orange',
+    justifyContent: 'center',
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: 'black',
+    marginBottom: 8,
+  },
+  errorMessage: {
+    color: 'black',
+  },
+});

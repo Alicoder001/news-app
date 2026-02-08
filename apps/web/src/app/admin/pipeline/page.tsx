@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
-import { DataCard, StatusBadge } from '@/components/admin/stats-card';
-import { Activity, Play, RefreshCw, Clock } from 'lucide-react';
+import { StatusBadge } from '@/components/admin/stats-card';
+import { Activity, Play } from 'lucide-react';
 import Link from 'next/link';
 
 async function getPipelineRuns() {

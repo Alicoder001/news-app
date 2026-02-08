@@ -60,7 +60,7 @@ export function ArticleEditForm({ article, categories }: ArticleEditFormProps) {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || 'Xatolik yuz berdi');
+        throw new Error(error.message || error.error || 'Xatolik yuz berdi');
       }
 
       setMessage({ type: 'success', text: 'Maqola muvaffaqiyatli yangilandi!' });
@@ -85,7 +85,7 @@ export function ArticleEditForm({ article, categories }: ArticleEditFormProps) {
 
       router.push('/admin/articles');
       router.refresh();
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'O\'chirishda xatolik yuz berdi' });
       setIsDeleting(false);
     }
@@ -103,7 +103,7 @@ export function ArticleEditForm({ article, categories }: ArticleEditFormProps) {
       if (!res.ok) throw new Error('Telegram\'ga yuborishda xatolik');
 
       setMessage({ type: 'success', text: 'Telegram kanalga yuborildi!' });
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Telegram\'ga yuborishda xatolik' });
     } finally {
       setIsSendingTelegram(false);

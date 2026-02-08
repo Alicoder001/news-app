@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getCorsHeaders } from '@/lib/security/cors';
 
 export async function GET(
   request: Request,
@@ -21,40 +22,48 @@ export async function GET(
 
     if (!article) {
       return NextResponse.json(
-        { error: 'Article not found' }, 
+        { error: { code: 'NOT_FOUND', message: 'Article not found' } }, 
         { 
           status: 404,
-          headers: { 'Access-Control-Allow-Origin': '*' }
+          headers: getCorsHeaders(request, 'GET, OPTIONS')
         }
       );
     }
 
-    return NextResponse.json(article, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    const related = await prisma.article.findMany({
+      where: article.categoryId
+        ? {
+            id: { not: article.id },
+            categoryId: article.categoryId,
+          }
+        : {
+            id: { not: article.id },
+          },
+      include: {
+        category: true,
       },
+      orderBy: { createdAt: 'desc' },
+      take: 4,
+    });
+
+    return NextResponse.json({ data: article, related }, {
+      headers: getCorsHeaders(request, 'GET, OPTIONS'),
     });
   } catch (error) {
     console.error('API Single Article Error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' }, 
+      { error: { code: 'INTERNAL_SERVER_ERROR', message: 'Internal Server Error' } }, 
       { 
         status: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' }
+        headers: getCorsHeaders(request, 'GET, OPTIONS')
       }
     );
   }
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(request: Request) {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
+    headers: getCorsHeaders(request, 'GET, OPTIONS'),
   });
 }

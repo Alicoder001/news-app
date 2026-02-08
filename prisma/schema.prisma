@@ -8,15 +8,17 @@ datasource db {
 }
 
 model NewsSource {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   name        String
-  url         String   @unique
-  type        SourceType @default(NEWS_API)
-  isActive    Boolean  @default(true)
+  url         String       @unique
+  type        SourceType   @default(NEWS_API)
+  isActive    Boolean      @default(true)
   lastFetched DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   RawArticle  RawArticle[]
+
+  @@index([isActive])
 }
 
 enum SourceType {
@@ -26,34 +28,36 @@ enum SourceType {
 }
 
 model RawArticle {
-  id              String      @id @default(cuid())
-  externalId      String?     @unique // ID from the original source
-  title           String
-  description     String?     @db.Text
-  content         String?     @db.Text
-  url             String      @unique
-  imageUrl        String?     // Original image from source
-  publishedAt     DateTime?
-  sourceId        String
-  source          NewsSource  @relation(fields: [sourceId], references: [id])
-  isProcessed     Boolean     @default(false)
-  processedAt     DateTime?
-  Article         Article?
-  createdAt       DateTime    @default(now())
+  id          String     @id @default(cuid())
+  externalId  String?    @unique // ID from the original source
+  title       String
+  description String?    @db.Text
+  content     String?    @db.Text
+  url         String     @unique
+  imageUrl    String? // Original image from source
+  publishedAt DateTime?
+  sourceId    String
+  source      NewsSource @relation(fields: [sourceId], references: [id])
+  isProcessed Boolean    @default(false)
+  processedAt DateTime?
+  Article     Article?
+  createdAt   DateTime   @default(now())
+
+  @@index([isProcessed, createdAt])
 }
 
 model Category {
   id          String    @id @default(cuid())
   slug        String    @unique
-  name        String    // "Sun'iy Intellekt"
-  nameEn      String?   // For future i18n
+  name        String // "Sun'iy Intellekt"
+  nameEn      String? // For future i18n
   description String?   @db.Text
-  icon        String?   // Emoji or icon name
-  color       String?   // Hex color
+  icon        String? // Emoji or icon name
+  color       String? // Hex color
   articles    Article[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
+
   @@index([slug])
 }
 
@@ -63,63 +67,64 @@ model Tag {
   slug      String    @unique
   articles  Article[]
   createdAt DateTime  @default(now())
-  
+
   @@index([slug])
 }
 
 model Article {
-  id              String      @id @default(cuid())
-  slug            String      @unique
-  title           String      // AI processed title
-  summary         String?     @db.Text // AI generated summary
-  content         String      @db.Text // AI generated canonical content
-  imageUrl        String?     // Featured image
-  originalUrl     String
-  rawArticleId    String      @unique
-  rawArticle      RawArticle  @relation(fields: [rawArticleId], references: [id])
-  
+  id           String     @id @default(cuid())
+  slug         String     @unique
+  title        String // AI processed title
+  summary      String?    @db.Text // AI generated summary
+  content      String     @db.Text // AI generated canonical content
+  imageUrl     String? // Featured image
+  originalUrl  String
+  rawArticleId String     @unique
+  rawArticle   RawArticle @relation(fields: [rawArticleId], references: [id])
+
   // Category & Tags
-  categoryId      String?
-  category        Category?   @relation(fields: [categoryId], references: [id])
-  tags            Tag[]
-  
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+  tags       Tag[]
+
   // Content Metadata
-  readingTime     Int?        // minutes
-  wordCount       Int?
-  difficulty      Difficulty  @default(INTERMEDIATE)
-  importance      Importance  @default(MEDIUM)
-  
+  readingTime Int? // minutes
+  wordCount   Int?
+  difficulty  Difficulty @default(INTERMEDIATE)
+  importance  Importance @default(MEDIUM)
+
   // Engagement Metrics
-  viewCount       Int         @default(0)
-  shareCount      Int         @default(0)
-  
+  viewCount  Int @default(0)
+  shareCount Int @default(0)
+
   // Telegram
-  telegramPosted  Boolean     @default(false)
-  telegramPostId  String?
-  
+  telegramPosted Boolean @default(false)
+  telegramPostId String?
+
   // Meta
-  language        String      @default("uz")
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  
+  language  String   @default("uz")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([slug])
   @@index([createdAt])
   @@index([categoryId])
   @@index([viewCount])
+  @@index([telegramPosted, createdAt, importance])
 }
 
 enum Difficulty {
-  BEGINNER      // Boshlovchilar uchun
-  INTERMEDIATE  // O'rta
-  ADVANCED      // Murakkab
-  EXPERT        // Ekspertlar uchun
+  BEGINNER // Boshlovchilar uchun
+  INTERMEDIATE // O'rta
+  ADVANCED // Murakkab
+  EXPERT // Ekspertlar uchun
 }
 
 enum Importance {
-  LOW           // Ma'lumot uchun
-  MEDIUM        // Bilish kerak
-  HIGH          // Juda muhim
-  CRITICAL      // Game-changer
+  LOW // Ma'lumot uchun
+  MEDIUM // Bilish kerak
+  HIGH // Juda muhim
+  CRITICAL // Game-changer
 }
 
 // ============================================
@@ -128,27 +133,27 @@ enum Importance {
 
 /// Pipeline execution history for monitoring
 model PipelineRun {
-  id            String         @id @default(cuid())
-  status        PipelineStatus @default(RUNNING)
-  startedAt     DateTime       @default(now())
-  completedAt   DateTime?
-  
+  id          String         @id @default(cuid())
+  status      PipelineStatus @default(RUNNING)
+  startedAt   DateTime       @default(now())
+  completedAt DateTime?
+
   // Metrics
   articlesFound     Int @default(0)
   articlesProcessed Int @default(0)
   articlesSkipped   Int @default(0)
   errors            Int @default(0)
-  
+
   // AI Usage
-  tokensUsed    Int   @default(0)
-  aiCost        Float @default(0)
-  
+  tokensUsed Int   @default(0)
+  aiCost     Float @default(0)
+
   // Duration in milliseconds
-  durationMs    Int?
-  
+  durationMs Int?
+
   // Error details
-  errorLog      String? @db.Text
-  
+  errorLog String? @db.Text
+
   @@index([startedAt])
   @@index([status])
 }
@@ -162,36 +167,36 @@ enum PipelineStatus {
 
 /// AI API usage tracking for cost monitoring
 model AIUsage {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
   // Model info
-  model       String   // gpt-4o-mini, gpt-4o, etc.
-  operation   String   // article_process, summary, categorize
-  
+  model     String // gpt-4o-mini, gpt-4o, etc.
+  operation String // article_process, summary, categorize
+
   // Token counts
   promptTokens     Int
   completionTokens Int
   totalTokens      Int
-  
+
   // Cost in USD
-  cost        Float
-  
+  cost Float
+
   // Reference to processed article (optional)
-  articleId   String?
-  
+  articleId String?
+
   @@index([createdAt])
   @@index([model])
 }
 
 /// System settings key-value store
 model SystemSetting {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     String   @db.Text
+  id        String      @id @default(cuid())
+  key       String      @unique
+  value     String      @db.Text
   type      SettingType @default(STRING)
-  updatedAt DateTime @updatedAt
-  
+  updatedAt DateTime    @updatedAt
+
   @@index([key])
 }
 
@@ -201,4 +206,3 @@ enum SettingType {
   BOOLEAN
   JSON
 }
-

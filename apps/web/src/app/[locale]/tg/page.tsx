@@ -20,7 +20,6 @@ async function getArticles() {
 
 export default async function TelegramMiniApp() {
   const t = await getTranslations('tg');
-  const tCommon = await getTranslations('common');
   const articles = await getArticles();
 
   return (

@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Difficulty, Importance } from '@prisma/client';
 import prisma from '@/lib/prisma';
+import { requireAdminApiAuth } from '@/lib/admin/auth';
+import { parseJsonBody, updateArticleSchema } from '@/lib/admin/validation';
 
 // GET - Single article
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await requireAdminApiAuth(request);
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     
@@ -36,23 +42,16 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await requireAdminApiAuth(request, { requireTrustedOrigin: true });
+  if (authError) return authError;
+
   try {
     const { id } = await params;
-    const body = await request.json();
+    const parsed = await parseJsonBody(request, updateArticleSchema);
+    if (parsed.error) return parsed.error;
 
-    const {
-      title,
-      slug,
-      summary,
-      content,
-      imageUrl,
-      categoryId,
-      difficulty,
-      importance,
-      readingTime,
-      isFeatured,
-      isPublished,
-    } = body;
+    const { title, slug, summary, content, imageUrl, categoryId, difficulty, importance, readingTime } =
+      parsed.data;
 
     // Check if article exists
     const existing = await prisma.article.findUnique({ where: { id } });
@@ -77,8 +76,8 @@ export async function PUT(
         content,
         imageUrl: imageUrl || null,
         categoryId: categoryId || null,
-        difficulty: difficulty ? difficulty.toUpperCase() : undefined,
-        importance: importance ? importance.toUpperCase() : undefined,
+        difficulty: difficulty as Difficulty | undefined,
+        importance: importance as Importance | undefined,
         readingTime: readingTime || null,
         updatedAt: new Date(),
       },
@@ -99,6 +98,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await requireAdminApiAuth(request, { requireTrustedOrigin: true });
+  if (authError) return authError;
+
   try {
     const { id } = await params;
 
