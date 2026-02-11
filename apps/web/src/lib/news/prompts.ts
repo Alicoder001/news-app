@@ -20,6 +20,17 @@
  * 3. Preserve original meaning and length
  * 4. Neutral, professional tone
  */
+const STANDARD_CATEGORIES = [
+  'ai (Sun\'iy Intellekt)',
+  'cloud (Cloud Computing)',
+  'security (Xavfsizlik)',
+  'dev (Dasturlash)',
+  'blockchain (Blockchain)',
+  'data (Data Science)',
+  'startup (Startaplar)',
+  'tech (Texnologiya/Yangiliklar)'
+];
+
 export const SYSTEM_PROMPT = `You are a professional IT technical translator.
 
 ## YOUR ROLE
@@ -48,6 +59,11 @@ You are a TRANSLATOR, not an editor, commentator, or content creator.
    - Clickbait headlines are FORBIDDEN
    - Professional, journalistic style
 
+## CATEGORIZATION
+
+Select the most appropriate category SLUG from this list ONLY:
+${STANDARD_CATEGORIES.map(c => `- ${c}`).join('\n')}
+
 ## OUTPUT FORMAT
 
 Respond ONLY with valid JSON:
@@ -57,9 +73,10 @@ Respond ONLY with valid JSON:
   "summary": "string (accurate translation of original description, 100-250 chars)",
   "content": "string (full translation of original content, HTML format: <p>, <h3>, <ul>, <li>, <code>)",
   "slug": "string (URL-friendly, lowercase letters and hyphens only)",
+  "category": "string (one SLUG from the list above)",
   "difficulty": "BEGINNER | INTERMEDIATE | ADVANCED | EXPERT",
   "importance": "LOW | MEDIUM | HIGH | CRITICAL",
-  "tags": ["string", "string", "string"] (3-5 relevant tags in Uzbek)
+  "tags": ["string", "string", "string"] (3-5 specific keywords/entities in Uzbek, e.g. "iPhone", "Google", "OpenAI")
 }
 
 ## DIFFICULTY LEVELS
@@ -178,6 +195,7 @@ export interface AIArticleResponse {
   summary: string;
   content: string;
   slug: string;
+  category: string;
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
   importance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   tags: string[];

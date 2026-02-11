@@ -10,7 +10,7 @@ import { NewsletterSignup } from '@/components/newsletter-signup';
 import { AboutWidget } from '@/components/about-widget';
 import { HeroCarousel } from '@/components/hero-carousel';
 import { TelegramCta } from '@/components/telegram-cta';
-import { FeaturesBanner } from '@/components/features-banner';
+import { FeaturesCompact } from '@/components/features-banner';
 import { Pagination } from '@/components/pagination';
 import { getTranslations } from 'next-intl/server';
 
@@ -111,8 +111,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
              <HeroCarousel articles={finalFeaturedArticles} />
           )}
 
-          {/* FEATURES BANNER */}
-          <FeaturesBanner />
 
           {/* DENSE ARTICLE GRID (3 Columns) */}
           <section className="space-y-6">
@@ -179,6 +177,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         {/* COMPACT SIDEBAR */}
         <aside className="lg:col-span-3 self-start sticky top-24 space-y-8 pl-2 border-l border-foreground/5">
           <TrendingSection />
+          <FeaturesCompact />
           <AboutWidget />
           <NewsletterSignup />
         </aside>

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Metadata } from 'next';
+import { Tag } from '@/components/tag';
 import { TelegramBackButton } from '@/components/telegram-back-button';
 import { DifficultyBadge } from '@/components/badges';
 import { 
@@ -144,9 +145,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <header className="mb-10 space-y-6">
           <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-wider font-bold text-foreground/40">
             {article.category && (
-              <span style={{ color: article.category.color || 'inherit' }} className="text-foreground/80">
+              <Link 
+                href={`/category/${article.category.slug}`}
+                style={{ color: article.category.color || 'inherit' }} 
+                className="text-foreground/80 hover:underline transition-all"
+              >
                 {article.category.name}
-              </span>
+              </Link>
             )}
             <span className="w-1 h-1 rounded-full bg-foreground/20"></span>
             <span>{publishedDate}</span>
@@ -195,21 +200,31 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           />
         </div>
 
-        {/* Tags */}
-        {article.tags.length > 0 && (
-          <div className="mt-16 pt-8 border-t border-foreground/5">
-            <div className="flex flex-wrap gap-2">
-              {article.tags.map((tag) => (
-                <span 
-                  key={tag.id}
-                  className="px-3 py-1 bg-foreground/5 text-foreground/60 text-xs rounded-full font-medium hover:bg-foreground/10 transition-colors cursor-pointer"
-                >
-                  #{tag.name}
-                </span>
-              ))}
-            </div>
+        {/* Tags and Category combined as hashtags */}
+        <div className="mt-16 pt-8 border-t border-foreground/5">
+          <div className="flex flex-wrap gap-2">
+            {/* Always show category as first hashtag */}
+            {article.category && (
+              <Tag 
+                tag={{ 
+                    name: article.category.name, 
+                    slug: article.category.slug 
+                }} 
+                variant="subtle" 
+                href={`/category/${article.category.slug}`}
+              />
+            )}
+            
+            {/* Show all article tags */}
+            {article.tags.map((tag) => (
+              <Tag 
+                key={tag.id}
+                tag={tag}
+                variant="subtle"
+              />
+            ))}
           </div>
-        )}
+        </div>
 
         {/* Source Link */}
         <div className="mt-8 flex items-center justify-between text-xs text-foreground/40 border-t border-foreground/5 pt-6">

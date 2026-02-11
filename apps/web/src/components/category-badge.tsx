@@ -1,5 +1,7 @@
 'use client';
 
+import { Link } from '@/i18n/navigation';
+
 interface CategoryBadgeProps {
   category: {
     name: string;
@@ -17,8 +19,9 @@ export function CategoryBadge({ category, size = 'sm' }: CategoryBadgeProps) {
   };
 
   return (
-    <span
-      className={`${sizeClasses[size]} font-bold uppercase tracking-widest rounded-full border bg-opacity-10`}
+    <Link
+      href={`/category/${category.slug}`}
+      className={`${sizeClasses[size]} font-bold uppercase tracking-widest rounded-full border bg-opacity-10 hover:bg-opacity-20 transition-all`}
       style={{
         color: category.color || '#3b82f6',
         backgroundColor: `${category.color || '#3b82f6'}10`,
@@ -26,6 +29,6 @@ export function CategoryBadge({ category, size = 'sm' }: CategoryBadgeProps) {
       }}
     >
       {category.name}
-    </span>
+    </Link>
   );
 }

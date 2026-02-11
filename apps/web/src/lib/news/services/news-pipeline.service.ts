@@ -137,11 +137,24 @@ export class NewsPipeline {
         const readingTime = calculateReadingTime(aiResult.content);
         const wordCount = calculateWordCount(aiResult.content);
         
-        // 5. Handle category (from AI tags or default)
-        const categoryName = aiResult.tags?.[0] || 'technology';
-        const categoryId = await findOrCreateCategory(categoryName);
+        // 5. Handle category (from AI or default)
+        const categoryId = await findOrCreateCategory(aiResult.category || 'tech');
 
-        // 6. Validate enums
+        // 6. Handle tags
+        const tagNames = aiResult.tags || [];
+        const tagIds: string[] = [];
+        
+        for (const name of tagNames) {
+          const tagSlug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+          const tag = await prisma.tag.upsert({
+            where: { slug: tagSlug },
+            update: { name },
+            create: { name, slug: tagSlug },
+          });
+          tagIds.push(tag.id);
+        }
+
+        // 7. Validate enums
         const difficulty = validateDifficulty(aiResult.difficulty);
         const importance = validateImportance(aiResult.importance);
 
@@ -168,9 +181,14 @@ export class NewsPipeline {
             importance,
             // Category
             categoryId,
+            // Tags
+            tags: {
+              connect: tagIds.map(id => ({ id }))
+            }
           },
           include: {
             category: true,
+            tags: true,
           },
         });
 

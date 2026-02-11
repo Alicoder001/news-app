@@ -35,6 +35,7 @@ const aiResponseSchema = z.object({
   summary: z.string().min(50).max(500),
   content: z.string().min(100),
   slug: z.string().regex(/^[a-z0-9-]+$/),
+  category: z.string().min(2).max(50),
   difficulty: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT']),
   importance: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
   tags: z.array(z.string()).min(1).max(10),
@@ -48,6 +49,7 @@ export interface AIResult {
   summary: string;
   content: string;
   slug: string;
+  category: string;
   difficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
   importance?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   tags?: string[];
@@ -147,9 +149,10 @@ export class AIService {
       summary,
       content,
       slug: this.generateSlug(title),
+      category: 'tech',
       difficulty: 'INTERMEDIATE',
       importance: 'MEDIUM',
-      tags: ['tech', 'news'],
+      tags: ['texnologiya', 'yangiliklar'],
     };
   }
 
@@ -296,6 +299,7 @@ export class AIService {
         summary: parsed.summary,
         content: parsed.content,
         slug: parsed.slug || this.generateSlug(parsed.title),
+        category: parsed.category || 'tech',
         difficulty: parsed.difficulty,
         importance: parsed.importance,
         tags: parsed.tags,

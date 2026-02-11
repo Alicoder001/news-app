@@ -1,5 +1,7 @@
 'use client';
 
+import { Link } from '@/i18n/navigation';
+
 interface TagProps {
   tag: {
     name: string;
@@ -7,9 +9,10 @@ interface TagProps {
   };
   size?: 'sm' | 'md';
   variant?: 'default' | 'subtle';
+  href?: string;
 }
 
-export function Tag({ tag, size = 'sm', variant = 'default' }: TagProps) {
+export function Tag({ tag, size = 'sm', variant = 'default', href }: TagProps) {
   const sizeClasses = {
     sm: 'text-xs px-2 py-0.5',
     md: 'text-sm px-3 py-1',
@@ -20,8 +23,11 @@ export function Tag({ tag, size = 'sm', variant = 'default' }: TagProps) {
     subtle: 'bg-white/5 text-foreground/60 border-white/10',
   };
 
+  const finalHref = href || `/tag/${tag.slug}`;
+
   return (
-    <span
+    <Link
+      href={finalHref}
       className={`
         inline-flex items-center
         rounded-md font-medium border
@@ -31,6 +37,6 @@ export function Tag({ tag, size = 'sm', variant = 'default' }: TagProps) {
       `}
     >
       #{tag.name}
-    </span>
+    </Link>
   );
 }
