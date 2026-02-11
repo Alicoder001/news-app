@@ -34,9 +34,6 @@ export async function TrendingSection() {
             className="group block"
           >
             <div className="flex gap-3 items-start min-h-[72px]">
-              <span className="text-lg font-light text-foreground/20 group-hover:text-foreground/30 transition-colors font-serif italic w-4 text-center mt-0.5 shrink-0">
-                {index + 1}
-              </span>
               
               <div className="space-y-2 flex-1 min-w-0">
                 <h4 className="text-sm font-medium leading-snug group-hover:text-foreground/80 transition-colors line-clamp-2">

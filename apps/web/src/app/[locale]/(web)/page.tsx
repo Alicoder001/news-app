@@ -11,7 +11,8 @@ import { AboutWidget } from '@/components/about-widget';
 import { HeroCarousel } from '@/components/hero-carousel';
 import { TelegramCta } from '@/components/telegram-cta';
 import { FeaturesCompact } from '@/components/features-banner';
-import { Pagination } from '@/components/pagination';
+import { InfiniteArticleList } from '@/components/infinite-article-list';
+import { ArticleWithRelations } from '@/lib/news/actions';
 import { getTranslations } from 'next-intl/server';
 
 const ARTICLES_PER_PAGE = 12;
@@ -98,7 +99,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     <div className="space-y-8">
       {/* SEO: Main H1 with keywords - hidden visually but accessible */}
       <h1 className="sr-only">
-        {t('seoTitle')} - IT Yangiliklar, Sun'iy Intellekt, Dasturlash, Texnologiya O'zbekistonda
+        {t('seoTitle')} - IT Yangiliklar, Sun&apos;iy Intellekt, Dasturlash, Texnologiya O&apos;zbekistonda
       </h1>
       
       <CategoryNav />
@@ -112,7 +113,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           )}
 
 
-          {/* DENSE ARTICLE GRID (3 Columns) */}
+          {/* INFINITE ARTICLE GRID */}
           <section className="space-y-6">
             <div className="flex items-center justify-between border-b border-foreground/5 pb-3">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.3em] text-foreground/70">
@@ -122,60 +123,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-              {regularArticles.map((article) => (
-                <article key={article.id} className="group flex flex-col gap-3">
-                  {/* Thumbnail */}
-                  <div className="relative aspect-[3/2] w-full rounded-lg overflow-hidden bg-muted">
-                    {(article as unknown as { imageUrl?: string }).imageUrl && (
-                      <Image 
-                        src={(article as unknown as { imageUrl: string }).imageUrl} 
-                        alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-muted-foreground/70">
-                        {article.category && (
-                          <span style={{ color: article.category.color || 'inherit' }} className="brightness-90">
-                            {article.category.name}
-                          </span>
-                        )}
-                        <span>{new Date(article.createdAt).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}</span>
-                    </div>
-
-                    <Link href={`/articles/${article.slug}`} className="block space-y-1.5">
-                      <h3 className="text-base font-serif font-bold leading-snug group-hover:text-foreground/70 transition-colors line-clamp-2">
-                        {article.title}
-                      </h3>
-                      {article.summary && (
-                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                          {article.summary}
-                        </p>
-                      )}
-                    </Link>
-                    
-                    <div className="flex items-center gap-2 pt-1 border-t border-foreground/5 mt-2">
-                       <span className="text-[10px] text-muted-foreground">{article.readingTime || 4} min</span>
-                       <DifficultyBadge difficulty={article.difficulty} />
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-            
-            {/* Pagination */}
-            <Pagination currentPage={currentPage} totalPages={totalPages} />
+            <InfiniteArticleList 
+              initialArticles={regularArticles as ArticleWithRelations[]} 
+              initialPage={1}
+              totalPages={totalPages}
+            />
           </section>
         </main>
 
         {/* COMPACT SIDEBAR */}
-        <aside className="lg:col-span-3 self-start sticky top-24 space-y-8 pl-2 border-l border-foreground/5">
+        <aside className="lg:col-span-3 self-start sticky top-24 space-y-6 pl-2 border-l border-foreground/5">
           <TrendingSection />
           <FeaturesCompact />
           <AboutWidget />

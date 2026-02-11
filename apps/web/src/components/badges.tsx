@@ -20,7 +20,7 @@ export function ImportanceBadge({ importance }: ImportanceBadgeProps) {
 
   return (
     <span
-      className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-all duration-300 hover:brightness-110"
+      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border transition-all duration-300 hover:brightness-110"
       style={{
         color: config.color,
         backgroundColor: config.bg,
@@ -54,7 +54,7 @@ export function DifficultyBadge({ difficulty }: DifficultyBadgeProps) {
 
   return (
     <span
-      className="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70"
+      className="inline-flex items-center text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70"
       style={{ color }}
     >
       {label}

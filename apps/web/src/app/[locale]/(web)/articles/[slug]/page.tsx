@@ -142,7 +142,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       <article className="max-w-3xl mx-auto">
         {/* Header Section */}
-        <header className="mb-10 space-y-6">
+        <header className="mb-8 space-y-6">
           <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-wider font-bold text-foreground/40">
             {article.category && (
               <Link 
@@ -165,12 +165,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             )}
           </div>
 
-          <h1 className="text-3xl md:text-5xl lg:text-[3.5rem] font-serif font-bold leading-[1.1] tracking-tight text-foreground">
+          <h1 className="text-3xl md:text-5xl lg:text-[2.75rem] font-serif font-bold leading-[1.1] tracking-tight text-foreground">
             {article.title}
           </h1>
 
           {article.summary && (
-            <p className="text-lg md:text-xl leading-relaxed text-muted-foreground font-light border-l-2 border-foreground/10 pl-5 italic">
+            <p className="text-lg leading-relaxed text-muted-foreground font-light border-l-2 border-foreground/10 pl-5 italic">
               {article.summary}
             </p>
           )}
@@ -191,7 +191,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </header>
 
         {/* Separator */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-12" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-8" />
 
         {/* Content */}
         <div className="prose prose-lg prose-headings:font-serif prose-headings:font-bold prose-p:text-foreground/80 prose-p:leading-8 prose-li:text-foreground/80 prose-strong:text-foreground max-w-none">

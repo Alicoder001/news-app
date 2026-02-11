@@ -27,7 +27,7 @@ export function Header() {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out border-b border-transparent",
         scrolled
           ? "bg-background/80 backdrop-blur-xl border-border/40 shadow-sm py-3"
-          : "bg-transparent py-6"
+          : "bg-transparent py-4"
       )}
     >
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-16 flex items-center justify-between">
