@@ -26,20 +26,20 @@ export async function TrendingSection() {
       <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/70 mb-4">
         {t('trending')}
       </h3>
-      <div className="space-y-4">
+      <div className="space-y-3">
             {trendingArticles.map((article, index) => (
           <Link
             key={article.id}
             href={`/articles/${article.slug}`}
             className="group block"
           >
-            <div className="flex gap-3 items-start min-h-[72px]">
+            <div className="flex gap-2.5 items-start min-h-[60px]">
               
-              <div className="space-y-2 flex-1 min-w-0">
-                <h4 className="text-sm font-medium leading-snug group-hover:text-foreground/80 transition-colors line-clamp-2">
+              <div className="space-y-1 flex-1 min-w-0">
+                <h4 className="text-[13px] font-medium leading-tight group-hover:text-foreground/80 transition-colors line-clamp-2">
                   {article.title}
                 </h4>
-                <div className="flex items-center gap-2 text-[9px] uppercase tracking-wider font-bold text-foreground/60">
+                <div className="flex items-center gap-2 text-[8px] uppercase tracking-wider font-bold text-foreground/60">
                   <span>{article.category?.name}</span>
                   <span className="opacity-30">•</span>
                   <span>{article.viewCount} views</span>
@@ -47,13 +47,13 @@ export async function TrendingSection() {
               </div>
 
               {article.imageUrl && (
-                 <div className="w-12 h-12 relative rounded bg-muted overflow-hidden shrink-0">
+                 <div className="w-10 h-10 relative rounded-sm bg-muted overflow-hidden shrink-0">
                     <Image
                        src={article.imageUrl}
                        alt=""
                        fill
                        className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                       sizes="48px"
+                       sizes="40px"
                     />
                  </div>
               )}

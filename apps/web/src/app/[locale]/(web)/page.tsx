@@ -6,6 +6,7 @@ import { Tag } from '@/components/tag';
 import { ImportanceBadge, DifficultyBadge } from '@/components/badges';
 import { CategoryNav } from '@/components/category-nav';
 import { TrendingSection } from '@/components/trending-section';
+import { AdBanner } from '@/components/ad-banner';
 import { NewsletterSignup } from '@/components/newsletter-signup';
 import { AboutWidget } from '@/components/about-widget';
 import { HeroCarousel } from '@/components/hero-carousel';
@@ -96,7 +97,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     : allArticles;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* SEO: Main H1 with keywords - hidden visually but accessible */}
       <h1 className="sr-only">
         {t('seoTitle')} - IT Yangiliklar, Sun&apos;iy Intellekt, Dasturlash, Texnologiya O&apos;zbekistonda
@@ -104,7 +105,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       
       <CategoryNav />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <main className="lg:col-span-9 space-y-8">
           
           {/* HERO CAROUSEL SECTION */}
@@ -134,6 +135,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         {/* COMPACT SIDEBAR */}
         <aside className="lg:col-span-3 self-start sticky top-24 space-y-6 pl-2 border-l border-foreground/5">
           <TrendingSection />
+          
+          <div className="space-y-6">
+            <AdBanner slot="sidebar-rectangle" format="rectangle" className="mx-auto" />
+          </div>
+
           <FeaturesCompact />
           <AboutWidget />
           <NewsletterSignup />

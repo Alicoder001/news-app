@@ -21,11 +21,13 @@ export function CategoryBadge({ category, size = 'sm' }: CategoryBadgeProps) {
   return (
     <Link
       href={`/category/${category.slug}`}
-      className={`${sizeClasses[size]} font-bold uppercase tracking-widest rounded-full border bg-opacity-10 hover:bg-opacity-20 transition-all`}
+      className={`${sizeClasses[size]} font-bold uppercase tracking-[0.15em] rounded-sm border border-white/10
+                 backdrop-blur-md hover:scale-105 active:scale-95 transition-all duration-300
+                 hover:shadow-[0_0_12px_-2px_currentColor]`}
       style={{
         color: category.color || '#3b82f6',
-        backgroundColor: `${category.color || '#3b82f6'}10`,
-        borderColor: `${category.color || '#3b82f6'}20`,
+        backgroundColor: `${category.color || '#3b82f6'}15`,
+        borderColor: `${category.color || '#3b82f6'}30`,
       }}
     >
       {category.name}

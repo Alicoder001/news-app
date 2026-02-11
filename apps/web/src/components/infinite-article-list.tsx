@@ -6,6 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { DifficultyBadge } from '@/components/badges';
 import { ArticleWithRelations, fetchArticlesAction } from '@/lib/news/actions';
+import { AdBanner } from '@/components/ad-banner';
+import React, { Fragment } from 'react';
 
 interface InfiniteArticleListProps {
   initialArticles: ArticleWithRelations[];
@@ -61,51 +63,60 @@ export function InfiniteArticleList({
   }, [inView, hasMore, loading, loadMoreArticles]);
 
   return (
-    <div className="space-y-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
-        {articles.map((article) => (
-          <article key={article.id} className="group flex flex-col gap-3">
-            {/* Thumbnail */}
-            <div className="relative aspect-[3/2] w-full rounded-lg overflow-hidden bg-muted">
-              {article.imageUrl && (
-                <Image 
-                  src={article.imageUrl} 
-                  alt={article.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              )}
-            </div>
-
-            {/* Content */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-muted-foreground/70">
-                {article.category && (
-                  <span style={{ color: article.category.color || 'inherit' }} className="brightness-90">
-                    {article.category.name}
-                  </span>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-6">
+        {articles.map((article, index) => (
+          <Fragment key={article.id}>
+            <article className="group flex flex-col gap-2">
+              {/* Thumbnail */}
+              <div className="relative aspect-[16/10] w-full rounded-sm overflow-hidden bg-muted">
+                {article.imageUrl && (
+                  <Image 
+                    src={article.imageUrl} 
+                    alt={article.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  />
                 )}
-                <span>{new Date(article.createdAt).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}</span>
               </div>
 
-              <Link href={`/articles/${article.slug}`} className="block space-y-1.5">
-                <h3 className="text-base font-serif font-bold leading-snug group-hover:text-foreground/70 transition-colors line-clamp-2">
-                  {article.title}
-                </h3>
-                {article.summary && (
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                    {article.summary}
-                  </p>
-                )}
-              </Link>
-              
-              <div className="flex items-center gap-2 pt-1 border-t border-foreground/5 mt-2">
-                <span className="text-[10px] text-muted-foreground">{article.readingTime || 4} min</span>
-                <DifficultyBadge difficulty={article.difficulty} />
+              {/* Content */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[9px] uppercase font-bold tracking-wider text-muted-foreground/70">
+                  {article.category && (
+                    <span style={{ color: article.category.color || 'inherit' }} className="brightness-90">
+                      {article.category.name}
+                    </span>
+                  )}
+                  <span>{new Date(article.createdAt).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}</span>
+                </div>
+
+                <Link href={`/articles/${article.slug}`} className="block space-y-1">
+                  <h3 className="text-sm font-serif font-bold leading-tight group-hover:text-foreground/70 transition-colors line-clamp-2">
+                    {article.title}
+                  </h3>
+                  {article.summary && (
+                    <p className="text-[13px] text-muted-foreground leading-snug line-clamp-2">
+                      {article.summary}
+                    </p>
+                  )}
+                </Link>
+                
+                <div className="flex items-center gap-2 pt-1 border-t border-foreground/5 mt-1">
+                  <span className="text-[9px] text-muted-foreground">{article.readingTime || 4} min</span>
+                  <DifficultyBadge difficulty={article.difficulty} />
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+
+            {/* In-feed Ad after every 8 articles on Desktop, 6 on Mobile */}
+            {(index + 1) % 8 === 0 && (
+              <div className="col-span-full py-4 border-y border-white/5 my-2">
+                <AdBanner slot={`in-feed-${index}`} format="leaderboard" className="mx-auto" />
+              </div>
+            )}
+          </Fragment>
         ))}
       </div>
 
