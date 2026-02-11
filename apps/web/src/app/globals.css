@@ -139,3 +139,83 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* Neon Background Effects */
+.neon-grid {
+  background-image: 
+    linear-gradient(to right, color-mix(in srgb, var(--color-accent) 15%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-accent) 15%, transparent) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(ellipse at center, black, transparent 80%);
+}
+
+.dark .neon-grid {
+  background-image: 
+    linear-gradient(to right, color-mix(in srgb, var(--color-accent) 25%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-accent) 25%, transparent) 1px, transparent 1px);
+}
+
+.neon-line {
+  position: absolute;
+  background: linear-gradient(to right, transparent, var(--color-accent), transparent);
+  height: 1px;
+  width: 100%;
+  opacity: 0.1;
+  animation: neon-scan 10s linear infinite;
+}
+
+.dark .neon-line {
+  opacity: 0.3;
+}
+
+@keyframes neon-scan {
+  0% { transform: translateY(-100vh); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes pulse-neon {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.animate-pulse-neon {
+  animation: pulse-neon 4s ease-in-out infinite;
+}
+
+/* Advanced Floating Animations */
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -50px) rotate(2deg); }
+  66% { transform: translate(-20px, 20px) rotate(-1deg); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-40px, 60px) rotate(-3deg); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(15px, 15px); }
+  50% { transform: translate(0, 30px); }
+  75% { transform: translate(-15px, 15px); }
+}
+
+.animate-float-slow {
+  animation: float-slow 20s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 15s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 10s ease-in-out infinite;
+}
+
+/* Glass Enhancement */
+.neon-glass {
+  @apply backdrop-blur-xl border border-white/10 dark:border-white/5;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
