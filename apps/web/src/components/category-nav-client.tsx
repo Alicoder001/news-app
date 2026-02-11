@@ -30,8 +30,8 @@ export function CategoryNavClient({ categories, homeLabel }: CategoryNavClientPr
   const linkBaseClass = "shrink-0 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all duration-300 hover:scale-105 active:scale-95 rounded-sm border whitespace-nowrap";
 
   return (
-    <nav className="w-full sticky top-[56px] z-40 mb-6 py-2 overflow-hidden pointer-events-none">
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 scroll-smooth pointer-events-auto">
+    <nav className="w-full sticky top-[56px] z-40 mb-2 py-1 overflow-hidden pointer-events-none">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 scroll-smooth pointer-events-auto">
         <Link 
             href="/"
             className={cn(

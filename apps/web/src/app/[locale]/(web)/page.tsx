@@ -97,7 +97,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     : allArticles;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-1">
       {/* SEO: Main H1 with keywords - hidden visually but accessible */}
       <h1 className="sr-only">
         {t('seoTitle')} - IT Yangiliklar, Sun&apos;iy Intellekt, Dasturlash, Texnologiya O&apos;zbekistonda
@@ -105,8 +105,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       
       <CategoryNav />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <main className="lg:col-span-9 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        <main className="lg:col-span-9 space-y-4">
           
           {/* HERO CAROUSEL SECTION */}
           {finalFeaturedArticles.length > 0 && (
@@ -133,7 +133,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </main>
 
         {/* COMPACT SIDEBAR */}
-        <aside className="lg:col-span-3 self-start sticky top-24 space-y-6 pl-2 border-l border-foreground/5">
+        <aside className="lg:col-span-3 self-start sticky top-24 space-y-6 pl-8 border-l border-foreground/5">
           <TrendingSection />
           
           <div className="space-y-6">
