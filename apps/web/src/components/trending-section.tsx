@@ -23,7 +23,7 @@ export async function TrendingSection() {
 
   return (
     <section>
-      <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/70 mb-4">
+      <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/70 mb-4">
         {t('trending')}
       </h3>
       <div className="space-y-3">
@@ -36,10 +36,10 @@ export async function TrendingSection() {
             <div className="flex gap-2.5 items-start min-h-[60px]">
               
               <div className="space-y-1 flex-1 min-w-0">
-                <h4 className="text-[13px] font-medium leading-tight group-hover:text-foreground/80 transition-colors line-clamp-2">
+                <h4 className="text-sm font-medium leading-tight group-hover:text-foreground/80 transition-colors line-clamp-2">
                   {article.title}
                 </h4>
-                <div className="flex items-center gap-2 text-[8px] uppercase tracking-wider font-bold text-foreground/60">
+                <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider font-bold text-foreground/60">
                   <span>{article.category?.name}</span>
                   <span className="opacity-30">•</span>
                   <span>{article.viewCount} views</span>

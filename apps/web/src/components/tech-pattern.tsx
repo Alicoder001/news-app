@@ -23,7 +23,7 @@ export function TechPattern() {
         preserveAspectRatio="xMidYMid slice"
       >
         {/* Neural Network Nodes - distributed across screen */}
-        <g fill="currentColor" className="filter drop-shadow-[0_0_2px_rgba(59,130,246,0.5)]">
+        <g fill="currentColor">
           {/* Row 1 */}
           <circle cx="10" cy="8" r="0.3" className="animate-pulse-neon" style={{ animationDelay: '0s' }} />
           <circle cx="25" cy="12" r="0.4" className="animate-pulse-neon text-blue-400" style={{ animationDelay: '0.5s' }} />

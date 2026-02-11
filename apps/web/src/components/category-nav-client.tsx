@@ -27,7 +27,7 @@ export function CategoryNavClient({ categories, homeLabel }: CategoryNavClientPr
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const linkBaseClass = "shrink-0 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all duration-300 hover:scale-105 active:scale-95 rounded-sm border whitespace-nowrap";
+  const linkBaseClass = "shrink-0 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 hover:scale-105 active:scale-95 rounded-sm border whitespace-nowrap";
 
   return (
     <nav className="w-full sticky top-[56px] z-40 mb-2 py-1 overflow-hidden pointer-events-none">
@@ -51,14 +51,9 @@ export function CategoryNavClient({ categories, homeLabel }: CategoryNavClientPr
             className={cn(
               linkBaseClass,
               scrolled
-                ? "bg-background/60 backdrop-blur-md text-foreground"
-                : "bg-foreground/5 text-foreground/70 hover:text-foreground border-foreground/10 hover:border-foreground/20 hover:bg-foreground/10"
+                ? "bg-background/60 backdrop-blur-md text-foreground border-foreground/10 hover:border-foreground/30"
+                : "bg-foreground/5 text-foreground/70 hover:text-foreground border-foreground/5 hover:border-foreground/15 hover:bg-foreground/10"
             )}
-            style={{
-                borderColor: scrolled ? (category.color ? `${category.color}40` : 'rgba(255,255,255,0.1)') : (category.color ? `${category.color}30` : undefined),
-                color: (scrolled || !category.color) ? undefined : category.color,
-                boxShadow: scrolled ? undefined : `0 0 15px -3px ${category.color ? `${category.color}20` : 'rgba(0,0,0,0)'}`
-            }}
           >
             {category.name}
           </Link>

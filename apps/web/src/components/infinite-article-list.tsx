@@ -83,7 +83,7 @@ export function InfiniteArticleList({
 
               {/* Content */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[9px] uppercase font-bold tracking-wider text-muted-foreground/70">
+                <div className="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider text-muted-foreground/70">
                   {article.category && (
                     <span style={{ color: article.category.color || 'inherit' }} className="brightness-90">
                       {article.category.name}
@@ -93,18 +93,18 @@ export function InfiniteArticleList({
                 </div>
 
                 <Link href={`/articles/${article.slug}`} className="block space-y-1">
-                  <h3 className="text-sm font-serif font-bold leading-tight group-hover:text-foreground/70 transition-colors line-clamp-2">
+                  <h3 className="text-base font-serif font-bold leading-tight group-hover:text-foreground/70 transition-colors line-clamp-2">
                     {article.title}
                   </h3>
                   {article.summary && (
-                    <p className="text-[13px] text-muted-foreground leading-snug line-clamp-2">
+                    <p className="text-sm text-muted-foreground leading-snug line-clamp-2">
                       {article.summary}
                     </p>
                   )}
                 </Link>
                 
                 <div className="flex items-center gap-2 pt-1 border-t border-foreground/5 mt-1">
-                  <span className="text-[9px] text-muted-foreground">{article.readingTime || 4} min</span>
+                  <span className="text-[11px] text-muted-foreground">{article.readingTime || 4} min</span>
                   <DifficultyBadge difficulty={article.difficulty} />
                 </div>
               </div>

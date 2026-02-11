@@ -12,25 +12,25 @@ export function NeonOrbs() {
       {/* Primary Cyan Orb */}
       <div 
         className="absolute -top-[10%] -left-[5%] w-[50%] h-[50%] rounded-full 
-                   bg-cyan-500/15 dark:bg-cyan-500/10 blur-[100px] animate-float-slow" 
+                   bg-cyan-500/15 dark:bg-cyan-500/10 blur-[100px] animate-float-slow animate-gpu" 
       />
       
       {/* Secondary Indigo Orb */}
       <div 
         className="absolute bottom-[10%] -right-[5%] w-[60%] h-[60%] rounded-full 
-                   bg-indigo-500/15 dark:bg-indigo-500/10 blur-[120px] animate-float-medium" 
+                   bg-indigo-500/15 dark:bg-indigo-500/10 blur-[120px] animate-float-medium animate-gpu" 
       />
       
       {/* Accent Violet Orb */}
       <div 
         className="absolute top-[40%] right-[10%] w-[30%] h-[40%] rounded-full 
-                   bg-violet-500/10 dark:bg-violet-500/5 blur-[80px] animate-float-fast" 
+                   bg-violet-500/10 dark:bg-violet-500/5 blur-[80px] animate-float-fast animate-gpu" 
       />
 
       {/* Blue Gloomy Orb */}
       <div 
         className="absolute -bottom-[20%] left-[20%] w-[45%] h-[45%] rounded-full 
-                   bg-blue-600/10 dark:bg-blue-600/5 blur-[100px] animate-float-slow"
+                   bg-blue-600/10 dark:bg-blue-600/5 blur-[100px] animate-float-slow animate-gpu"
         style={{ animationDirection: 'reverse', animationDuration: '25s' }}
       />
     </div>
