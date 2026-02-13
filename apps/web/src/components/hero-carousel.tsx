@@ -72,8 +72,8 @@ export function HeroCarousel({ articles }: HeroCarouselProps) {
                 </div>
 
                 {/* Content Section */}
-                <div className="space-y-3">
-                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
+                <div className="space-y-4 glass-card p-6 md:p-8 rounded-2xl h-full flex flex-col justify-center">
+                   <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
                       {article.category && (
                         <span style={{ color: article.category.color || 'inherit' }} className="brightness-90">
                           {article.category.name}
@@ -83,19 +83,19 @@ export function HeroCarousel({ articles }: HeroCarouselProps) {
                       <span>{new Date(article.createdAt).toLocaleDateString('uz-UZ')}</span>
                    </div>
 
-                   <Link href={`/articles/${article.slug}`} className="block group-hover/carousel:opacity-95 transition-opacity">
-                      <h2 className="text-2xl md:text-3xl font-serif font-bold leading-tight tracking-tight text-foreground mb-2">
+                   <Link href={`/articles/${article.slug}`} className="block group-hover/carousel:opacity-95 transition-opacity space-y-3">
+                      <h2 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold leading-tight tracking-tight text-foreground">
                         {article.title}
                       </h2>
-                      <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-3">
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
                         {article.summary}
                       </p>
                    </Link>
 
-                   <div className="flex items-center gap-3 pt-1">
-                       <span className="text-xs text-muted-foreground font-medium">Antigravity Team</span>
+                   <div className="flex items-center gap-3 pt-2 border-t border-foreground/5">
+                       <span className="text-[11px] text-muted-foreground font-medium">Antigravity Team</span>
                        <span className="text-muted-foreground text-xs">•</span>
-                       <span className="text-xs text-muted-foreground">
+                       <span className="text-[11px] text-muted-foreground">
                          {article.readingTime || 5} min read
                        </span>
                    </div>

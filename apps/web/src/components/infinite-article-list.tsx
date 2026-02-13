@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { DifficultyBadge } from '@/components/badges';
 import { ArticleWithRelations, fetchArticlesAction } from '@/lib/news/actions';
 import { AdBanner } from '@/components/ad-banner';
+import { SITE_CONFIG } from '@/lib/config/social';
 import React, { Fragment } from 'react';
 
 interface InfiniteArticleListProps {
@@ -67,9 +68,9 @@ export function InfiniteArticleList({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 gap-y-7">
         {articles.map((article, index) => (
           <Fragment key={article.id}>
-            <article className="group flex flex-col gap-2">
+            <article className="group flex flex-col gap-3 glass-card p-3 h-full">
               {/* Thumbnail */}
-              <div className="relative aspect-[16/10] w-full rounded-sm overflow-hidden bg-muted">
+              <div className="relative aspect-[16/10] w-full rounded-sm overflow-hidden">
                 {article.imageUrl && (
                   <Image 
                     src={article.imageUrl} 
@@ -103,7 +104,7 @@ export function InfiniteArticleList({
                   )}
                 </Link>
                 
-                <div className="flex items-center gap-2 pt-1 border-t border-foreground/5 mt-1">
+                <div className="flex items-center gap-2 pt-2 border-t border-foreground/5 mt-auto">
                   <span className="text-[11px] text-muted-foreground">{article.readingTime || 4} min</span>
                   <DifficultyBadge difficulty={article.difficulty} />
                 </div>
@@ -111,7 +112,7 @@ export function InfiniteArticleList({
             </article>
 
             {/* In-feed Ad after every 8 articles on Desktop, 6 on Mobile */}
-            {(index + 1) % 8 === 0 && (
+            {(index + 1) % 8 === 0 && SITE_CONFIG.features.ads && (
               <div className="col-span-full py-6 border-y border-white/5 my-4">
                 <AdBanner slot={`in-feed-${index}`} format="leaderboard" className="mx-auto" />
               </div>

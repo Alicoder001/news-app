@@ -46,6 +46,11 @@ export const SITE_CONFIG = {
     'kiberhavfsizlik',
     'startup',
   ],
+
+  // Feature Toggles
+  features: {
+    ads: false,
+  },
 } as const;
 
 /**

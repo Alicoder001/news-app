@@ -7,6 +7,7 @@ import { ImportanceBadge, DifficultyBadge } from '@/components/badges';
 import { CategoryNav } from '@/components/category-nav';
 import { TrendingSection } from '@/components/trending-section';
 import { AdBanner } from '@/components/ad-banner';
+import { SITE_CONFIG } from '@/lib/config/social';
 import { NewsletterSignup } from '@/components/newsletter-signup';
 import { AboutWidget } from '@/components/about-widget';
 import { HeroCarousel } from '@/components/hero-carousel';
@@ -133,12 +134,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </main>
 
         {/* COMPACT SIDEBAR */}
-        <aside className="lg:col-span-3 self-start sticky top-24 space-y-6 pl-8 border-l border-foreground/5">
+        <aside className="lg:col-span-3 self-start sticky top-24 space-y-6">
           <TrendingSection />
           
-          <div className="space-y-6">
-            <AdBanner slot="sidebar-rectangle" format="rectangle" className="mx-auto" />
-          </div>
+          {SITE_CONFIG.features.ads && (
+            <div className="space-y-6">
+              <AdBanner slot="sidebar-rectangle" format="rectangle" className="mx-auto" />
+            </div>
+          )}
 
           <FeaturesCompact />
           <AboutWidget />

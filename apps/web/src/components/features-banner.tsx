@@ -17,6 +17,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/config/social';
+import { cn } from '@/lib/utils';
 
 const features = [
   {
@@ -112,37 +113,39 @@ export function FeaturesBanner({ className = '' }: { className?: string }) {
  */
 export function FeaturesCompact({ className = '' }: { className?: string }) {
   return (
-    <div className={`space-y-2 ${className}`}>
-      <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/70 mb-3">
+    <div className={cn("glass-card p-4 rounded-xl space-y-3", className)}>
+      <h3 className="text-[11px] font-bold uppercase tracking-widest text-foreground/70 mb-2">
         Imkoniyatlar
       </h3>
-      {features.slice(0, 3).map((feature) => {
-        const Icon = feature.icon;
-        return (
-          <a
-            key={feature.title}
-            href={feature.href}
-            target={feature.external ? '_blank' : undefined}
-            rel={feature.external ? 'noopener noreferrer' : undefined}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-foreground/5 transition-colors group"
-          >
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${feature.bgColor} ${feature.color}`}>
-              <Icon className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-sm font-medium group-hover:text-foreground transition-colors">
-                {feature.title}
-              </p>
-              <p className="text-xs text-muted-foreground line-clamp-1">
-                {feature.description}
-              </p>
-            </div>
-          </a>
-        );
-      })}
+      <div className="space-y-2">
+        {features.slice(0, 3).map((feature) => {
+          const Icon = feature.icon;
+          return (
+            <a
+              key={feature.title}
+              href={feature.href}
+              target={feature.external ? '_blank' : undefined}
+              rel={feature.external ? 'noopener noreferrer' : undefined}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-foreground/5 transition-colors group"
+            >
+              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110", feature.bgColor, feature.color)}>
+                <Icon className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-sm font-medium group-hover:text-foreground transition-colors">
+                  {feature.title}
+                </p>
+                <p className="text-[11px] text-muted-foreground line-clamp-1">
+                  {feature.description}
+                </p>
+              </div>
+            </a>
+          );
+        })}
+      </div>
       <Link 
         href="/features" 
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors pt-1"
+        className="flex items-center border-t border-foreground/5 pt-2 gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         Barcha imkoniyatlar
         <ArrowRight className="w-3 h-3" />

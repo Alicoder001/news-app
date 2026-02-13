@@ -22,20 +22,20 @@ export async function TrendingSection() {
   });
 
   return (
-    <section>
+    <section className="glass-card p-4">
       <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/70 mb-4">
         {t('trending')}
       </h3>
-      <div className="space-y-3">
+      <div className="space-y-4">
             {trendingArticles.map((article, index) => (
           <Link
             key={article.id}
             href={`/articles/${article.slug}`}
             className="group block"
           >
-            <div className="flex gap-2.5 items-start min-h-[60px]">
+            <div className="flex gap-3 items-start min-h-[60px]">
               
-              <div className="space-y-1 flex-1 min-w-0">
+              <div className="space-y-1.5 flex-1 min-w-0">
                 <h4 className="text-sm font-medium leading-tight group-hover:text-foreground/80 transition-colors line-clamp-2">
                   {article.title}
                 </h4>
@@ -47,13 +47,13 @@ export async function TrendingSection() {
               </div>
 
               {article.imageUrl && (
-                 <div className="w-10 h-10 relative rounded-sm bg-muted overflow-hidden shrink-0">
+                 <div className="w-12 h-12 relative rounded-sm overflow-hidden shrink-0 border border-white/5">
                     <Image
                        src={article.imageUrl}
                        alt=""
                        fill
                        className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                       sizes="40px"
+                       sizes="48px"
                     />
                  </div>
               )}

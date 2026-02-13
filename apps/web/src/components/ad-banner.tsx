@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 
 import Image from 'next/image';
 
+import { SITE_CONFIG } from '@/lib/config/social';
+
 interface AdContent {
   title: string;
   description: string;
@@ -49,6 +51,8 @@ export function AdBanner({ slot, format, className = '', type }: AdBannerProps) 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  if (!SITE_CONFIG.features.ads) return null;
 
   // Simplified ad selection logic
   const adKeys = Object.keys(MOCK_ADS) as Array<keyof typeof MOCK_ADS>;

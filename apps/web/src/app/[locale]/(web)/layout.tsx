@@ -3,6 +3,7 @@ import { TechPattern } from "@/components/tech-pattern";
 import { Footer } from "@/components/footer";
 import { NeonOrbs } from "@/components/neon-orbs";
 import { AdBanner } from "@/components/ad-banner";
+import { SITE_CONFIG } from "@/lib/config/social";
 
 export default function WebLayout({
   children,
@@ -21,9 +22,11 @@ export default function WebLayout({
       
       <main className="relative z-10 max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-12 py-4 pt-16 flex-1 w-full">
         {/* Top Leaderboard Ad */}
-        <div className="w-full flex justify-center mb-4">
-          <AdBanner slot="top-leaderboard" format="leaderboard" />
-        </div>
+        {SITE_CONFIG.features.ads && (
+          <div className="w-full flex justify-center mb-4">
+            <AdBanner slot="top-leaderboard" format="leaderboard" />
+          </div>
+        )}
         {children}
       </main>
 
