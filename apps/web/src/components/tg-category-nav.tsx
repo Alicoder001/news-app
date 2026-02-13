@@ -1,20 +1,13 @@
 import Link from 'next/link';
-import prisma from '@/lib/prisma';
+import { getTopCategories } from '@/lib/api/server-api';
 
 export async function TGCategoryNav() {
-  const categories = await prisma.category.findMany({
-    include: {
-      _count: {
-        select: { articles: true },
-      },
-    },
-    orderBy: {
-      articles: {
-        _count: 'desc',
-      },
-    },
-    take: 8,
-  });
+  const response = await getTopCategories(8);
+  const categories = (response.data.categories as Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>) ?? [];
 
   return (
     <nav className="w-full border-b border-foreground/5 bg-background/50 backdrop-blur-sm sticky top-[76px] z-20 mb-6">

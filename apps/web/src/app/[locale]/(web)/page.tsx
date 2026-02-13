@@ -1,4 +1,3 @@
-import prisma from '@/lib/prisma';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { CategoryBadge } from '@/components/category-badge';
@@ -14,49 +13,20 @@ import { HeroCarousel } from '@/components/hero-carousel';
 import { TelegramCta } from '@/components/telegram-cta';
 import { FeaturesCompact } from '@/components/features-banner';
 import { InfiniteArticleList } from '@/components/infinite-article-list';
-import { ArticleWithRelations } from '@/lib/news/actions';
+import { ArticleWithRelations, fetchArticlesAction } from '@/lib/news/actions';
 import { getTranslations } from 'next-intl/server';
+import { getFeaturedArticles as fetchFeaturedArticles } from '@/lib/api/server-api';
 
 const ARTICLES_PER_PAGE = 12;
 
 async function getArticles(page: number = 1) {
-  const skip = (page - 1) * ARTICLES_PER_PAGE;
-  
-  const [articles, totalCount] = await Promise.all([
-    prisma.article.findMany({
-      include: {
-        category: true,
-        tags: true,
-        rawArticle: { include: { source: true } }
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: ARTICLES_PER_PAGE,
-    }),
-    prisma.article.count(),
-  ]);
-  
-  return {
-    articles,
-    totalPages: Math.ceil(totalCount / ARTICLES_PER_PAGE),
-    currentPage: page,
-  };
+  return fetchArticlesAction(page, ARTICLES_PER_PAGE);
 }
 
 // Fetch top 3 critical/featured articles
 async function getFeaturedArticles() {
-  return await prisma.article.findMany({
-    where: {
-      importance: 'CRITICAL',
-    },
-    include: {
-      category: true,
-      tags: true,
-      rawArticle: { include: { source: true } }
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 3,
-  });
+  const response = await fetchFeaturedArticles(3);
+  return ((response.data.articles as ArticleWithRelations[]) ?? []).slice(0, 3);
 }
 
 interface HomePageProps {

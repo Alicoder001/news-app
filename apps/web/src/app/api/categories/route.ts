@@ -1,18 +1,32 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import {
+  CORS_HEADERS,
+  requestBackend,
+} from '@/lib/api/backend-client';
 
 export async function GET() {
   try {
-    const categories = await prisma.category.findMany({
-      orderBy: { name: 'asc' },
-    });
+    const backend = await requestBackend<{
+      success: boolean;
+      data: {
+        categories: unknown[];
+      };
+    }>('/v1/categories');
+
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: 'Backend API Error' },
+        {
+          status: backend.status || 502,
+          headers: CORS_HEADERS,
+        }
+      );
+    }
+
+    const categories = backend.data.data.categories;
 
     return NextResponse.json(categories, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
+      headers: CORS_HEADERS,
     });
   } catch (error) {
     console.error('API Categories Error:', error);
@@ -20,7 +34,7 @@ export async function GET() {
       { error: 'Internal Server Error' }, 
       { 
         status: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' }
+        headers: CORS_HEADERS
       }
     );
   }
@@ -29,10 +43,6 @@ export async function GET() {
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
+    headers: CORS_HEADERS,
   });
 }

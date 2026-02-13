@@ -10,7 +10,7 @@ import type {
   Article,
   ArticleListItem,
   Category,
-  PaginatedResponse,
+  CanonicalResponse,
 } from '@news-app/api-types';
 import { Platform } from 'react-native';
 
@@ -19,7 +19,7 @@ import { Platform } from 'react-native';
 // For mobile, we need the local IP address
 const API_BASE =
   process.env.EXPO_PUBLIC_API_URL || 
-  (Platform.OS === 'web' ? 'http://localhost:3000' : 'http://192.168.1.100:3000');
+  (Platform.OS === 'web' ? 'http://localhost:4000' : 'http://192.168.1.100:4000');
 
 /**
  * Fetch wrapper with error handling
@@ -47,25 +47,45 @@ export const api = {
       limit = 10,
       categorySlug?: string
     ): Promise<{ articles: ArticleListItem[]; total: number }> => {
-      let url = `/api/articles?page=${page}&limit=${limit}`;
+      let url = `/v1/articles?page=${page}&limit=${limit}`;
       if (categorySlug) {
         url += `&category=${categorySlug}`;
       }
-      return fetchApi(url);
+      const response = await fetchApi<CanonicalResponse<{
+        articles: ArticleListItem[];
+        pagination: { total: number };
+      }>>(url);
+      if (!response.success) {
+        throw new Error(response.error.message);
+      }
+      return {
+        articles: response.data.articles ?? [],
+        total: response.data.pagination?.total ?? 0,
+      };
     },
 
     /**
      * Get single article by slug
      */
     getBySlug: async (slug: string): Promise<Article> => {
-      return fetchApi(`/api/articles/${slug}`);
+      const response = await fetchApi<CanonicalResponse<{ article: Article }>>(`/v1/articles/${slug}`);
+      if (!response.success) {
+        throw new Error(response.error.message);
+      }
+      return response.data.article;
     },
 
     /**
      * Get featured/hero articles
      */
     getFeatured: async (limit = 5): Promise<ArticleListItem[]> => {
-      return fetchApi(`/api/articles/featured?limit=${limit}`);
+      const response = await fetchApi<CanonicalResponse<{ articles: ArticleListItem[] }>>(
+        `/v1/articles/featured?limit=${limit}`,
+      );
+      if (!response.success) {
+        throw new Error(response.error.message);
+      }
+      return response.data.articles ?? [];
     },
   },
 
@@ -74,7 +94,11 @@ export const api = {
      * Get all categories
      */
     list: async (): Promise<Category[]> => {
-      return fetchApi('/api/categories');
+      const response = await fetchApi<CanonicalResponse<{ categories: Category[] }>>('/v1/categories');
+      if (!response.success) {
+        throw new Error(response.error.message);
+      }
+      return response.data.categories ?? [];
     },
   },
 };

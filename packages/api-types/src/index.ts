@@ -26,3 +26,15 @@ export type {
   ApiError,
   ErrorResponse
 } from './responses';
+
+// Canonical v1 API contracts
+export type {
+  CanonicalSuccess,
+  CanonicalError,
+  CanonicalResponse,
+  CanonicalPagination,
+  CanonicalArticleListPayload,
+  CanonicalArticleDetailPayload,
+  CanonicalFeaturedPayload,
+  CanonicalCategoriesPayload,
+} from './canonical';

@@ -1,59 +1,55 @@
-import prisma from '@/lib/prisma';
+import { getBackendBaseUrl } from '@/lib/api/backend-client';
 import { RawArticleData } from '../types';
 
+interface TriggerResponse {
+  accepted?: boolean;
+}
+
+async function triggerInternalJob(job: 'sync-news' | 'process-raw'): Promise<void> {
+  const token = process.env.API_INTERNAL_TOKEN;
+  if (!token) {
+    return;
+  }
+
+  const response = await fetch(`${getBackendBaseUrl()}/v1/internal/jobs/trigger`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-internal-token': token,
+    },
+    body: JSON.stringify({
+      job,
+      payload: {
+        source: 'legacy-web-adapter',
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to trigger internal job: ${response.status}`);
+  }
+
+  await response.json() as TriggerResponse;
+}
+
 export class RawArticleRepository {
-  static async exists(url: string) {
-    const count = await prisma.rawArticle.count({
-      where: { url }
-    });
-    return count > 0;
+  static async exists(_url: string) {
+    return false;
   }
 
   static async createMany(articles: RawArticleData[]) {
-    // Filter out existing ones to avoid P2002 (Unique constraint)
-    const existingUrls = await prisma.rawArticle.findMany({
-      where: {
-        url: { in: articles.map(a => a.url) }
-      },
-      select: { url: true }
-    });
-
-    const existingUrlSet = new Set(existingUrls.map(e => e.url));
-    const newArticles = articles.filter(a => !existingUrlSet.has(a.url));
-
-    if (newArticles.length === 0) return 0;
-
-    return await prisma.rawArticle.createMany({
-      data: newArticles.map(a => ({
-        externalId: a.externalId,
-        title: a.title,
-        description: a.description,
-        content: a.content,
-        url: a.url,
-        imageUrl: a.imageUrl,  // Re-enabled!
-        publishedAt: a.publishedAt,
-        sourceId: a.sourceId,
-      })),
-      skipDuplicates: true,
-    });
+    if (articles.length > 0) {
+      await triggerInternalJob('sync-news');
+    }
+    return 0;
   }
 
-  static async getUnprocessed(limit: number = 10) {
-    return await prisma.rawArticle.findMany({
-      where: { isProcessed: false },
-      include: { source: true },
-      take: limit,
-      orderBy: { createdAt: 'asc' } // Oldest first (FIFO queue)
-    });
+  static async getUnprocessed(_limit: number = 10) {
+    return [];
   }
 
-  static async markAsProcessed(id: string) {
-    return await prisma.rawArticle.update({
-      where: { id },
-      data: { 
-        isProcessed: true,
-        processedAt: new Date()
-      }
-    });
+  static async markAsProcessed(_id: string) {
+    await triggerInternalJob('process-raw');
+    return { success: true };
   }
 }

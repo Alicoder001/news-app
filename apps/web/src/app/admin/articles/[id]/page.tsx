@@ -1,31 +1,41 @@
-import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ArticleEditForm } from './article-edit-form';
+import { getAdminArticleById, getCategories as fetchCategories } from '@/lib/api/server-api';
 
 interface EditArticlePageProps {
   params: Promise<{ id: string }>;
 }
 
 async function getArticle(id: string) {
-  const article = await prisma.article.findUnique({
-    where: { id },
-    include: {
-      category: true,
-      tags: true,
-      rawArticle: {
-        include: { source: true },
-      },
-    },
-  });
-  return article;
+  try {
+    const response = await getAdminArticleById(id);
+    return response.data.article as {
+      id: string;
+      title: string;
+      slug: string;
+      summary: string | null;
+      content: string;
+      imageUrl: string | null;
+      categoryId: string | null;
+      difficulty: string | null;
+      importance: string | null;
+      readingTime: number | null;
+    };
+  } catch {
+    return null;
+  }
 }
 
 async function getCategories() {
-  return prisma.category.findMany({
-    orderBy: { name: 'asc' },
-  });
+  const response = await fetchCategories();
+  return (response.data.categories as Array<{
+    id: string;
+    name: string;
+    slug: string;
+    color: string | null;
+  }>) ?? [];
 }
 
 export default async function EditArticlePage({ params }: EditArticlePageProps) {

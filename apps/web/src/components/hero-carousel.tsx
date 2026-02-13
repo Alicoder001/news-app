@@ -5,11 +5,24 @@ import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Category, Article } from '@prisma/client';
+import type { Difficulty, Importance } from '@news-app/api-types';
 
-type FeaturedArticle = Article & {
-  category: Category | null;
-  imageUrl?: string | null; // Explicitly adding optional imageUrl to silence linter if Prisma types are stale
+type FeaturedArticle = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  imageUrl?: string | null;
+  createdAt: string;
+  readingTime: number | null;
+  difficulty?: Difficulty;
+  importance?: Importance;
+  category: {
+    id: string;
+    slug: string;
+    name: string;
+    color?: string | null;
+  } | null;
 };
 
 interface HeroCarouselProps {

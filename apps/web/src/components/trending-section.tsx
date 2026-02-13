@@ -1,25 +1,23 @@
-import prisma from '@/lib/prisma';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
+import { getArticles } from '@/lib/api/server-api';
 
 export async function TrendingSection() {
   const t = await getTranslations('home');
-  
-  const trendingArticles = await prisma.article.findMany({
-    take: 5,
-    orderBy: {
-      viewCount: 'desc'
-    },
-    include: {
-      category: true,
-    },
-    where: {
-      createdAt: {
-        gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      }
-    }
+  const response = await getArticles({
+    limit: 5,
+    sort: 'trending',
+    days: 7,
   });
+  const trendingArticles = (response.data.articles as Array<{
+    id: string;
+    slug: string;
+    title: string;
+    imageUrl: string | null;
+    viewCount: number;
+    category?: { name: string } | null;
+  }>) ?? [];
 
   return (
     <section className="glass-card p-4">

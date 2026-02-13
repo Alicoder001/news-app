@@ -1,4 +1,3 @@
-import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -6,6 +5,8 @@ import { Globe } from 'lucide-react';
 import { TelegramBackButton } from '@/components/telegram-back-button';
 import { DifficultyBadge } from '@/components/badges';
 import { ArticleActions } from '@/components/article-actions';
+import { getArticleBySlug } from '@/lib/api/server-api';
+import type { Difficulty } from '@news-app/api-types';
 
 interface ArticlePageProps {
   params: Promise<{
@@ -14,24 +15,28 @@ interface ArticlePageProps {
 }
 
 async function getArticle(slug: string) {
-  const article = await prisma.article.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      tags: true,
-      rawArticle: {
-        include: {
-          source: true,
-        },
-      },
-    },
-  });
-
-  if (!article) {
+  try {
+    const response = await getArticleBySlug(slug);
+    return response.data.article as {
+      id: string;
+      slug: string;
+      title: string;
+      summary: string | null;
+      content: string;
+      imageUrl: string | null;
+      originalUrl: string;
+      readingTime?: number | null;
+      difficulty?: Difficulty;
+      category?: { name?: string; color?: string | null } | null;
+      tags: Array<{ id: string; name: string }>;
+      rawArticle?: {
+        publishedAt?: string | null;
+        source?: { name: string } | null;
+      } | null;
+    };
+  } catch {
     return null;
   }
-
-  return article;
 }
 
 export default async function TelegramArticlePage({ params }: ArticlePageProps) {
@@ -42,7 +47,7 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
     notFound();
   }
 
-  const publishedDate = article.rawArticle.publishedAt
+  const publishedDate = article.rawArticle?.publishedAt
     ? new Date(article.rawArticle.publishedAt).toLocaleDateString('uz-UZ', {
         year: 'numeric',
         month: 'long',
@@ -163,7 +168,7 @@ export default async function TelegramArticlePage({ params }: ArticlePageProps) 
         <div className="mt-6 flex items-center justify-between text-xs text-foreground/40 border-t border-foreground/5 pt-4">
             <div className="flex items-center gap-1.5">
                 <span>Manba:</span>
-                <span className="font-medium text-foreground/60">{article.rawArticle.source.name}</span>
+                <span className="font-medium text-foreground/60">{article.rawArticle?.source?.name ?? 'Unknown'}</span>
             </div>
             <a
                 href={article.originalUrl}

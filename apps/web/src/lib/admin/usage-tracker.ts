@@ -6,7 +6,7 @@
  * @author Antigravity Team
  */
 
-import prisma from '@/lib/prisma';
+import { getAdminUsageSummary, trackInternalUsage } from '@/lib/api/server-api';
 
 /**
  * OpenAI pricing per 1M tokens (as of Dec 2024)
@@ -63,21 +63,35 @@ export async function trackAIUsage(options: TrackingOptions): Promise<void> {
   const cost = calculateCost(model, usage);
 
   try {
-    await prisma.aIUsage.create({
-      data: {
-        model,
-        operation,
-        promptTokens: usage.promptTokens,
-        completionTokens: usage.completionTokens,
-        totalTokens: usage.totalTokens,
-        cost,
-        articleId,
-      },
+    await trackInternalUsage({
+      model,
+      operation,
+      promptTokens: usage.promptTokens,
+      completionTokens: usage.completionTokens,
+      totalTokens: usage.totalTokens,
+      cost,
+      articleId,
     });
   } catch (error) {
     // Don't fail the main operation if tracking fails
     console.error('Failed to track AI usage:', error);
   }
+}
+
+function aggregateFromSummary(data: {
+  usage: {
+    totalTokens: number;
+    totalCost: number;
+    byModel: Record<string, { tokens: number; cost: number }>;
+    byOperation: Record<string, { tokens: number; cost: number; count: number }>;
+  };
+}) {
+  return {
+    totalTokens: data.usage.totalTokens,
+    totalCost: Number(data.usage.totalCost.toFixed(4)),
+    byModel: data.usage.byModel,
+    byOperation: data.usage.byOperation,
+  };
 }
 
 /**
@@ -92,46 +106,21 @@ export async function getUsageStats(
   byModel: Record<string, { tokens: number; cost: number }>;
   byOperation: Record<string, { tokens: number; cost: number; count: number }>;
 }> {
-  const usages = await prisma.aIUsage.findMany({
-    where: {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    },
-  });
-
-  let totalTokens = 0;
-  let totalCost = 0;
-  const byModel: Record<string, { tokens: number; cost: number }> = {};
-  const byOperation: Record<string, { tokens: number; cost: number; count: number }> = {};
-
-  for (const usage of usages) {
-    totalTokens += usage.totalTokens;
-    totalCost += usage.cost;
-
-    // By model
-    if (!byModel[usage.model]) {
-      byModel[usage.model] = { tokens: 0, cost: 0 };
-    }
-    byModel[usage.model].tokens += usage.totalTokens;
-    byModel[usage.model].cost += usage.cost;
-
-    // By operation
-    if (!byOperation[usage.operation]) {
-      byOperation[usage.operation] = { tokens: 0, cost: 0, count: 0 };
-    }
-    byOperation[usage.operation].tokens += usage.totalTokens;
-    byOperation[usage.operation].cost += usage.cost;
-    byOperation[usage.operation].count += 1;
-  }
-
-  return {
-    totalTokens,
-    totalCost: Number(totalCost.toFixed(4)),
-    byModel,
-    byOperation,
+  const dayDiff = Math.max(
+    1,
+    Math.ceil((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)),
+  );
+  const response = await getAdminUsageSummary(dayDiff);
+  const data = response.data as {
+    usage: {
+      totalTokens: number;
+      totalCost: number;
+      byModel: Record<string, { tokens: number; cost: number }>;
+      byOperation: Record<string, { tokens: number; cost: number; count: number }>;
+    };
   };
+
+  return aggregateFromSummary({ usage: data.usage });
 }
 
 /**
@@ -145,46 +134,14 @@ export async function getDailyUsage(days: number = 30): Promise<
     count: number;
   }>
 > {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
-  startDate.setHours(0, 0, 0, 0);
-
-  const usages = await prisma.aIUsage.findMany({
-    where: {
-      createdAt: {
-        gte: startDate,
-      },
-    },
-    orderBy: {
-      createdAt: 'asc',
-    },
-  });
-
-  const dailyMap = new Map<string, { tokens: number; cost: number; count: number }>();
-
-  // Initialize all days
-  for (let i = 0; i < days; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() - (days - 1 - i));
-    const dateStr = d.toISOString().split('T')[0];
-    dailyMap.set(dateStr, { tokens: 0, cost: 0, count: 0 });
-  }
-
-  // Aggregate data
-  for (const usage of usages) {
-    const dateStr = usage.createdAt.toISOString().split('T')[0];
-    const existing = dailyMap.get(dateStr);
-    if (existing) {
-      existing.tokens += usage.totalTokens;
-      existing.cost += usage.cost;
-      existing.count += 1;
-    }
-  }
-
-  return Array.from(dailyMap.entries()).map(([date, data]) => ({
-    date,
-    tokens: data.tokens,
-    cost: Number(data.cost.toFixed(4)),
-    count: data.count,
-  }));
+  const response = await getAdminUsageSummary(days);
+  const data = response.data as {
+    daily: Array<{
+      date: string;
+      tokens: number;
+      cost: number;
+      count: number;
+    }>;
+  };
+  return data.daily ?? [];
 }

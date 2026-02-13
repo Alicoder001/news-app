@@ -1,10 +1,11 @@
-import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { DifficultyBadge } from '@/components/badges';
 import { TGCategoryNav } from '@/components/tg-category-nav';
 import { ArticleActions } from '@/components/article-actions';
+import { getArticles, getCategoryBySlug } from '@/lib/api/server-api';
+import type { Difficulty } from '@news-app/api-types';
 
 interface CategoryPageProps {
   params: Promise<{
@@ -13,29 +14,36 @@ interface CategoryPageProps {
 }
 
 async function getCategoryArticles(slug: string) {
-  const category = await prisma.category.findUnique({
-    where: { slug },
-  });
+  try {
+    const categoryResponse = await getCategoryBySlug(slug);
+    const category = categoryResponse.data.category as {
+      id: string;
+      slug: string;
+      name: string;
+      color?: string | null;
+    };
 
-  if (!category) {
+    const articlesResponse = await getArticles({
+      category: slug,
+      limit: 20,
+      includeRawSource: true,
+    });
+    const articles = (articlesResponse.data.articles as Array<{
+      id: string;
+      slug: string;
+      title: string;
+      summary: string | null;
+      imageUrl: string | null;
+      createdAt: string;
+      readingTime?: number | null;
+      difficulty?: Difficulty;
+      category?: { name?: string; color?: string | null } | null;
+    }>) ?? [];
+
+    return { category, articles };
+  } catch {
     return null;
   }
-
-  const articles = await prisma.article.findMany({
-    where: {
-      category: {
-        slug: slug,
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 20,
-    include: {
-      category: true,
-      rawArticle: { include: { source: true } }
-    },
-  });
-
-  return { category, articles };
 }
 
 export default async function TelegramCategoryPage({ params }: CategoryPageProps) {

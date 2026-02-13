@@ -8,7 +8,7 @@
  * @version 1.0.0
  */
 
-import { Difficulty, Importance } from '@prisma/client';
+import type { Difficulty, Importance } from '@news-app/api-types';
 
 /**
  * Article data for Telegram post

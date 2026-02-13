@@ -1,10 +1,11 @@
-import prisma from '@/lib/prisma';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { CategoryNav } from '@/components/category-nav';
 import { DifficultyBadge } from '@/components/badges';
 import { getTranslations } from 'next-intl/server';
+import { getArticles, getCategoryBySlug } from '@/lib/api/server-api';
+import type { Difficulty } from '@news-app/api-types';
 
 const ARTICLES_PER_PAGE = 12;
 
@@ -17,46 +18,43 @@ interface CategoryPageProps {
 }
 
 async function getCategoryData(slug: string, page: number = 1) {
-  const skip = (page - 1) * ARTICLES_PER_PAGE;
+  try {
+    const categoryResponse = await getCategoryBySlug(slug);
+    const category = categoryResponse.data.category as {
+      id: string;
+      slug: string;
+      name: string;
+      color?: string | null;
+      description?: string | null;
+    };
+    const articlesResponse = await getArticles({
+      page,
+      limit: ARTICLES_PER_PAGE,
+      category: slug,
+    });
+    const articlesData = articlesResponse.data as {
+      articles?: Array<{
+        id: string;
+        slug: string;
+        title: string;
+        summary: string | null;
+        imageUrl: string | null;
+        createdAt: string;
+        difficulty: Difficulty;
+        category?: { name?: string; color?: string | null } | null;
+      }>;
+      pagination?: { totalPages?: number };
+    };
 
-  const category = await prisma.category.findUnique({
-    where: { slug },
-  });
-
-  if (!category) {
+    return {
+      category,
+      articles: articlesData.articles ?? [],
+      totalPages: articlesData.pagination?.totalPages ?? 0,
+      currentPage: page,
+    };
+  } catch {
     return null;
   }
-
-  const [articles, totalCount] = await Promise.all([
-    prisma.article.findMany({
-      where: {
-        category: {
-          slug: slug,
-        },
-      },
-      include: {
-        category: true,
-        tags: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: ARTICLES_PER_PAGE,
-    }),
-    prisma.article.count({
-      where: {
-        category: {
-          slug: slug,
-        },
-      },
-    }),
-  ]);
-
-  return {
-    category,
-    articles,
-    totalPages: Math.ceil(totalCount / ARTICLES_PER_PAGE),
-    currentPage: page,
-  };
 }
 
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {

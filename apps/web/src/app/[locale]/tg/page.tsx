@@ -1,4 +1,3 @@
-import prisma from '@/lib/prisma';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { DifficultyBadge } from '@/components/badges';
@@ -7,15 +6,24 @@ import { TGCategoryNav } from '@/components/tg-category-nav';
 import { ArticleActions } from '@/components/article-actions';
 import { getTranslations } from 'next-intl/server';
 import { SITE_CONFIG } from '@/lib/config/social';
+import { getArticles as fetchArticles } from '@/lib/api/server-api';
+import type { Difficulty } from '@news-app/api-types';
 
 async function getArticles() {
-  return await prisma.article.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 20,
-    include: {
-      category: true,
-    },
+  const response = await fetchArticles({
+    limit: 20,
   });
+  return (response.data.articles as Array<{
+    id: string;
+    slug: string;
+    title: string;
+    summary: string | null;
+    imageUrl: string | null;
+    createdAt: string;
+    readingTime?: number | null;
+    difficulty?: Difficulty;
+    category?: { name?: string; color?: string | null } | null;
+  }>) ?? [];
 }
 
 export default async function TelegramMiniApp() {

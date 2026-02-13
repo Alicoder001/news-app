@@ -1,264 +1,51 @@
-import { RawArticleRepository } from '../repositories/raw-article.repository';
-import { AIService } from './ai.service';
-import { TelegramService } from './telegram.service';
-import { FilteringService } from './filtering.service';
-import { getImageWithFallback } from '../utils/meta-image';
-import prisma from '@/lib/prisma';
-import { Difficulty, Importance } from '@prisma/client';
+import { getBackendBaseUrl } from '@/lib/api/backend-client';
 
-/**
- * News Processing Pipeline
- * 
- * Full pipeline: RawArticle → AI Processing → Article → Telegram
- * 
- * @author Antigravity Team
- * @version 2.0.0
- */
-
-/**
- * Calculate reading time based on word count
- * Average reading speed: 200 words per minute
- */
-function calculateReadingTime(content: string): number {
-  const words = content.trim().split(/\s+/).length;
-  const minutes = Math.ceil(words / 200);
-  return Math.max(1, Math.min(minutes, 30)); // Min 1, Max 30 minutes
-}
-
-/**
- * Calculate word count
- */
-function calculateWordCount(content: string): number {
-  return content.trim().split(/\s+/).length;
-}
-
-/**
- * Find or create category by name
- */
-async function findOrCreateCategory(categoryName?: string): Promise<string | null> {
-  if (!categoryName) return null;
-  
-  // Normalize category name
-  const slug = categoryName
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
-  
-  try {
-    // Try to find existing
-    let category = await prisma.category.findUnique({
-      where: { slug },
-    });
-    
-    // Create if not exists
-    if (!category) {
-      category = await prisma.category.create({
-        data: {
-          slug,
-          name: categoryName,
-          nameEn: categoryName,
-        },
-      });
-      console.log(`📁 Created category: ${categoryName}`);
-    }
-    
-    return category.id;
-  } catch (error) {
-    console.warn(`⚠️ Could not create category: ${categoryName}`, error);
-    return null;
+async function triggerJob(job: 'sync-news' | 'process-raw', payload?: Record<string, unknown>) {
+  const token = process.env.API_INTERNAL_TOKEN;
+  if (!token) {
+    throw new Error('API_INTERNAL_TOKEN is required for pipeline job triggering');
   }
-}
 
-/**
- * Validate and cast difficulty
- */
-function validateDifficulty(value?: string): Difficulty {
-  const valid: Difficulty[] = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];
-  if (value && valid.includes(value as Difficulty)) {
-    return value as Difficulty;
+  const response = await fetch(`${getBackendBaseUrl()}/v1/internal/jobs/trigger`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-internal-token': token,
+    },
+    body: JSON.stringify({
+      job,
+      payload: payload ?? {},
+    }),
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Pipeline trigger failed: ${response.status}`);
   }
-  return 'INTERMEDIATE';
+
+  return response.json();
 }
 
-/**
- * Validate and cast importance
- */
-function validateImportance(value?: string): Importance {
-  const valid: Importance[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-  if (value && valid.includes(value as Importance)) {
-    return value as Importance;
-  }
-  return 'MEDIUM';
-}
-
-/**
- * Main Pipeline Class
- */
 export class NewsPipeline {
-  /**
-   * Run the processing pipeline
-   * @param limit - Max articles to process (default: all unprocessed, use 1 for scheduled jobs)
-   */
-  static async run(limit?: number): Promise<{
+  static async run(_limit?: number): Promise<{
     processed: number;
     skipped: number;
     errors: number;
   }> {
-    console.log(`🚀 Pipeline started${limit ? ` (limit: ${limit})` : ''}...`);
-    
-    let processed = 0;
-    let skipped = 0;
-    let errors = 0;
+    await triggerJob('sync-news', { source: 'legacy-news-pipeline-run' });
+    await triggerJob('process-raw', { source: 'legacy-news-pipeline-run' });
 
-    // 1. Get unprocessed articles (with optional limit)
-    const rawArticles = await RawArticleRepository.getUnprocessed(limit);
-    console.log(`📦 Found ${rawArticles.length} unprocessed articles`);
-
-    for (const raw of rawArticles) {
-      try {
-        // 2. Filter noise
-        if (!FilteringService.shouldProcess(raw)) {
-          console.log(`⏭️ Skipping: ${raw.title.slice(0, 50)}...`);
-          await RawArticleRepository.markAsProcessed(raw.id);
-          skipped++;
-          continue;
-        }
-
-        console.log(`\n🔄 Processing: ${raw.title.slice(0, 50)}...`);
-
-        // 3. AI Processing
-        const aiResult = await AIService.processArticle(
-          raw.title, 
-          raw.content || raw.description || '',
-          raw.url
-        );
-
-        // 4. Calculate metadata
-        const readingTime = calculateReadingTime(aiResult.content);
-        const wordCount = calculateWordCount(aiResult.content);
-        
-        // 5. Handle category (from AI or default)
-        const categoryId = await findOrCreateCategory(aiResult.category || 'tech');
-
-        // 6. Handle tags
-        const tagNames = aiResult.tags || [];
-        const tagIds: string[] = [];
-        
-        for (const name of tagNames) {
-          const tagSlug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-          const tag = await prisma.tag.upsert({
-            where: { slug: tagSlug },
-            update: { name },
-            create: { name, slug: tagSlug },
-          });
-          tagIds.push(tag.id);
-        }
-
-        // 7. Validate enums
-        const difficulty = validateDifficulty(aiResult.difficulty);
-        const importance = validateImportance(aiResult.importance);
-
-        // 6.5. Get image (from API or fallback to meta tags)
-        const rawWithImage = raw as typeof raw & { imageUrl?: string | null };
-        const imageUrl = await getImageWithFallback(rawWithImage.imageUrl, raw.url);
-
-        // 7. Save Canonical Article with ALL fields
-        const article = await prisma.article.create({
-          data: {
-            slug: aiResult.slug,
-            title: aiResult.title,
-            summary: aiResult.summary,
-            content: aiResult.content,
-            originalUrl: raw.url,
-            rawArticleId: raw.id,
-            language: 'uz',
-            // Image from source or meta fallback
-            imageUrl: imageUrl || null,
-            // Metadata
-            readingTime,
-            wordCount,
-            difficulty,
-            importance,
-            // Category
-            categoryId,
-            // Tags
-            tags: {
-              connect: tagIds.map(id => ({ id }))
-            }
-          },
-          include: {
-            category: true,
-            tags: true,
-          },
-        });
-
-        console.log(`   ✅ Saved: ${article.title.slice(0, 40)}...`);
-        console.log(`   📊 ${readingTime} min | ${difficulty} | ${importance}`);
-
-        // 8. Post to Telegram with FULL metadata
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://news-app.uz';
-        const articleUrl = `${baseUrl}/articles/${article.slug}`;
-        
-        const tgPostId = await TelegramService.postArticle({
-          title: article.title,
-          summary: article.summary || '',
-          url: articleUrl,
-          category: article.category?.name,
-          difficulty: article.difficulty,
-          importance: article.importance,
-          readingTime: article.readingTime || undefined,
-        });
-
-        if (tgPostId) {
-          await prisma.article.update({
-            where: { id: article.id },
-            data: { 
-              telegramPosted: true,
-              telegramPostId: tgPostId,
-            },
-          });
-          console.log(`   📱 Posted to Telegram`);
-        }
-
-        // 9. Mark Raw as processed
-        await RawArticleRepository.markAsProcessed(raw.id);
-        processed++;
-        
-      } catch (error) {
-        console.error(`❌ Error processing ${raw.id}:`, error);
-        errors++;
-        // Still mark as processed to avoid infinite loop
-        await RawArticleRepository.markAsProcessed(raw.id);
-      }
-    }
-
-    console.log(`\n✅ Pipeline finished:`);
-    console.log(`   Processed: ${processed}`);
-    console.log(`   Skipped: ${skipped}`);
-    console.log(`   Errors: ${errors}`);
-
-    return { processed, skipped, errors };
+    return {
+      processed: 0,
+      skipped: 0,
+      errors: 0,
+    };
   }
 
-  /**
-   * Process a single article (for testing)
-   */
   static async processOne(rawArticleId: string): Promise<void> {
-    const raw = await prisma.rawArticle.findUnique({
-      where: { id: rawArticleId },
-      include: { source: true },
+    await triggerJob('process-raw', {
+      source: 'legacy-news-pipeline-single',
+      rawArticleId,
     });
-
-    if (!raw) {
-      throw new Error(`RawArticle not found: ${rawArticleId}`);
-    }
-
-    // Temporarily set as unprocessed and run pipeline
-    await prisma.rawArticle.update({
-      where: { id: rawArticleId },
-      data: { isProcessed: false },
-    });
-
-    await this.run();
   }
 }

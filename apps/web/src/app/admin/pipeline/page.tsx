@@ -1,29 +1,27 @@
-import prisma from '@/lib/prisma';
 import { DataCard, StatusBadge } from '@/components/admin/stats-card';
 import { Activity, Play, RefreshCw, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { getAdminPipelineRuns } from '@/lib/api/server-api';
 
 async function getPipelineRuns() {
-  const runs = await prisma.pipelineRun.findMany({
-    take: 50,
-    orderBy: { startedAt: 'desc' },
-  });
-
-  // Calculate stats
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const todayRuns = runs.filter(r => r.startedAt >= today);
-  const successRate = runs.length > 0
-    ? Math.round((runs.filter(r => r.status === 'COMPLETED').length / runs.length) * 100)
-    : 0;
-
-  const totalArticles = runs.reduce((sum, r) => sum + r.articlesProcessed, 0);
-  const avgDuration = runs.length > 0
-    ? Math.round(runs.reduce((sum, r) => sum + (r.durationMs || 0), 0) / runs.length / 1000)
-    : 0;
-
-  return { runs, todayRuns: todayRuns.length, successRate, totalArticles, avgDuration };
+  const response = await getAdminPipelineRuns(50);
+  return response.data as {
+    runs: Array<{
+      id: string;
+      status: string;
+      startedAt: string;
+      durationMs: number | null;
+      articlesFound: number;
+      articlesProcessed: number;
+      errors: number;
+      aiCost: number;
+      tokensUsed: number;
+    }>;
+    todayRuns: number;
+    successRate: number;
+    totalArticles: number;
+    avgDuration: number;
+  };
 }
 
 function formatDuration(ms: number | null): string {
@@ -113,10 +111,10 @@ export default async function PipelinePage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm">
-                    {run.startedAt.toLocaleDateString('uz-UZ')}
+                    {new Date(run.startedAt).toLocaleDateString('uz-UZ')}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {run.startedAt.toLocaleTimeString('uz-UZ', { 
+                    {new Date(run.startedAt).toLocaleTimeString('uz-UZ', { 
                       hour: '2-digit', 
                       minute: '2-digit' 
                     })}

@@ -1,28 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+
+import { ensureAdminApiAuth } from '@/lib/admin/auth';
+import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
 
 // PUT - Update source
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await ensureAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
     const body = await request.json();
     const { name, type, url, isActive } = body;
 
-    const source = await prisma.newsSource.update({
-      where: { id },
-      data: {
-        name,
-        type,
-        url,
-        isActive,
-        updatedAt: new Date(),
+    const backend = await requestBackend<{ success: boolean; data: unknown }>(
+      `/v1/admin/sources/${id}`,
+      {
+        method: 'PUT',
+        headers: getInternalBridgeHeaders(),
+        body: JSON.stringify({ name, type, url, isActive }),
       },
-    });
+    );
 
-    return NextResponse.json(source);
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: 'Server xatosi' },
+        { status: backend.status || 500 },
+      );
+    }
+
+    return NextResponse.json(backend.data.data);
   } catch (error) {
     console.error('Error updating source:', error);
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 });
@@ -32,22 +42,29 @@ export async function PUT(
 // PATCH - Toggle source active status
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await ensureAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
-    
-    const existing = await prisma.newsSource.findUnique({ where: { id } });
-    if (!existing) {
-      return NextResponse.json({ error: 'Manba topilmadi' }, { status: 404 });
+    const backend = await requestBackend<{ success: boolean; data: unknown }>(
+      `/v1/admin/sources/${id}`,
+      {
+        method: 'PATCH',
+        headers: getInternalBridgeHeaders(),
+      },
+    );
+
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: 'Server xatosi' },
+        { status: backend.status || 500 },
+      );
     }
 
-    const source = await prisma.newsSource.update({
-      where: { id },
-      data: { isActive: !existing.isActive },
-    });
-
-    return NextResponse.json(source);
+    return NextResponse.json(backend.data.data);
   } catch (error) {
     console.error('Error toggling source:', error);
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 });
@@ -57,12 +74,27 @@ export async function PATCH(
 // DELETE - Delete source
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await ensureAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
+    const backend = await requestBackend<{ success: boolean; data: unknown }>(
+      `/v1/admin/sources/${id}`,
+      {
+        method: 'DELETE',
+        headers: getInternalBridgeHeaders(),
+      },
+    );
 
-    await prisma.newsSource.delete({ where: { id } });
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: 'Server xatosi' },
+        { status: backend.status || 500 },
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

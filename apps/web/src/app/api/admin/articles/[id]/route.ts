@@ -1,30 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+
+import { ensureAdminApiAuth } from '@/lib/admin/auth';
+import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
 
 // GET - Single article
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await ensureAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
-    
-    const article = await prisma.article.findUnique({
-      where: { id },
-      include: {
-        category: true,
-        tags: true,
-        rawArticle: {
-          include: { source: true },
-        },
-      },
-    });
 
-    if (!article) {
+    const backend = await requestBackend<{ success: boolean; data: { article: unknown } }>(
+      `/v1/admin/articles/${id}`,
+      {
+        headers: getInternalBridgeHeaders(),
+      },
+    );
+
+    if (backend.status === 404) {
       return NextResponse.json({ error: 'Maqola topilmadi' }, { status: 404 });
     }
 
-    return NextResponse.json(article);
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: 'Server xatosi' },
+        { status: backend.status || 500 },
+      );
+    }
+
+    return NextResponse.json(backend.data.data.article);
   } catch (error) {
     console.error('Error fetching article:', error);
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 });
@@ -34,60 +42,41 @@ export async function GET(
 // PUT - Update article
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await ensureAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
     const body = await request.json();
 
-    const {
-      title,
-      slug,
-      summary,
-      content,
-      imageUrl,
-      categoryId,
-      difficulty,
-      importance,
-      readingTime,
-      isFeatured,
-      isPublished,
-    } = body;
+    const backend = await requestBackend<{
+      success: boolean;
+      data?: unknown;
+      error?: { code?: string };
+    }>(`/v1/admin/articles/${id}`, {
+      method: 'PUT',
+      headers: getInternalBridgeHeaders(),
+      body: JSON.stringify(body),
+    });
 
-    // Check if article exists
-    const existing = await prisma.article.findUnique({ where: { id } });
-    if (!existing) {
+    if (backend.status === 404) {
       return NextResponse.json({ error: 'Maqola topilmadi' }, { status: 404 });
     }
 
-    // Check slug uniqueness if changed
-    if (slug !== existing.slug) {
-      const slugExists = await prisma.article.findUnique({ where: { slug } });
-      if (slugExists) {
-        return NextResponse.json({ error: 'Bu slug allaqachon mavjud' }, { status: 400 });
-      }
+    if (backend.data?.error?.code === 'SLUG_ALREADY_EXISTS') {
+      return NextResponse.json({ error: 'Bu slug allaqachon mavjud' }, { status: 400 });
     }
 
-    const article = await prisma.article.update({
-      where: { id },
-      data: {
-        title,
-        slug,
-        summary: summary || null,
-        content,
-        imageUrl: imageUrl || null,
-        categoryId: categoryId || null,
-        difficulty: difficulty ? difficulty.toUpperCase() : undefined,
-        importance: importance ? importance.toUpperCase() : undefined,
-        readingTime: readingTime || null,
-        updatedAt: new Date(),
-      },
-      include: {
-        category: true,
-      },
-    });
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: 'Server xatosi' },
+        { status: backend.status || 500 },
+      );
+    }
 
-    return NextResponse.json(article);
+    return NextResponse.json(backend.data.data);
   } catch (error) {
     console.error('Error updating article:', error);
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 });
@@ -97,20 +86,31 @@ export async function PUT(
 // DELETE - Delete article
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await ensureAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
 
-    // Check if article exists
-    const existing = await prisma.article.findUnique({ where: { id } });
-    if (!existing) {
+    const backend = await requestBackend<{ success: boolean }>(`/v1/admin/articles/${id}`, {
+      method: 'DELETE',
+      headers: getInternalBridgeHeaders(),
+    });
+
+    if (backend.status === 404) {
       return NextResponse.json({ error: 'Maqola topilmadi' }, { status: 404 });
     }
 
-    await prisma.article.delete({ where: { id } });
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: 'Server xatosi' },
+        { status: backend.status || 500 },
+      );
+    }
 
-    return NextResponse.json({ success: true, message: 'Maqola o\'chirildi' });
+    return NextResponse.json({ success: true, message: "Maqola o'chirildi" });
   } catch (error) {
     console.error('Error deleting article:', error);
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 });

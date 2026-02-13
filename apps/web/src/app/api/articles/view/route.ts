@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import {
+  requestBackend,
+} from '@/lib/api/backend-client';
 
 /**
  * Article View Counter API
@@ -50,18 +52,26 @@ async function handleSingleView(body: ViewRequest) {
     );
   }
 
-  // Atomic increment - no read-modify-write race condition
-  const updated = await prisma.article.update({
-    where: { slug: body.slug },
-    data: {
-      viewCount: { increment: 1 },
-    },
-    select: { viewCount: true },
+  const backend = await requestBackend<{
+    success: boolean;
+    data?: {
+      viewCount: number;
+    };
+  }>('/v1/articles/view', {
+    method: 'POST',
+    body: JSON.stringify({ slug: body.slug }),
   });
+
+  if (!backend.ok || !backend.data?.success) {
+    return NextResponse.json(
+      { success: false, error: 'Backend API Error' },
+      { status: backend.status || 502 }
+    );
+  }
 
   return NextResponse.json({
     success: true,
-    viewCount: updated.viewCount,
+    viewCount: backend.data.data?.viewCount ?? 0,
   });
 }
 
@@ -76,17 +86,21 @@ async function handleBatchView(body: BatchViewRequest) {
 
   // Limit batch size to prevent abuse
   const slugs = body.slugs.slice(0, 20);
-
-  // Use transaction for atomic batch update
-  const result = await prisma.article.updateMany({
-    where: { slug: { in: slugs } },
-    data: {
-      viewCount: { increment: 1 },
-    },
-  });
+  let updated = 0;
+  await Promise.all(
+    slugs.map(async (slug) => {
+      const response = await requestBackend<{ success?: boolean }>('/v1/articles/view', {
+        method: 'POST',
+        body: JSON.stringify({ slug }),
+      });
+      if (response.ok && response.data?.success) {
+        updated += 1;
+      }
+    }),
+  );
 
   return NextResponse.json({
     success: true,
-    updated: result.count,
+    updated,
   });
 }

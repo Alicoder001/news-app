@@ -1,15 +1,36 @@
 'use server';
 
-import prisma from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
+import { getArticles } from '@/lib/api/server-api';
+import type { Difficulty, Importance } from '@news-app/api-types';
 
-export type ArticleWithRelations = Prisma.ArticleGetPayload<{
-  include: {
-    category: true;
-    tags: true;
-    rawArticle: { include: { source: true } }
-  }
-}>;
+export interface ArticleWithRelations {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  content?: string;
+  imageUrl: string | null;
+  category: {
+    id: string;
+    slug: string;
+    name: string;
+    color?: string | null;
+  } | null;
+  tags: Array<{ id: string; name: string; slug: string }>;
+  rawArticle?: {
+    source?: {
+      id: string;
+      name: string;
+      url?: string;
+    } | null;
+    publishedAt?: string | null;
+  } | null;
+  readingTime: number | null;
+  difficulty: Difficulty;
+  importance: Importance;
+  viewCount: number;
+  createdAt: string;
+}
 
 export async function fetchArticlesAction(
   page: number = 1,
@@ -17,40 +38,20 @@ export async function fetchArticlesAction(
   categoryId?: string,
   tagId?: string
 ) {
-  const skip = (page - 1) * pageSize;
-
-  const where: Prisma.ArticleWhereInput = {};
-  
-  if (categoryId) {
-    where.categoryId = categoryId;
-  }
-  
-  if (tagId) {
-    where.tags = {
-      some: {
-        id: tagId
-      }
-    };
-  }
-
   try {
-    const articles = await prisma.article.findMany({
-      where,
-      include: {
-        category: true,
-        tags: true,
-        rawArticle: { include: { source: true } }
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: pageSize,
+    const response = await getArticles({
+      page,
+      limit: pageSize,
+      includeRawSource: true,
     });
-
-    const totalCount = await prisma.article.count({ where });
+    const data = response.data as {
+      articles?: ArticleWithRelations[];
+      pagination?: { totalPages?: number };
+    };
 
     return {
-      articles,
-      totalPages: Math.ceil(totalCount / pageSize),
+      articles: data.articles ?? [],
+      totalPages: data.pagination?.totalPages ?? 0,
       currentPage: page,
     };
   } catch (error) {

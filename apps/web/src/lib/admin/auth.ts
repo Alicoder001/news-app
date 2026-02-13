@@ -9,6 +9,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { NextResponse } from 'next/server';
 
 const ADMIN_COOKIE_NAME = 'admin_auth';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
@@ -82,4 +83,20 @@ export function getAdminInfo() {
     isConfigured: !!process.env.ADMIN_SECRET,
     isDevelopment: process.env.NODE_ENV === 'development',
   };
+}
+
+/**
+ * API route guard for admin endpoints
+ * Returns 401 JSON response when request is not authenticated.
+ */
+export async function ensureAdminApiAuth(): Promise<NextResponse | null> {
+  const authenticated = await isAuthenticated();
+  if (authenticated) {
+    return null;
+  }
+
+  return NextResponse.json(
+    { error: 'Unauthorized' },
+    { status: 401 }
+  );
 }

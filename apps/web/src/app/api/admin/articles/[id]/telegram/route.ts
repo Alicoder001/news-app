@@ -1,39 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { TelegramService } from '@/lib/news/services/telegram.service';
+
+import { ensureAdminApiAuth } from '@/lib/admin/auth';
+import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
 
 // POST - Send article to Telegram
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const unauthorized = await ensureAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
 
-    const article = await prisma.article.findUnique({
-      where: { id },
-      include: {
-        category: true,
-        tags: true,
+    const backend = await requestBackend<{ success: boolean }>(
+      `/v1/admin/articles/${id}/telegram`,
+      {
+        method: 'POST',
+        headers: getInternalBridgeHeaders(),
       },
-    });
+    );
 
-    if (!article) {
+    if (backend.status === 404) {
       return NextResponse.json({ error: 'Maqola topilmadi' }, { status: 404 });
     }
 
-    const telegramArticle = {
-      title: article.title,
-      summary: article.summary || article.title,
-      url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://aishunos.uz'}/articles/${article.slug}`,
-      category: article.category?.name,
-      imageUrl: article.imageUrl || undefined,
-    };
-    await TelegramService.postArticle(telegramArticle);
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: "Telegram'ga yuborishda xatolik" },
+        { status: backend.status || 500 },
+      );
+    }
 
     return NextResponse.json({ success: true, message: 'Telegram kanalga yuborildi' });
   } catch (error) {
     console.error('Error sending to Telegram:', error);
-    return NextResponse.json({ error: 'Telegram\'ga yuborishda xatolik' }, { status: 500 });
+    return NextResponse.json({ error: "Telegram'ga yuborishda xatolik" }, { status: 500 });
   }
 }

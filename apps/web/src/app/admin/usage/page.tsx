@@ -1,23 +1,43 @@
-import prisma from '@/lib/prisma';
 import { DataCard } from '@/components/admin/stats-card';
 import { Coins, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
-import { getUsageStats, getDailyUsage } from '@/lib/admin/usage-tracker';
+import { getAdminUsageRecent, getAdminUsageSummary } from '@/lib/api/server-api';
 
 async function getUsageData() {
-  const now = new Date();
-  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-
-  const [thisMonth, lastMonth, dailyUsage, recentUsages] = await Promise.all([
-    getUsageStats(thisMonthStart),
-    getUsageStats(lastMonthStart, lastMonthEnd),
-    getDailyUsage(30),
-    prisma.aIUsage.findMany({
-      take: 20,
-      orderBy: { createdAt: 'desc' },
-    }),
+  const [thisMonthResponse, lastMonthResponse, recentResponse] = await Promise.all([
+    getAdminUsageSummary(30),
+    getAdminUsageSummary(60),
+    getAdminUsageRecent(20),
   ]);
+  const thisMonthData = thisMonthResponse.data as {
+    usage: {
+      totalCost: number;
+      totalTokens: number;
+      byModel: Record<string, { tokens: number; cost: number }>;
+      byOperation: Record<string, { tokens: number; cost: number; count: number }>;
+    };
+    daily: Array<{ date: string; tokens: number; cost: number; count: number }>;
+  };
+  const lastMonthData = lastMonthResponse.data as {
+    usage: {
+      totalCost: number;
+      totalTokens: number;
+    };
+  };
+  const recentData = recentResponse.data as {
+    rows: Array<{
+      id: string;
+      createdAt: string;
+      model: string;
+      operation: string;
+      promptTokens: number;
+      completionTokens: number;
+      cost: number;
+    }>;
+  };
+  const thisMonth = thisMonthData.usage;
+  const lastMonth = lastMonthData.usage;
+  const dailyUsage = thisMonthData.daily.slice(-30);
+  const recentUsages = recentData.rows;
 
   const costChange = lastMonth.totalCost > 0
     ? ((thisMonth.totalCost - lastMonth.totalCost) / lastMonth.totalCost) * 100
@@ -199,7 +219,7 @@ export default async function UsagePage() {
               {recentUsages.map((usage) => (
                 <tr key={usage.id}>
                   <td className="py-3 text-xs text-muted-foreground">
-                    {usage.createdAt.toLocaleString('uz-UZ', {
+                    {new Date(usage.createdAt).toLocaleString('uz-UZ', {
                       month: 'short',
                       day: 'numeric',
                       hour: '2-digit',
