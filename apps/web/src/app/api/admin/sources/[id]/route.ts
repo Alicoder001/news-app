@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { ensureAdminApiAuth } from '@/lib/admin/auth';
-import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
+import { getAdminApiAuthHeaders } from '@/lib/admin/auth';
+import { requestBackend } from '@/lib/api/backend-client';
 
 // PUT - Update source
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const unauthorized = await ensureAdminApiAuth();
-  if (unauthorized) return unauthorized;
+  const adminHeaders = await getAdminApiAuthHeaders();
+  if (!adminHeaders) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const { id } = await params;
@@ -20,7 +22,7 @@ export async function PUT(
       `/v1/admin/sources/${id}`,
       {
         method: 'PUT',
-        headers: getInternalBridgeHeaders(),
+        headers: adminHeaders,
         body: JSON.stringify({ name, type, url, isActive }),
       },
     );
@@ -44,8 +46,10 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const unauthorized = await ensureAdminApiAuth();
-  if (unauthorized) return unauthorized;
+  const adminHeaders = await getAdminApiAuthHeaders();
+  if (!adminHeaders) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const { id } = await params;
@@ -53,7 +57,7 @@ export async function PATCH(
       `/v1/admin/sources/${id}`,
       {
         method: 'PATCH',
-        headers: getInternalBridgeHeaders(),
+        headers: adminHeaders,
       },
     );
 
@@ -76,8 +80,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const unauthorized = await ensureAdminApiAuth();
-  if (unauthorized) return unauthorized;
+  const adminHeaders = await getAdminApiAuthHeaders();
+  if (!adminHeaders) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const { id } = await params;
@@ -85,7 +91,7 @@ export async function DELETE(
       `/v1/admin/sources/${id}`,
       {
         method: 'DELETE',
-        headers: getInternalBridgeHeaders(),
+        headers: adminHeaders,
       },
     );
 

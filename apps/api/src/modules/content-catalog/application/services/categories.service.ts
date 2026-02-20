@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import type { Category as CategoryRecord } from '@prisma/client';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 
 @Injectable()
@@ -13,7 +14,7 @@ export class CategoriesService {
     return {
       success: true,
       data: {
-        categories: categories.map((category) => ({
+        categories: categories.map((category: CategoryRecord) => ({
           id: category.id,
           slug: category.slug,
           name: category.name,
@@ -44,7 +45,8 @@ export class CategoriesService {
     return {
       success: true,
       data: {
-        categories: categories.map((category) => ({
+        categories: categories.map(
+          (category: CategoryRecord & { _count: { articles: number } }) => ({
           id: category.id,
           slug: category.slug,
           name: category.name,
@@ -53,7 +55,8 @@ export class CategoriesService {
           icon: category.icon,
           color: category.color,
           articleCount: category._count.articles,
-        })),
+          }),
+        ),
       },
     };
   }

@@ -12,6 +12,18 @@ type CompatArticleListItem = ArticleListItem & {
   tags?: Array<{ id: string; name: string; slug: string }>;
 };
 
+type ArticleWithCategoryAndTags = Prisma.ArticleGetPayload<{
+  include: { category: true; tags: true };
+}>;
+
+type ArticleWithRawSource = Prisma.ArticleGetPayload<{
+  include: { category: true; tags: true; rawArticle: { include: { source: true } } };
+}>;
+
+type AdminArticleListRow = Prisma.ArticleGetPayload<{
+  include: { category: true; rawArticle: { include: { source: true } } };
+}>;
+
 @Injectable()
 export class ArticlesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -41,7 +53,7 @@ export class ArticlesService {
       importance: article.importance,
       viewCount: article.viewCount,
       createdAt: article.createdAt.toISOString(),
-      tags: article.tags.map((tag) => ({
+      tags: article.tags.map((tag: { id: string; name: string; slug: string }) => ({
         id: tag.id,
         name: tag.name,
         slug: tag.slug,
@@ -73,7 +85,7 @@ export class ArticlesService {
             color: article.category.color,
           }
         : null,
-      tags: article.tags.map((tag) => ({
+      tags: article.tags.map((tag: { id: string; name: string; slug: string }) => ({
         id: tag.id,
         name: tag.name,
         slug: tag.slug,
@@ -92,7 +104,7 @@ export class ArticlesService {
     };
   }
 
-  list(query: ListArticlesQueryDto) {
+  async list(query: ListArticlesQueryDto) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
@@ -122,30 +134,24 @@ export class ArticlesService {
         ? { viewCount: 'desc' }
         : { createdAt: 'desc' };
 
-    const include = {
-      category: true,
-      tags: true,
-      ...(query.includeRawSource
-        ? {
+    if (query.includeRawSource) {
+      const [articles, total] = await this.prisma.$transaction([
+        this.prisma.article.findMany({
+          where,
+          include: {
+            category: true,
+            tags: true,
             rawArticle: {
               include: {
                 source: true,
               },
             },
-          }
-        : {}),
-    } satisfies Prisma.ArticleInclude;
-
-    return this.prisma.$transaction(async (tx) => {
-      const [articles, total] = await Promise.all([
-        tx.article.findMany({
-          where,
-          include,
+          },
           orderBy,
           skip,
           take: limit,
         }),
-        tx.article.count({ where }),
+        this.prisma.article.count({ where }),
       ]);
 
       const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
@@ -153,34 +159,19 @@ export class ArticlesService {
       return {
         success: true,
         data: {
-          articles: articles.map((article) => ({
+          articles: articles.map((article: ArticleWithRawSource) => ({
             ...this.toArticleListItem(article),
-            ...(query.includeRawSource
+            rawArticle: article.rawArticle
               ? {
-                  rawArticle: (() => {
-                    const maybeRaw = article as typeof article & {
-                      rawArticle?: {
-                        source?: {
-                          id: string;
-                          name: string;
-                          url: string;
-                        } | null;
-                      } | null;
-                    };
-                    return maybeRaw.rawArticle
-                      ? {
-                          source: maybeRaw.rawArticle.source
-                            ? {
-                                id: maybeRaw.rawArticle.source.id,
-                                name: maybeRaw.rawArticle.source.name,
-                                url: maybeRaw.rawArticle.source.url,
-                              }
-                            : null,
-                        }
-                      : null;
-                  })(),
+                  source: article.rawArticle.source
+                    ? {
+                        id: article.rawArticle.source.id,
+                        name: article.rawArticle.source.name,
+                        url: article.rawArticle.source.url,
+                      }
+                    : null,
                 }
-              : {}),
+              : null,
           })),
           pagination: {
             page,
@@ -192,7 +183,38 @@ export class ArticlesService {
           },
         },
       };
-    });
+    }
+
+    const [articles, total] = await this.prisma.$transaction([
+      this.prisma.article.findMany({
+        where,
+        include: {
+          category: true,
+          tags: true,
+        },
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      this.prisma.article.count({ where }),
+    ]);
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+    return {
+      success: true,
+      data: {
+        articles: articles.map((article: ArticleWithCategoryAndTags) => this.toArticleListItem(article)),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNextPage: totalPages > 0 ? page < totalPages : false,
+          hasPrevPage: page > 1,
+        },
+      },
+    };
   }
 
   async getBySlug(slug: string) {
@@ -254,7 +276,7 @@ export class ArticlesService {
     return {
       success: true,
       data: {
-        articles: articles.map((article) => this.toArticleListItem(article)),
+        articles: articles.map((article: ArticleWithCategoryAndTags) => this.toArticleListItem(article)),
       },
     };
   }
@@ -272,7 +294,7 @@ export class ArticlesService {
     return {
       success: true,
       data: {
-        articles: rows.map((row) => ({
+        articles: rows.map((row: { slug: string; updatedAt: Date }) => ({
           slug: row.slug,
           updatedAt: row.updatedAt.toISOString(),
         })),
@@ -283,61 +305,59 @@ export class ArticlesService {
   async adminList(page: number, limit: number) {
     const skip = (page - 1) * limit;
 
-    return this.prisma.$transaction(async (tx) => {
-      const [articles, total] = await Promise.all([
-        tx.article.findMany({
-          skip,
-          take: limit,
-          orderBy: { createdAt: 'desc' },
-          include: {
-            category: true,
-            rawArticle: {
-              include: { source: true },
-            },
-          },
-        }),
-        tx.article.count(),
-      ]);
-
-      return {
-        success: true,
-        data: {
-          articles: articles.map((article) => ({
-            id: article.id,
-            slug: article.slug,
-            title: article.title,
-            summary: article.summary,
-            imageUrl: article.imageUrl,
-            viewCount: article.viewCount,
-            createdAt: article.createdAt.toISOString(),
-            category: article.category
-              ? {
-                  id: article.category.id,
-                  name: article.category.name,
-                  slug: article.category.slug,
-                }
-              : null,
-            rawArticle: article.rawArticle
-              ? {
-                  source: article.rawArticle.source
-                    ? {
-                        id: article.rawArticle.source.id,
-                        name: article.rawArticle.source.name,
-                        url: article.rawArticle.source.url,
-                      }
-                    : null,
-                }
-              : null,
-          })),
-          pagination: {
-            page,
-            limit,
-            total,
-            totalPages: total === 0 ? 0 : Math.ceil(total / limit),
+    const [articles, total] = await this.prisma.$transaction([
+      this.prisma.article.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          category: true,
+          rawArticle: {
+            include: { source: true },
           },
         },
-      };
-    });
+      }),
+      this.prisma.article.count(),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        articles: articles.map((article: AdminArticleListRow) => ({
+          id: article.id,
+          slug: article.slug,
+          title: article.title,
+          summary: article.summary,
+          imageUrl: article.imageUrl,
+          viewCount: article.viewCount,
+          createdAt: article.createdAt.toISOString(),
+          category: article.category
+            ? {
+                id: article.category.id,
+                name: article.category.name,
+                slug: article.category.slug,
+              }
+            : null,
+          rawArticle: article.rawArticle
+            ? {
+                source: article.rawArticle.source
+                  ? {
+                      id: article.rawArticle.source.id,
+                      name: article.rawArticle.source.name,
+                      url: article.rawArticle.source.url,
+                    }
+                  : null,
+              }
+            : null,
+        })),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: total === 0 ? 0 : Math.ceil(total / limit),
+        },
+      },
+    };
   }
 
   async view(dto: ViewArticleDto) {

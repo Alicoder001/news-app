@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { Article as ArticleRecord, PipelineRun } from '@prisma/client';
 
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 import { AiUsageService } from './ai-usage.service';
@@ -65,24 +66,26 @@ export class AdminInsightsService {
                 : null,
             }
           : null,
-        recentPipelineRuns: recentPipelineRuns.map((run) => ({
+        recentPipelineRuns: recentPipelineRuns.map((run: PipelineRun) => ({
           ...run,
           startedAt: run.startedAt.toISOString(),
           completedAt: run.completedAt ? run.completedAt.toISOString() : null,
         })),
-        recentArticles: recentArticles.map((article) => ({
-          id: article.id,
-          slug: article.slug,
-          title: article.title,
-          createdAt: article.createdAt.toISOString(),
-          category: article.category
-            ? {
-                id: article.category.id,
-                name: article.category.name,
-                slug: article.category.slug,
-              }
-            : null,
-        })),
+        recentArticles: recentArticles.map(
+          (article: ArticleRecord & { category: { id: string; name: string; slug: string } | null }) => ({
+            id: article.id,
+            slug: article.slug,
+            title: article.title,
+            createdAt: article.createdAt.toISOString(),
+            category: article.category
+              ? {
+                  id: article.category.id,
+                  name: article.category.name,
+                  slug: article.category.slug,
+                }
+              : null,
+          }),
+        ),
         aiUsage: usageStats,
         dailyUsage,
       },
@@ -97,21 +100,30 @@ export class AdminInsightsService {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayRuns = runs.filter((run) => run.startedAt >= today);
+    const todayRuns = runs.filter((run: PipelineRun) => run.startedAt >= today);
     const successRate =
       runs.length > 0
-        ? Math.round((runs.filter((run) => run.status === 'COMPLETED').length / runs.length) * 100)
+        ? Math.round(
+            (runs.filter((run: PipelineRun) => run.status === 'COMPLETED').length / runs.length) * 100,
+          )
         : 0;
-    const totalArticles = runs.reduce((sum, run) => sum + run.articlesProcessed, 0);
+    const totalArticles = runs.reduce(
+      (sum: number, run: PipelineRun) => sum + run.articlesProcessed,
+      0,
+    );
     const avgDuration =
       runs.length > 0
-        ? Math.round(runs.reduce((sum, run) => sum + (run.durationMs ?? 0), 0) / runs.length / 1000)
+        ? Math.round(
+            runs.reduce((sum: number, run: PipelineRun) => sum + (run.durationMs ?? 0), 0) /
+              runs.length /
+              1000,
+          )
         : 0;
 
     return {
       success: true,
       data: {
-        runs: runs.map((run) => ({
+        runs: runs.map((run: PipelineRun) => ({
           ...run,
           startedAt: run.startedAt.toISOString(),
           completedAt: run.completedAt ? run.completedAt.toISOString() : null,

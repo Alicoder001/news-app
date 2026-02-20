@@ -4,10 +4,19 @@ import {
   requestBackend,
 } from '@/lib/api/backend-client';
 
+function parseBoundedLimit(value: string | null): number {
+  const parsed = Number.parseInt(value ?? '', 10);
+  if (!Number.isFinite(parsed)) {
+    return 5;
+  }
+
+  return Math.min(20, Math.max(1, parsed));
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '5');
+    const limit = parseBoundedLimit(searchParams.get('limit'));
 
     const backend = await requestBackend<{
       success: boolean;

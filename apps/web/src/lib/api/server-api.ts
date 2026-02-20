@@ -1,4 +1,5 @@
-import { getBackendBaseUrl, getInternalBridgeHeaders } from './backend-client';
+import { getAdminApiAuthHeaders } from '@/lib/admin/auth';
+import { getBackendBaseUrl } from './backend-client';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -77,65 +78,70 @@ export function getTagBySlug(slug: string) {
   return backendFetch<{ success: boolean; data: JsonRecord }>(`/v1/tags/${slug}`);
 }
 
-function getAdminHeaders() {
-  return getInternalBridgeHeaders();
+async function getAdminHeaders() {
+  const headers = await getAdminApiAuthHeaders();
+  if (!headers) {
+    throw new Error('Unauthorized admin session');
+  }
+
+  return headers;
 }
 
-export function getAdminOverview() {
+export async function getAdminOverview() {
   return backendFetch<{ success: boolean; data: JsonRecord }>('/v1/admin/overview', {
-    headers: getAdminHeaders(),
+    headers: await getAdminHeaders(),
   });
 }
 
-export function getAdminArticles(page = 1, limit = 20) {
+export async function getAdminArticles(page = 1, limit = 20) {
   return backendFetch<{ success: boolean; data: JsonRecord }>(
     `/v1/admin/articles?page=${page}&limit=${limit}`,
-    { headers: getAdminHeaders() },
+    { headers: await getAdminHeaders() },
   );
 }
 
-export function getAdminArticleById(id: string) {
+export async function getAdminArticleById(id: string) {
   return backendFetch<{ success: boolean; data: JsonRecord }>(`/v1/admin/articles/${id}`, {
-    headers: getAdminHeaders(),
+    headers: await getAdminHeaders(),
   });
 }
 
-export function getAdminSources() {
+export async function getAdminSources() {
   return backendFetch<{ success: boolean; data: JsonRecord }>('/v1/admin/sources', {
-    headers: getAdminHeaders(),
+    headers: await getAdminHeaders(),
   });
 }
 
-export function getAdminPipelineRuns(limit = 50) {
+export async function getAdminPipelineRuns(limit = 50) {
   return backendFetch<{ success: boolean; data: JsonRecord }>(
     `/v1/admin/pipeline/runs?limit=${limit}`,
     {
-      headers: getAdminHeaders(),
+      headers: await getAdminHeaders(),
     },
   );
 }
 
-export function getAdminUsageSummary(days = 30) {
+export async function getAdminUsageSummary(days = 30) {
   return backendFetch<{ success: boolean; data: JsonRecord }>(
     `/v1/admin/usage/summary?days=${days}`,
     {
-      headers: getAdminHeaders(),
+      headers: await getAdminHeaders(),
     },
   );
 }
 
-export function getAdminUsageRecent(limit = 20) {
+export async function getAdminUsageRecent(limit = 20) {
   return backendFetch<{ success: boolean; data: JsonRecord }>(
     `/v1/admin/usage/recent?limit=${limit}`,
     {
-      headers: getAdminHeaders(),
+      headers: await getAdminHeaders(),
     },
   );
 }
 
-export function getAdminSettings() {
+export async function getAdminSettings() {
   return backendFetch<{ success: boolean; data: JsonRecord }>('/v1/admin/settings', {
-    headers: getAdminHeaders(),
+    headers: await getAdminHeaders(),
   });
 }
 

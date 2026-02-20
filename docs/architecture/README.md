@@ -1,7 +1,7 @@
 ﻿# Arxitektura
 
-> **Versiya:** 1.0  
-> **Yangilangan:** 2026-01-19
+> **Versiya:** 1.1  
+> **Yangilangan:** 2026-02-20
 
 ---
 
@@ -27,12 +27,13 @@ Ushbu hujjat Aishunos platformasining texnik arxitekturasi haqida umumiy ma'lumo
 
 | Qatlam | Texnologiya | Versiya | Vazifasi |
 |--------|-------------|---------|----------|
-| **Framework** | Next.js | 16.1.1 | App Router, SSR, API Routes |
+| **Frontend Framework** | Next.js | 16.1.1 | App Router, SSR/SSG UI |
+| **Backend Framework** | NestJS | 11.x | Canonical REST API |
 | **UI Library** | React | 19.2.3 | Komponent asosidagi UI |
 | **Til** | TypeScript | 5.x | Tip xavfsizligi |
 | **Stillar** | Tailwind CSS | 4.x | Utility-first CSS |
 | **Database** | PostgreSQL | - | Asosiy ma'lumotlar bazasi |
-| **ORM** | Prisma | 6.19.1 | Database access layer |
+| **ORM** | Prisma | 7.4.0 | Database access layer |
 
 ### State Management
 
@@ -74,16 +75,16 @@ Ushbu hujjat Aishunos platformasining texnik arxitekturasi haqida umumiy ma'lumo
 │         │                │                │                    │
 │         └────────────────┼────────────────┘                    │
 │                          ▼                                      │
-│                  ┌───────────────┐                             │
-│                  │   REST API    │                             │
-│                  │  (Next.js)    │                             │
-│                  └───────┬───────┘                             │
+│                ┌───────────────────┐                           │
+│                │ Canonical REST API │                          │
+│                │     (NestJS)       │                          │
+│                └─────────┬──────────┘                          │
 │                          │                                      │
 │         ┌────────────────┼────────────────┐                    │
 │         ▼                ▼                ▼                    │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
 │  │  PostgreSQL │  │   OpenAI    │  │  Telegram   │            │
-│  │   (Prisma)  │  │  GPT-4o-mini│  │   Bot API   │            │
+│  │  (Prisma 7) │  │  GPT-4o-mini│  │   Bot API   │            │
 │  └─────────────┘  └─────────────┘  └─────────────┘            │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘

@@ -68,10 +68,7 @@ export class TheNewsAPIProvider extends BaseNewsProvider {
    */
   async fetchArticles(): Promise<RawArticleData[]> {
     const currentKey = this.apiKey;
-    
-    // DEBUG: Log token status
-    this.log(`API Key status: ${currentKey ? 'FOUND (' + currentKey.slice(0, 8) + '...)' : 'NOT FOUND'}`);
-    
+
     if (!currentKey) {
       this.log('THENEWSAPI_KEY not found. Skipping TheNewsAPI fetch.', 'warn');
       return [];

@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { ensureAdminApiAuth } from '@/lib/admin/auth';
-import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
+import { getAdminApiAuthHeaders } from '@/lib/admin/auth';
+import { requestBackend } from '@/lib/api/backend-client';
 
 // GET - Single article
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const unauthorized = await ensureAdminApiAuth();
-  if (unauthorized) return unauthorized;
+  const adminHeaders = await getAdminApiAuthHeaders();
+  if (!adminHeaders) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const { id } = await params;
@@ -17,7 +19,7 @@ export async function GET(
     const backend = await requestBackend<{ success: boolean; data: { article: unknown } }>(
       `/v1/admin/articles/${id}`,
       {
-        headers: getInternalBridgeHeaders(),
+        headers: adminHeaders,
       },
     );
 
@@ -44,8 +46,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const unauthorized = await ensureAdminApiAuth();
-  if (unauthorized) return unauthorized;
+  const adminHeaders = await getAdminApiAuthHeaders();
+  if (!adminHeaders) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const { id } = await params;
@@ -57,7 +61,7 @@ export async function PUT(
       error?: { code?: string };
     }>(`/v1/admin/articles/${id}`, {
       method: 'PUT',
-      headers: getInternalBridgeHeaders(),
+      headers: adminHeaders,
       body: JSON.stringify(body),
     });
 
@@ -88,15 +92,17 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const unauthorized = await ensureAdminApiAuth();
-  if (unauthorized) return unauthorized;
+  const adminHeaders = await getAdminApiAuthHeaders();
+  if (!adminHeaders) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const { id } = await params;
 
     const backend = await requestBackend<{ success: boolean }>(`/v1/admin/articles/${id}`, {
       method: 'DELETE',
-      headers: getInternalBridgeHeaders(),
+      headers: adminHeaders,
     });
 
     if (backend.status === 404) {

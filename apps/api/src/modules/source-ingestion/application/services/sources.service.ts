@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SourceType } from '@prisma/client';
+import type { NewsSource } from '@prisma/client';
 
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 
@@ -23,7 +24,7 @@ export class SourcesService {
     return {
       success: true,
       data: {
-        sources: sources.map((source) => ({
+        sources: sources.map((source: NewsSource & { _count: { RawArticle: number } }) => ({
           id: source.id,
           name: source.name,
           url: source.url,

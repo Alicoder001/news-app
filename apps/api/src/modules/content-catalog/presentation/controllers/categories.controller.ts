@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CategoriesService } from '../../application/services/categories.service';
@@ -16,8 +16,9 @@ export class CategoriesController {
 
   @Get('top')
   @ApiOperation({ summary: 'Get top categories ordered by article count' })
-  top(@Query('limit') limit?: number) {
-    return this.categoriesService.listTop(limit ?? 8);
+  top(@Query('limit', new ParseIntPipe({ optional: true })) limit?: number) {
+    const safeLimit = Math.max(1, Math.min(limit ?? 8, 20));
+    return this.categoriesService.listTop(safeLimit);
   }
 
   @Get(':slug')

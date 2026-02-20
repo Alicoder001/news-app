@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { ensureAdminApiAuth } from '@/lib/admin/auth';
-import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
+import { getAdminApiAuthHeaders } from '@/lib/admin/auth';
+import { requestBackend } from '@/lib/api/backend-client';
 
 // POST - Send article to Telegram
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const unauthorized = await ensureAdminApiAuth();
-  if (unauthorized) return unauthorized;
+  const adminHeaders = await getAdminApiAuthHeaders();
+  if (!adminHeaders) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const { id } = await params;
@@ -18,7 +20,7 @@ export async function POST(
       `/v1/admin/articles/${id}/telegram`,
       {
         method: 'POST',
-        headers: getInternalBridgeHeaders(),
+        headers: adminHeaders,
       },
     );
 

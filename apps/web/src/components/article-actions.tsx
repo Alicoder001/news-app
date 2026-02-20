@@ -2,6 +2,7 @@
 
 import { Share2, Bookmark } from "lucide-react";
 import { useSavedArticlesContext, SavedArticle } from "./saved-articles-provider";
+import { routing } from '@/i18n/routing';
 
 interface ArticleActionsProps {
   title: string;
@@ -25,11 +26,24 @@ export function ArticleActions({
   const { toggleSave, isArticleSaved, isLoaded } = useSavedArticlesContext();
   const isSaved = isLoaded && isArticleSaved(slug);
 
+  const resolveLocalePrefix = (pathname: string): string => {
+    const [firstSegment] = pathname.split('/').filter(Boolean);
+    if (
+      firstSegment &&
+      routing.locales.includes(firstSegment as (typeof routing.locales)[number])
+    ) {
+      return `/${firstSegment}`;
+    }
+
+    return '';
+  };
+
   const handleShare = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    const url = `${window.location.origin}/tg/article/${slug}`;
+    const localePrefix = resolveLocalePrefix(window.location.pathname);
+    const url = `${window.location.origin}${localePrefix}/tg/article/${slug}`;
     
     if (navigator.share) {
       navigator.share({

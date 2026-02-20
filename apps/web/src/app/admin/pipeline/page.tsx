@@ -1,7 +1,7 @@
-import { DataCard, StatusBadge } from '@/components/admin/stats-card';
-import { Activity, Play, RefreshCw, Clock } from 'lucide-react';
-import Link from 'next/link';
+import { StatusBadge } from '@/components/admin/stats-card';
+import { Activity } from 'lucide-react';
 import { getAdminPipelineRuns } from '@/lib/api/server-api';
+import { ManualTriggerControls } from './manual-trigger-controls';
 
 async function getPipelineRuns() {
   const response = await getAdminPipelineRuns(50);
@@ -46,13 +46,7 @@ export default async function PipelinePage() {
             Avtomatik yangiliklar to'plash
           </p>
         </div>
-        <Link
-          href="/api/cron/news"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors"
-        >
-          <Play className="w-4 h-4" />
-          Manual ishga tushirish
-        </Link>
+        <ManualTriggerControls />
       </div>
 
       {/* Stats */}
@@ -155,12 +149,7 @@ export default async function PipelinePage() {
                     <p className="text-sm text-muted-foreground">
                       Pipeline hali ishlamagan
                     </p>
-                    <Link
-                      href="/api/cron/news"
-                      className="text-sm text-foreground font-medium hover:underline"
-                    >
-                      Birinchi marta ishga tushirish →
-                    </Link>
+                    <ManualTriggerControls compact />
                   </div>
                 </td>
               </tr>

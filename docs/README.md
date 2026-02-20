@@ -1,7 +1,7 @@
 ﻿# Aishunos Documentation
 
 > **Versiya:** 3.0  
-> **Yangilangan:** 2026-01-20
+> **Yangilangan:** 2026-02-20
 
 ---
 
@@ -165,8 +165,8 @@ pnpm dev
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | Next.js 15, React 19, Tailwind CSS |
-| **Backend** | Next.js API Routes, Prisma |
+| **Frontend** | Next.js 16.1.1, React 19, Tailwind CSS 4 |
+| **Backend** | NestJS 11 + Prisma 7.4.0 |
 | **Database** | PostgreSQL (Neon) |
 | **AI** | OpenAI GPT-4o-mini |
 | **Hosting** | Vercel |

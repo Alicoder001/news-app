@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { Link } from '@/i18n/navigation';
 import { DifficultyBadge } from '@/components/badges';
 import { TGCategoryNav } from '@/components/tg-category-nav';
 import { ArticleActions } from '@/components/article-actions';

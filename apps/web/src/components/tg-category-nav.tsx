@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { getTopCategories } from '@/lib/api/server-api';
 
 export async function TGCategoryNav() {

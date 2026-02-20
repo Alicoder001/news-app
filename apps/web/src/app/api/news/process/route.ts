@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
-import { ensureAdminApiAuth } from '@/lib/admin/auth';
-import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
+import { getAdminApiAuthHeaders } from '@/lib/admin/auth';
+import { requestBackend } from '@/lib/api/backend-client';
 
 export async function GET() {
   return NextResponse.json({
@@ -12,8 +12,10 @@ export async function GET() {
 }
 
 export async function POST() {
-  const unauthorized = await ensureAdminApiAuth();
-  if (unauthorized) return unauthorized;
+  const adminHeaders = await getAdminApiAuthHeaders();
+  if (!adminHeaders) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const backend = await requestBackend<{
@@ -22,16 +24,11 @@ export async function POST() {
       mode: 'queue' | 'dry-run';
       job: string;
       jobId?: string;
-    }>('/v1/internal/jobs/trigger', {
+    }>('/v1/admin/pipeline/trigger', {
       method: 'POST',
-      headers: getInternalBridgeHeaders(),
+      headers: adminHeaders,
       body: JSON.stringify({
         job: 'process-raw',
-        payload: {
-          trigger: 'manual-admin',
-          at: new Date().toISOString(),
-          idempotencyKey: `manual-process:${Date.now()}`,
-        },
       }),
     });
 

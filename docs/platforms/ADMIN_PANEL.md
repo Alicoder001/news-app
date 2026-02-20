@@ -1,7 +1,7 @@
 ﻿# Admin Panel
 
 > **Versiya:** 1.0  
-> **Yangilangan:** 2026-01-20  
+> **Yangilangan:** 2026-02-20  
 > **Status:** 🔄 Development
 
 ---
@@ -48,15 +48,17 @@ Admin panel maqolalar, manbalar va pipeline ni boshqarish uchun.
 ## Authentication
 
 ```typescript
-// Simple password auth (for now)
-// TODO: Migrate to NextAuth.js
+// Session boundary:
+// - Browser -> Next admin route: httpOnly admin token cookies
+// - Next admin route -> Nest API: Authorization Bearer <accessToken>
+// - Refresh handled through backend /v1/admin/auth/refresh
 
 POST /api/admin/login
 {
-  "password": "admin_password"
+  "secret": "ADMIN_SECRET"
 }
 
-// Response: Set HTTP-only cookie
+// Response: set access+refresh httpOnly cookies (no secret in cookies)
 ```
 
 ---

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { AIUsage } from '@prisma/client';
 
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 
@@ -129,7 +130,7 @@ export class AiUsageService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return rows.map((row) => ({
+    return rows.map((row: AIUsage) => ({
       id: row.id,
       createdAt: row.createdAt.toISOString(),
       model: row.model,

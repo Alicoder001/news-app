@@ -1,13 +1,13 @@
 ﻿# Web Application
 
 > **Versiya:** 1.0  
-> **Yangilangan:** 2026-01-20
+> **Yangilangan:** 2026-02-20
 
 ---
 
 ## Umumiy Korinish
 
-Aishunos web ilovasi Next.js 15 asosida qurilgan.
+Aishunos web ilovasi Next.js 16 asosida qurilgan va canonical backend sifatida `apps/api` (NestJS) bilan ishlaydi.
 
 ---
 
@@ -15,12 +15,13 @@ Aishunos web ilovasi Next.js 15 asosida qurilgan.
 
 | Technology | Version | Maqsad |
 |------------|---------|--------|
-| Next.js | 15.x | Framework |
+| Next.js | 16.1.1 | Framework |
 | React | 19.x | UI Library |
 | TypeScript | 5.x | Type safety |
-| Tailwind CSS | 3.x | Styling |
-| Prisma | 5.x | ORM |
-| next-intl | 3.x | i18n |
+| Tailwind CSS | 4.x | Styling |
+| next-intl | 4.x | i18n |
+| Backend API | NestJS 11.x | REST endpoints |
+| Prisma | 7.4.0 | ORM (backend) |
 
 ---
 

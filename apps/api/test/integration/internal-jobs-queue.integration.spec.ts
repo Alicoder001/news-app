@@ -11,9 +11,9 @@ jest.mock('bullmq', () => ({
   })),
 }));
 
-describe('InternalJobsService idempotency', () => {
-  it('passes idempotency key as BullMQ jobId for replay safety', async () => {
-    addMock.mockResolvedValue({ id: 'replay-key-1' });
+describe('InternalJobsService queue mode', () => {
+  it('queues telegram job and returns queue metadata', async () => {
+    addMock.mockResolvedValue({ id: 'telegram-job-1' });
 
     const configService = {
       get: jest.fn().mockImplementation((key: unknown) => {
@@ -25,28 +25,26 @@ describe('InternalJobsService idempotency', () => {
     } as unknown as ConfigService;
 
     const service = new InternalJobsService(configService);
-    const result = await service.trigger('process-raw', {
-      idempotencyKey: 'replay-key-1',
-      source: 'test',
+    const result = await service.trigger('telegram-post', {
+      source: 'integration-test',
     });
 
     expect(addMock).toHaveBeenCalledWith(
-      'process-raw',
+      'telegram-post',
       expect.objectContaining({
-        idempotencyKey: 'replay-key-1',
+        source: 'integration-test',
       }),
       expect.objectContaining({
         attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 5000,
-        },
         removeOnComplete: 50,
         removeOnFail: 100,
-        jobId: 'replay-key-1',
       }),
     );
-    expect(result.queued).toBe(true);
-    expect(result.jobId).toBe('replay-key-1');
+    expect(result).toEqual({
+      queued: true,
+      mode: 'queue',
+      job: 'telegram-post',
+      jobId: 'telegram-job-1',
+    });
   });
 });

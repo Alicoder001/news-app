@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { ArticlesService } from '../../application/services/articles.service';
@@ -18,14 +18,16 @@ export class ArticlesController {
 
   @Get('slugs')
   @ApiOperation({ summary: 'Get article slugs for sitemap/static params' })
-  slugs(@Query('limit') limit?: number) {
-    return this.articlesService.slugs(limit ?? 1000);
+  slugs(@Query('limit', new ParseIntPipe({ optional: true })) limit?: number) {
+    const safeLimit = Math.max(1, Math.min(limit ?? 1000, 5000));
+    return this.articlesService.slugs(safeLimit);
   }
 
   @Get('featured')
   @ApiOperation({ summary: 'Get featured articles (phase-1 scaffold)' })
-  featured(@Query('limit') limit?: number) {
-    return this.articlesService.featured(limit ?? 5);
+  featured(@Query('limit', new ParseIntPipe({ optional: true })) limit?: number) {
+    const safeLimit = Math.max(1, Math.min(limit ?? 5, 20));
+    return this.articlesService.featured(safeLimit);
   }
 
   @Get(':slug')

@@ -77,6 +77,12 @@ describe('RBAC E2E', () => {
     await app.close();
   });
 
+  it('rejects protected route access without bearer token', async () => {
+    await request(app.getHttpServer())
+      .get('/rbac-test/editor')
+      .expect(401);
+  });
+
   it('allows editor token on editor route but denies on super-admin route', async () => {
     const editorLogin = await authService.login('editor', 'super-secret-password');
     const editorAccessToken = editorLogin.accessToken;

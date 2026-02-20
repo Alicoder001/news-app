@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { ensureAdminApiAuth } from '@/lib/admin/auth';
-import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
+import { getAdminApiAuthHeaders } from '@/lib/admin/auth';
+import { requestBackend } from '@/lib/api/backend-client';
 
 // POST - Create new source
 export async function POST(request: NextRequest) {
-  const unauthorized = await ensureAdminApiAuth();
-  if (unauthorized) return unauthorized;
+  const adminHeaders = await getAdminApiAuthHeaders();
+  if (!adminHeaders) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const body = await request.json();
@@ -16,7 +18,7 @@ export async function POST(request: NextRequest) {
       '/v1/admin/sources',
       {
         method: 'POST',
-        headers: getInternalBridgeHeaders(),
+        headers: adminHeaders,
         body: JSON.stringify({
           name,
           type: type || 'RSS',

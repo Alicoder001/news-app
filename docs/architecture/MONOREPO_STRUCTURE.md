@@ -17,6 +17,7 @@ Aishunos loyihasi **pnpm workspace** asosidagi monorepo arxitekturasidan foydala
 news-app-monorepo/
 ├── apps/                          # Ilovalar
 │   ├── web/                       # Next.js web application
+│   ├── api/                       # NestJS canonical backend
 │   └── mobile/                    # Expo/React Native mobile app
 │
 ├── packages/                      # Shared paketlar
@@ -46,7 +47,7 @@ news-app-monorepo/
 | **Package nomi** | `@news-app/web` |
 | **Framework** | Next.js 16.1.1 |
 | **Port** | 3000 |
-| **Vazifasi** | Asosiy web sayt, API, Admin panel |
+| **Vazifasi** | Asosiy web sayt, Telegram UI, admin UI, API adapter routes |
 
 **Ichki struktura:**
 ```
@@ -56,13 +57,39 @@ apps/web/
 │   │   ├── [locale]/(web)/        # Public web sahifalar
 │   │   ├── [locale]/tg/           # Telegram Mini App
 │   │   ├── admin/                 # Admin panel
-│   │   └── api/                   # API routes
+│   │   └── api/                   # Backend adapter routes (no business core)
 │   ├── components/                # React komponentlar
 │   ├── lib/                       # Utilities, services
 │   │   └── news/                  # News pipeline
 │   └── i18n/                      # Internationalization
 ├── messages/                      # Locale fayllar (uz, ru, en)
 └── public/                        # Static assets
+```
+
+### `apps/api` - NestJS Canonical Backend
+
+| Xususiyat | Qiymat |
+|-----------|--------|
+| **Package nomi** | `@news-app/api` |
+| **Framework** | NestJS 11.x |
+| **Port** | 4000 |
+| **Vazifasi** | Auth, admin RBAC, content katalog, ingestion, operations API |
+
+**Ichki struktura:**
+```
+apps/api/
+├── src/
+│   ├── app.module.ts              # Root module
+│   ├── main.ts                    # Bootstrap (/v1 prefix)
+│   ├── config/                    # Env schema + configuration
+│   ├── common/                    # Shared filters/interceptors
+│   └── modules/                   # DDD modullar
+│       ├── content-catalog/
+│       ├── identity-access/
+│       ├── operations/
+│       ├── source-ingestion/
+│       └── distribution-telegram/
+└── test/                          # e2e + integration tests
 ```
 
 ### `apps/mobile` - React Native/Expo Mobile App
@@ -150,6 +177,7 @@ graph TD
     A[apps/web] --> D[packages/api-types]
     A --> E[packages/shared]
     A --> F[packages/i18n]
+    C[apps/api] --> D
     
     B[apps/mobile] --> D
     B --> E
@@ -157,6 +185,7 @@ graph TD
     
     style A fill:#e3f2fd
     style B fill:#e8f5e9
+    style C fill:#f3e5f5
     style D fill:#fff3e0
     style E fill:#fff3e0
     style F fill:#fff3e0
@@ -171,6 +200,7 @@ graph TD
 | Script | Vazifasi |
 |--------|----------|
 | `pnpm dev` | Web va Mobile parallel ishga tushirish |
+| `pnpm dev:api` | Faqat `apps/api` ni ishga tushirish |
 | `pnpm build` | Barcha paketlarni build qilish |
 | `pnpm lint` | Barcha paketlarda linting |
 | `pnpm type-check` | TypeScript tekshiruvi |
@@ -180,6 +210,15 @@ graph TD
 ```bash
 pnpm --filter @news-app/web dev      # Faqat web
 pnpm --filter @news-app/web build    # Web build
+```
+
+### API-specific
+
+```bash
+pnpm --filter @news-app/api dev          # Nest watch mode
+pnpm --filter @news-app/api build        # Nest build
+pnpm --filter @news-app/api test:e2e     # Auth/RBAC e2e
+pnpm --filter @news-app/api test:integration
 ```
 
 ### Mobile-specific

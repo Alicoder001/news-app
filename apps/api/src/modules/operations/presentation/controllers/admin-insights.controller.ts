@@ -1,12 +1,17 @@
 import {
+  Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
+  Post,
   ParseIntPipe,
   Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { IsIn, IsObject, IsOptional } from 'class-validator';
 
 import { AdminAuditInterceptor } from '../../../identity-access/infrastructure/interceptors/admin-audit.interceptor';
 import { JwtAuthGuard } from '../../../identity-access/infrastructure/security/jwt-auth.guard';
@@ -14,6 +19,16 @@ import { Roles } from '../../../identity-access/infrastructure/security/roles.de
 import { RolesGuard } from '../../../identity-access/infrastructure/security/roles.guard';
 import { AdminInsightsService } from '../../application/services/admin-insights.service';
 import { AiUsageService } from '../../application/services/ai-usage.service';
+import { InternalJobsService } from '../../application/services/internal-jobs.service';
+
+class AdminTriggerJobDto {
+  @IsIn(['sync-news', 'process-raw', 'telegram-post'])
+  job!: 'sync-news' | 'process-raw' | 'telegram-post';
+
+  @IsOptional()
+  @IsObject()
+  payload?: Record<string, unknown>;
+}
 
 @ApiTags('admin-insights')
 @ApiBearerAuth()
@@ -25,6 +40,7 @@ export class AdminInsightsController {
   constructor(
     private readonly adminInsightsService: AdminInsightsService,
     private readonly aiUsageService: AiUsageService,
+    private readonly internalJobsService: InternalJobsService,
   ) {}
 
   @Get('overview')
@@ -38,7 +54,25 @@ export class AdminInsightsController {
   pipelineRuns(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
-    return this.adminInsightsService.pipelineRuns(limit ?? 50);
+    const safeLimit = Math.max(1, Math.min(limit ?? 50, 100));
+    return this.adminInsightsService.pipelineRuns(safeLimit);
+  }
+
+  @Post('pipeline/trigger')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({ summary: 'Trigger pipeline job from admin session' })
+  async triggerPipeline(@Body() dto: AdminTriggerJobDto) {
+    const payload: Record<string, unknown> = {
+      trigger: 'manual-admin',
+      at: new Date().toISOString(),
+      ...(dto.payload ?? {}),
+    };
+    if (typeof payload.idempotencyKey !== 'string') {
+      payload.idempotencyKey = `manual-${dto.job}:${Date.now()}`;
+    }
+
+    const result = await this.internalJobsService.trigger(dto.job, payload);
+    return { accepted: true, ...result };
   }
 
   @Get('usage/summary')

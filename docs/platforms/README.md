@@ -1,7 +1,7 @@
 ﻿# Platforms
 
 > **Versiya:** 1.0  
-> **Yangilangan:** 2026-01-20
+> **Yangilangan:** 2026-02-20
 
 ---
 
@@ -26,10 +26,10 @@ Aishunos bir nechta platformalarda mavjud.
 
 | Platform | Technology |
 |----------|------------|
-| Web | Next.js 15, React 19 |
+| Web | Next.js 16.1.1, React 19 |
 | Telegram | Next.js + Telegram WebApp API |
 | Mobile | React Native (Expo) |
-| Admin | Next.js (same codebase) |
+| Admin | Next.js UI + NestJS admin API |
 
 ---
 

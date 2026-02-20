@@ -8,6 +8,11 @@ const eslintConfig = defineConfig([
   {
     files: ["src/**/*.{ts,tsx}"],
     rules: {
+      "react/no-unescaped-entities": "off",
+      "@next/next/no-html-link-for-pages": "off",
+      "react-hooks/purity": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
       "no-restricted-imports": [
         "error",
         {

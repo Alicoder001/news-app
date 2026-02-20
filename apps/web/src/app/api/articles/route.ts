@@ -4,11 +4,25 @@ import {
   requestBackend,
 } from '@/lib/api/backend-client';
 
+function parseBoundedInt(
+  value: string | null,
+  fallback: number,
+  min: number,
+  max: number,
+): number {
+  const parsed = Number.parseInt(value ?? '', 10);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.max(min, parsed));
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = parseBoundedInt(searchParams.get('page'), 1, 1, 1000);
+    const limit = parseBoundedInt(searchParams.get('limit'), 10, 1, 50);
     const category = searchParams.get('category');
 
     const backend = await requestBackend<{
