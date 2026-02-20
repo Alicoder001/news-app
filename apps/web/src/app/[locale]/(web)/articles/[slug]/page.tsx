@@ -1,4 +1,3 @@
-import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -14,6 +13,8 @@ import {
 import { ShareButtons } from '@/components/share-buttons';
 import { SITE_CONFIG } from '@/lib/config/social';
 import { sanitizeHtml } from '@/lib/sanitize';
+import { getArticleBySlug, getArticleSlugs } from '@/lib/api/server-api';
+import type { Difficulty } from '@news-app/api-types';
 
 interface ArticlePageProps {
   params: Promise<{
@@ -22,20 +23,31 @@ interface ArticlePageProps {
 }
 
 async function getArticle(slug: string) {
-  const article = await prisma.article.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      tags: true,
-      rawArticle: {
-        include: {
-          source: true,
-        },
-      },
-    },
-  });
-
-  return article;
+  try {
+    const response = await getArticleBySlug(slug);
+    return response.data.article as {
+      id: string;
+      slug: string;
+      title: string;
+      summary: string | null;
+      content: string;
+      imageUrl: string | null;
+      originalUrl: string;
+      category?: { name: string; slug: string; color?: string | null } | null;
+      tags: Array<{ id: string; name: string; slug: string }>;
+      createdAt: string;
+      updatedAt: string;
+      readingTime?: number | null;
+      wordCount?: number | null;
+      difficulty?: Difficulty | null;
+      rawArticle?: {
+        publishedAt?: string | null;
+        source?: { name: string } | null;
+      } | null;
+    };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -43,11 +55,13 @@ async function getArticle(slug: string) {
  * This enables static generation at build time
  */
 export async function generateStaticParams() {
-  const articles = await prisma.article.findMany({
-    select: { slug: true },
-    take: 100, // Limit to most recent 100 articles for build performance
-    orderBy: { createdAt: 'desc' },
-  });
+  let articles: Array<{ slug: string }> = [];
+  try {
+    const response = await getArticleSlugs(100);
+    articles = (response.data.articles as Array<{ slug: string }>) ?? [];
+  } catch {
+    articles = [];
+  }
 
   return articles.map((article) => ({
     slug: article.slug,
@@ -74,8 +88,8 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     imageUrl: article.imageUrl,
     category: article.category?.name,
     tags: article.tags.map(t => t.name),
-    createdAt: article.createdAt,
-    updatedAt: article.updatedAt,
+    createdAt: new Date(article.createdAt),
+    updatedAt: new Date(article.updatedAt),
   });
 }
 
@@ -87,7 +101,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound();
   }
 
-  const publishedDate = article.rawArticle.publishedAt
+  const publishedDate = article.rawArticle?.publishedAt
     ? new Date(article.rawArticle.publishedAt).toLocaleDateString('uz-UZ', {
         year: 'numeric',
         month: 'long',
@@ -103,11 +117,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     slug: article.slug,
     imageUrl: article.imageUrl,
     category: article.category?.name,
-    createdAt: article.createdAt,
-    updatedAt: article.updatedAt,
+    createdAt: new Date(article.createdAt),
+    updatedAt: new Date(article.updatedAt),
     readingTime: article.readingTime,
     wordCount: article.wordCount,
-    source: article.rawArticle.source.name,
+    source: article.rawArticle?.source?.name ?? 'Unknown',
   });
 
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
@@ -230,7 +244,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div className="mt-8 flex items-center justify-between text-xs text-foreground/40 border-t border-foreground/5 pt-6">
             <div className="flex items-center gap-2">
                 <span>Manba:</span>
-                <span className="font-medium text-foreground/60">{article.rawArticle.source.name}</span>
+                <span className="font-medium text-foreground/60">{article.rawArticle?.source?.name ?? 'Unknown'}</span>
             </div>
             <a
                 href={article.originalUrl}

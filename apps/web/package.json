@@ -7,13 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "jest -c test/jest.config.cjs --runInBand"
   },
   "dependencies": {
     "@news-app/api-types": "workspace:*",
     "@news-app/i18n": "workspace:*",
     "@news-app/shared": "workspace:*",
-    "@prisma/client": "^6.19.1",
     "@types/dompurify": "^3.2.0",
     "cheerio": "^1.1.2",
     "cross-env": "^10.1.0",
@@ -27,14 +27,17 @@
     "next-intl": "^4.6.1",
     "next-themes": "^0.4.6",
     "openai": "^6.15.0",
+    "@tanstack/react-query": "^5.90.16",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-intersection-observer": "^10.0.2",
     "rss-parser": "^3.13.0",
+    "zustand": "^5.0.9",
     "zod": "^4.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jest": "^30.0.0",
     "@types/jsdom": "^27.0.0",
     "@types/node": "^20",
     "@types/node-cron": "^3.0.11",
@@ -43,7 +46,9 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "jest": "^30.2.0",
     "tailwindcss": "^4",
+    "ts-jest": "^29.4.6",
     "typescript": "^5"
   }
 }

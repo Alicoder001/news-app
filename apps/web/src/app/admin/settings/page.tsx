@@ -1,32 +1,27 @@
-import prisma from '@/lib/prisma';
 import { DataCard } from '@/components/admin/stats-card';
 import { Settings, Key, Globe, Bell, Database, RefreshCw } from 'lucide-react';
+import { getAdminSettings } from '@/lib/api/server-api';
 
 async function getSettings() {
-  const settings = await prisma.systemSetting.findMany();
-  const settingsMap: Record<string, string> = {};
-  
-  for (const setting of settings) {
-    settingsMap[setting.key] = setting.value;
-  }
-  
-  return settingsMap;
+  const response = await getAdminSettings();
+  const data = response.data as {
+    settings: Record<string, string>;
+  };
+  return data.settings;
 }
 
 async function getSystemInfo() {
-  const [articlesCount, sourcesCount, pipelineRuns] = await Promise.all([
-    prisma.article.count(),
-    prisma.newsSource.count(),
-    prisma.pipelineRun.count(),
-  ]);
-
-  return {
-    articlesCount,
-    sourcesCount,
-    pipelineRuns,
-    nodeVersion: process.version,
-    nextVersion: '15+',
+  const response = await getAdminSettings();
+  const data = response.data as {
+    systemInfo: {
+      articlesCount: number;
+      sourcesCount: number;
+      pipelineRuns: number;
+      nodeVersion: string;
+      nextVersion: string;
+    };
   };
+  return data.systemInfo;
 }
 
 export default async function SettingsPage() {

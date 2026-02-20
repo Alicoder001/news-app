@@ -1,18 +1,18 @@
-import prisma from '@/lib/prisma';
 import { Rss, Plus, ExternalLink } from 'lucide-react';
 import { SourceActions } from './source-actions';
+import { getAdminSources } from '@/lib/api/server-api';
 
 async function getSources() {
-  const sources = await prisma.newsSource.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      _count: {
-        select: { RawArticle: true },
-      },
-    },
-  });
-
-  return sources;
+  const response = await getAdminSources();
+  return (response.data.sources as Array<{
+    id: string;
+    name: string;
+    url: string;
+    type: string;
+    isActive: boolean;
+    lastFetched: string | null;
+    rawArticleCount: number;
+  }>) ?? [];
 }
 
 export default async function SourcesPage() {
@@ -69,13 +69,13 @@ export default async function SourcesPage() {
             <div className="space-y-2 mb-4">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Maqolalar</span>
-                <span className="font-medium">{source._count.RawArticle}</span>
+                <span className="font-medium">{source.rawArticleCount}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">So'ngi yangilangan</span>
                 <span className="text-xs">
                   {source.lastFetched 
-                    ? source.lastFetched.toLocaleDateString('uz-UZ')
+                    ? new Date(source.lastFetched).toLocaleDateString('uz-UZ')
                     : 'Hali yangilanmagan'
                   }
                 </span>

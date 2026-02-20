@@ -1,5 +1,5 @@
-import prisma from '@/lib/prisma';
 import { NewsProvider, RawArticleData } from '../types';
+import { NewsSourceRepository, SourceType } from '../repositories/news-source.repository';
 
 /**
  * Abstract Base Provider for News Sources
@@ -45,31 +45,19 @@ export abstract class BaseNewsProvider implements NewsProvider {
     type: 'NEWS_API' | 'RSS' | 'SCRAPER' = 'NEWS_API'
   ): Promise<string> {
     try {
-      // Try to find existing source
-      let source = await prisma.newsSource.findUnique({
-        where: { url },
-      });
+      const result = await NewsSourceRepository.getOrCreate(
+        this.name,
+        url,
+        type as SourceType,
+      );
 
-      // Create if not exists
-      if (!source) {
-        source = await prisma.newsSource.create({
-          data: {
-            name: this.name,
-            url,
-            type,
-            isActive: true,
-          },
-        });
+      if (result.isNew) {
         this.log(`Created new source: ${url}`);
       }
 
-      // Update last fetched time
-      await prisma.newsSource.update({
-        where: { id: source.id },
-        data: { lastFetched: new Date() },
-      });
+      await NewsSourceRepository.updateLastFetched(result.id);
 
-      return source.id;
+      return result.id;
     } catch (error) {
       this.log(`Failed to get/create source: ${error}`, 'error');
       throw error;

@@ -1,64 +1,60 @@
 import { NextResponse } from 'next/server';
-import { NewsPipeline } from '@/lib/news/services/news-pipeline.service';
-import prisma from '@/lib/prisma';
 
-/**
- * News Processing API
- * 
- * Processes raw articles through AI pipeline.
- * 
- * @route GET /api/news/process - Get processing status
- * @route POST /api/news/process - Trigger processing
- */
+import { ensureAdminApiAuth } from '@/lib/admin/auth';
+import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
 
 export async function GET() {
-  const [unprocessed, processed] = await Promise.all([
-    prisma.rawArticle.count({ where: { isProcessed: false } }),
-    prisma.rawArticle.count({ where: { isProcessed: true } }),
-  ]);
-  
   return NextResponse.json({
     success: true,
-    status: {
-      unprocessed,
-      processed,
-      pending: unprocessed,
-    },
-    message: 'Use POST to trigger processing',
+    message: 'Use POST to trigger processing job',
+    mode: 'backend-internal-job',
   });
 }
 
 export async function POST() {
-  const startTime = Date.now();
-  
+  const unauthorized = await ensureAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
-    console.log('🤖 Manual processing triggered...');
-    
-    // Get count before
-    const beforeCount = await prisma.article.count();
-    
-    await NewsPipeline.run();
-    
-    // Get count after
-    const afterCount = await prisma.article.count();
-    const duration = Date.now() - startTime;
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Pipeline completed',
-      duration: `${duration}ms`,
-      articlesCreated: afterCount - beforeCount,
-      totalArticles: afterCount,
+    const backend = await requestBackend<{
+      accepted: boolean;
+      queued: boolean;
+      mode: 'queue' | 'dry-run';
+      job: string;
+      jobId?: string;
+    }>('/v1/internal/jobs/trigger', {
+      method: 'POST',
+      headers: getInternalBridgeHeaders(),
+      body: JSON.stringify({
+        job: 'process-raw',
+        payload: {
+          trigger: 'manual-admin',
+          at: new Date().toISOString(),
+          idempotencyKey: `manual-process:${Date.now()}`,
+        },
+      }),
+    });
+
+    if (!backend.ok || !backend.data?.accepted) {
+      return NextResponse.json(
+        { success: false, error: 'Failed to trigger processing job' },
+        { status: backend.status || 502 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message:
+        backend.data.mode === 'queue' ? 'Processing job queued' : 'Processing dry-run accepted',
+      ...backend.data,
     });
   } catch (error) {
-    console.error('❌ Pipeline failed:', error);
-    
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: error instanceof Error ? error.message : 'Pipeline failed',
-      }, 
-      { status: 500 }
+      },
+      { status: 500 },
     );
   }
 }

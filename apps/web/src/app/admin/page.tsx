@@ -1,8 +1,7 @@
-import prisma from '@/lib/prisma';
 import { StatsCard, DataCard, StatusBadge } from '@/components/admin/stats-card';
 import { FileText, Rss, Coins, Activity, TrendingUp, Clock } from 'lucide-react';
-import { getUsageStats, getDailyUsage } from '@/lib/admin/usage-tracker';
 import Link from 'next/link';
+import { getAdminOverview } from '@/lib/api/server-api';
 
 /**
  * Admin Dashboard
@@ -11,62 +10,41 @@ import Link from 'next/link';
  */
 
 async function getDashboardStats() {
-  const now = new Date();
-  const todayStart = new Date(now.setHours(0, 0, 0, 0));
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
-  const [
-    totalArticles,
-    todayArticles,
-    totalSources,
-    activeSources,
-    lastPipelineRun,
-    recentPipelineRuns,
-  ] = await Promise.all([
-    prisma.article.count(),
-    prisma.article.count({
-      where: { createdAt: { gte: todayStart } },
-    }),
-    prisma.newsSource.count(),
-    prisma.newsSource.count({
-      where: { isActive: true },
-    }),
-    prisma.pipelineRun.findFirst({
-      orderBy: { startedAt: 'desc' },
-    }),
-    prisma.pipelineRun.findMany({
-      take: 5,
-      orderBy: { startedAt: 'desc' },
-    }),
-  ]);
-
-  // Get AI usage for this month
-  const usageStats = await getUsageStats(monthStart);
-
-  return {
-    totalArticles,
-    todayArticles,
-    totalSources,
-    activeSources,
-    lastPipelineRun,
-    recentPipelineRuns,
-    aiUsage: usageStats,
+  const response = await getAdminOverview();
+  return response.data as {
+    totalArticles: number;
+    todayArticles: number;
+    totalSources: number;
+    activeSources: number;
+    lastPipelineRun: {
+      status: string;
+      articlesProcessed: number;
+    } | null;
+    recentPipelineRuns: Array<{
+      id: string;
+      status: string;
+      startedAt: string;
+      articlesProcessed: number;
+    }>;
+    aiUsage: {
+      totalCost: number;
+      totalTokens: number;
+    };
+    dailyUsage: Array<{ date: string; tokens: number }>;
+    recentArticles: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      createdAt: string;
+      category?: { name?: string } | null;
+    }>;
   };
-}
-
-async function getRecentArticles() {
-  return await prisma.article.findMany({
-    take: 5,
-    orderBy: { createdAt: 'desc' },
-    include: { category: true },
-  });
 }
 
 export default async function AdminDashboard() {
   const stats = await getDashboardStats();
-  const recentArticles = await getRecentArticles();
-  const dailyUsage = await getDailyUsage(14);
+  const recentArticles = stats.recentArticles;
+  const dailyUsage = stats.dailyUsage;
 
   return (
     <div className="p-8">
@@ -141,7 +119,7 @@ export default async function AdminDashboard() {
                       </span>
                     )}
                     <span className="text-xs text-muted-foreground">
-                      {article.createdAt.toLocaleDateString('uz-UZ')}
+                      {new Date(article.createdAt).toLocaleDateString('uz-UZ')}
                     </span>
                   </div>
                 </div>
@@ -187,7 +165,7 @@ export default async function AdminDashboard() {
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {run.startedAt.toLocaleTimeString('uz-UZ', { 
+                  {new Date(run.startedAt).toLocaleTimeString('uz-UZ', { 
                     hour: '2-digit', 
                     minute: '2-digit' 
                   })}

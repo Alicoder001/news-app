@@ -1,27 +1,27 @@
-import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import { Search, Filter, Edit2, Eye } from 'lucide-react';
 import { DeleteArticleButton } from './delete-article-button';
+import { getAdminArticles } from '@/lib/api/server-api';
 
 async function getArticles(page: number = 1, limit: number = 20) {
-  const skip = (page - 1) * limit;
-
-  const [articles, total] = await Promise.all([
-    prisma.article.findMany({
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        category: true,
-        rawArticle: {
-          include: { source: true },
-        },
-      },
-    }),
-    prisma.article.count(),
-  ]);
-
-  return { articles, total, pages: Math.ceil(total / limit) };
+  const response = await getAdminArticles(page, limit);
+  const data = response.data as {
+    articles: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      viewCount: number;
+      createdAt: string;
+      category?: { name?: string } | null;
+      rawArticle?: { source?: { name?: string } | null } | null;
+    }>;
+    pagination: { total: number; totalPages: number };
+  };
+  return {
+    articles: data.articles,
+    total: data.pagination.total,
+    pages: data.pagination.totalPages,
+  };
 }
 
 export default async function ArticlesPage({
@@ -116,7 +116,7 @@ export default async function ArticlesPage({
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-xs text-muted-foreground">
-                    {article.createdAt.toLocaleDateString('uz-UZ')}
+                    {new Date(article.createdAt).toLocaleDateString('uz-UZ')}
                   </span>
                 </td>
                 <td className="px-6 py-4">

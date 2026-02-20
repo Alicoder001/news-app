@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import prisma from '@/lib/prisma';
+import { getArticleSlugs, getCategories } from '@/lib/api/server-api';
 
 /**
  * Dynamic Sitemap Generator
@@ -17,21 +17,19 @@ const LOCALES = ['uz', 'ru', 'en'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Get all published articles
-  const articles = await prisma.article.findMany({
-    select: {
-      slug: true,
-      updatedAt: true,
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 1000, // Limit for performance
-  });
-
-  // Get all categories
-  const categories = await prisma.category.findMany({
-    select: {
-      slug: true,
-    },
-  });
+  let articles: Array<{ slug: string; updatedAt: string }> = [];
+  let categories: Array<{ slug: string }> = [];
+  try {
+    const [articleResponse, categoryResponse] = await Promise.all([
+      getArticleSlugs(1000),
+      getCategories(),
+    ]);
+    articles = (articleResponse.data.articles as Array<{ slug: string; updatedAt: string }>) ?? [];
+    categories = (categoryResponse.data.categories as Array<{ slug: string }>) ?? [];
+  } catch {
+    articles = [];
+    categories = [];
+  }
 
   const sitemap: MetadataRoute.Sitemap = [];
 
@@ -50,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const locale of LOCALES) {
       sitemap.push({
         url: `${BASE_URL}/${locale}/articles/${article.slug}`,
-        lastModified: article.updatedAt,
+        lastModified: new Date(article.updatedAt),
         changeFrequency: 'weekly',
         priority: 0.8,
       });

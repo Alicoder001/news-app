@@ -4,20 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter @news-app/web --filter @news-app/mobile --parallel dev",
+    "dev:all": "pnpm --filter @news-app/web --filter @news-app/mobile --filter @news-app/api --parallel dev",
+    "dev:api": "pnpm --filter @news-app/api dev",
     "build": "pnpm -r build",
     "start": "pnpm --filter @news-app/web start",
     "lint": "pnpm -r lint",
-    "type-check": "pnpm -r type-check"
+    "type-check": "pnpm -r type-check && pnpm check:no-prisma-web",
+    "check:no-prisma-web": "node scripts/check-no-prisma-web.mjs"
   },
   "devDependencies": {
-    "prisma": "^6.1.0",
+    "prisma": "^7.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5"
   },
-  "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
-  },
   "dependencies": {
-    "@prisma/client": "^6.19.1"
+    "@prisma/client": "^7.4.0"
   }
 }

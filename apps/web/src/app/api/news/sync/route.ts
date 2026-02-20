@@ -1,50 +1,59 @@
 import { NextResponse } from 'next/server';
-import { newsManager } from '@/lib/news/news-manager';
 
-/**
- * News Sync API
- * 
- * Fetches articles from all registered providers.
- * 
- * @route GET /api/news/sync - Get sync status
- * @route POST /api/news/sync - Trigger sync
- */
+import { ensureAdminApiAuth } from '@/lib/admin/auth';
+import { getInternalBridgeHeaders, requestBackend } from '@/lib/api/backend-client';
 
 export async function GET() {
-  const status = newsManager.getStatus();
-  
   return NextResponse.json({
     success: true,
-    providers: status.providers,
-    providerCount: status.providerCount,
-    message: 'Use POST to trigger sync',
+    message: 'Use POST to trigger sync job',
+    mode: 'backend-internal-job',
   });
 }
 
 export async function POST() {
-  const startTime = Date.now();
-  
+  const unauthorized = await ensureAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
-    console.log('📥 Manual sync triggered...');
-    
-    const result = await newsManager.syncAll();
-    const duration = Date.now() - startTime;
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Sync completed',
-      duration: `${duration}ms`,
-      ...result,
+    const backend = await requestBackend<{
+      accepted: boolean;
+      queued: boolean;
+      mode: 'queue' | 'dry-run';
+      job: string;
+      jobId?: string;
+    }>('/v1/internal/jobs/trigger', {
+      method: 'POST',
+      headers: getInternalBridgeHeaders(),
+      body: JSON.stringify({
+        job: 'sync-news',
+        payload: {
+          trigger: 'manual-admin',
+          at: new Date().toISOString(),
+          idempotencyKey: `manual-sync:${Date.now()}`,
+        },
+      }),
+    });
+
+    if (!backend.ok || !backend.data?.accepted) {
+      return NextResponse.json(
+        { success: false, error: 'Failed to trigger sync job' },
+        { status: backend.status || 502 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: backend.data.mode === 'queue' ? 'Sync job queued' : 'Sync dry-run accepted',
+      ...backend.data,
     });
   } catch (error) {
-    console.error('❌ Sync failed:', error);
-    
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: error instanceof Error ? error.message : 'Sync failed',
-      }, 
-      { status: 500 }
+      },
+      { status: 500 },
     );
   }
 }

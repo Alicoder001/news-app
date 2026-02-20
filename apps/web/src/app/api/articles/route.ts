@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import {
+  CORS_HEADERS,
+  requestBackend,
+} from '@/lib/api/backend-client';
 
 export async function GET(request: Request) {
   try {
@@ -7,50 +10,48 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const category = searchParams.get('category');
-    
-    const skip = (page - 1) * limit;
 
-    const [articles, total] = await Promise.all([
-      prisma.article.findMany({
-        where: category ? {
-          category: {
-            slug: category
-          }
-        } : {},
-        include: {
-          category: true,
-          tags: true,
-        },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      prisma.article.count({
-        where: category ? {
-          category: {
-            slug: category
-          }
-        } : {},
-      }),
-    ]);
-    const totalPages = Math.ceil(total / limit);
+    const backend = await requestBackend<{
+      success: boolean;
+      data: {
+        articles: unknown[];
+        pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPages: number;
+          hasNextPage: boolean;
+          hasPrevPage: boolean;
+        };
+      };
+    }>('/v1/articles', {
+      query: { page, limit, category: category ?? undefined },
+    });
+
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: 'Backend API Error' },
+        {
+          status: backend.status || 502,
+          headers: CORS_HEADERS,
+        }
+      );
+    }
+
+    const payload = backend.data.data;
     
     return NextResponse.json({
-      articles,
+      articles: payload.articles,
       pagination: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
+        page: payload.pagination.page,
+        limit: payload.pagination.limit,
+        total: payload.pagination.total,
+        totalPages: payload.pagination.totalPages,
+        hasNextPage: payload.pagination.hasNextPage,
+        hasPrevPage: payload.pagination.hasPrevPage,
       }
     }, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
+      headers: CORS_HEADERS,
     });
   } catch (error) {
     console.error('API Articles Error:', error);
@@ -58,7 +59,7 @@ export async function GET(request: Request) {
       { error: 'Internal Server Error' }, 
       { 
         status: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' }
+        headers: CORS_HEADERS
       }
     );
   }
@@ -67,10 +68,6 @@ export async function GET(request: Request) {
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
+    headers: CORS_HEADERS,
   });
 }

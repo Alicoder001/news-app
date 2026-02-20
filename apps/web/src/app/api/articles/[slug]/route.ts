@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import {
+  CORS_HEADERS,
+  requestBackend,
+} from '@/lib/api/backend-client';
 
 export async function GET(
   request: Request,
@@ -8,33 +11,35 @@ export async function GET(
   try {
     const { slug } = await params;
 
-    const article = await prisma.article.findUnique({
-      where: { slug },
-      include: {
-        category: true,
-        tags: true,
-        rawArticle: {
-          include: { source: true }
-        }
-      },
-    });
+    const backend = await requestBackend<{
+      success: boolean;
+      data: {
+        article: unknown;
+      };
+    }>(`/v1/articles/${slug}`);
 
-    if (!article) {
+    if (backend.status === 404) {
       return NextResponse.json(
         { error: 'Article not found' }, 
         { 
           status: 404,
-          headers: { 'Access-Control-Allow-Origin': '*' }
+          headers: CORS_HEADERS
         }
       );
     }
 
-    return NextResponse.json(article, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
+    if (!backend.ok || !backend.data?.success) {
+      return NextResponse.json(
+        { error: 'Backend API Error' },
+        {
+          status: backend.status || 502,
+          headers: CORS_HEADERS,
+        }
+      );
+    }
+
+    return NextResponse.json(backend.data.data.article, {
+      headers: CORS_HEADERS,
     });
   } catch (error) {
     console.error('API Single Article Error:', error);
@@ -42,7 +47,7 @@ export async function GET(
       { error: 'Internal Server Error' }, 
       { 
         status: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' }
+        headers: CORS_HEADERS
       }
     );
   }
@@ -51,10 +56,6 @@ export async function GET(
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
+    headers: CORS_HEADERS,
   });
 }
