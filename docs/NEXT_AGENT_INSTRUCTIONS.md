@@ -2,275 +2,264 @@
 
 ## Purpose
 
-This file is a direct handoff instruction for the next AI agent that will continue the `ai_shunos` MVP implementation.
+This is a strict handoff for the next AI agent.
 
-Your job is to take the current repository state and finish the remaining MVP work in one continuous execution pass.
+You must operate in the spirit of the local `autonomous-delivery` skill:
 
-You must **not** stop after each small task to report progress.
+- ultra strict end-to-end delivery mode
+- minimal interruption
+- blocker parameters collected up front
+- real `docs/TASKS.md` execution board discipline
+- continue implementing until the project is fully complete or a true blocker is reached
 
-You must continue working until:
+Do not treat this as a normal conversational coding session.
 
-- all realistically completable pending tasks are implemented, or
-- you hit a real blocker that cannot be resolved from repository context, or
-- you finish the full MVP task board.
+## Required Working Mode
 
-Only after that, produce one final report.
+You must follow this loop:
 
-## Absolute Working Mode
+`inspect -> normalize task board if needed -> identify blockers -> ask once for all blocker parameters -> write them into the correct files -> implement continuously -> validate -> update docs/TASKS.md -> final report once`
 
-You must work in this mode:
+You must not:
 
-- start work immediately
-- do not pause for incremental summaries
-- do not ask for confirmation between normal implementation steps
-- do not stop at analysis only
-- do not leave obvious next-step scaffolding when you can implement it now
-- do not return partial progress updates unless a real blocker appears
+- stop after small wins
+- ask for confirmation between ordinary implementation steps
+- give frequent progress summaries
+- leave obvious scaffolds when real implementation is possible now
+- delay environment setup until late in the run
 
-The expected behavior is:
+You must stop only if:
 
-`analyze -> implement -> wire together -> validate -> continue -> finalize report once`
+- a true blocker remains after repository inspection
+- the user has not yet provided required secrets/parameters you explicitly requested
+- an external dependency cannot be installed or reached even after reasonable remediation
 
-## Primary Source of Truth
+## First Required Action: Upfront Blocker Intake
 
-Read these files first and use them as the implementation contract:
+Before deep implementation, you must inspect the repository and then ask the user once in one compact grouped batch for all truly blocking inputs.
 
-- [docs/TASKS.md](/Users/coder/Desktop/news-app/docs/TASKS.md)
-- [docs/MVP_END_TO_END_SPEC.md](/Users/coder/Desktop/news-app/docs/MVP_END_TO_END_SPEC.md)
-- [docs/PHASES_OVERVIEW.md](/Users/coder/Desktop/news-app/docs/PHASES_OVERVIEW.md)
-- [docs/PHASE_1_FOUNDATION_AND_ARCHITECTURE.md](/Users/coder/Desktop/news-app/docs/PHASE_1_FOUNDATION_AND_ARCHITECTURE.md)
-- [docs/PHASE_2_DATA_AND_INGESTION.md](/Users/coder/Desktop/news-app/docs/PHASE_2_DATA_AND_INGESTION.md)
-- [docs/PHASE_3_VERIFICATION_AND_AGENTS.md](/Users/coder/Desktop/news-app/docs/PHASE_3_VERIFICATION_AND_AGENTS.md)
-- [docs/PHASE_4_PUBLISHING_AND_CLIENT_SURFACES.md](/Users/coder/Desktop/news-app/docs/PHASE_4_PUBLISHING_AND_CLIENT_SURFACES.md)
-- [docs/PHASE_5_ADMIN_AND_OPERATIONS.md](/Users/coder/Desktop/news-app/docs/PHASE_5_ADMIN_AND_OPERATIONS.md)
-- [docs/PROMPT_ENGINEERING_PIPELINE.md](/Users/coder/Desktop/news-app/docs/PROMPT_ENGINEERING_PIPELINE.md)
-- [docs/STARTUP.md](/Users/coder/Desktop/news-app/docs/STARTUP.md)
+This is mandatory.
 
-## Current Project Intent
+Do not start the main implementation pass until you have collected or resolved the blocker inputs.
 
-This repository is a fresh MVP rebuild.
+At minimum, verify whether you have these:
 
-The old project has already been archived into:
+- `DATABASE_URL`
+- `APP_URL`
+- `INTERNAL_PIPELINE_SECRET`
+- `CRON_SECRET`
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHANNEL_ID`
+- `AGENT_RUNTIME_MODE`
+- real CLI runtime command if agent execution should be non-placeholder
+- deployment target details if deployment is expected in this pass
+- public domain or Vercel URL if publish validation depends on it
+- any admin auth choice if admin protection is expected in this pass
 
-- [legacy](/Users/coder/Desktop/news-app/legacy)
+Rules for intake:
 
-Do not move legacy back into active root.
+- ask once, not repeatedly
+- group related items together
+- propose sensible defaults where possible
+- if the user needs to create a token, credential, bot, or URL, explicitly tell them to create it before the pass continues
+- once values are provided, write them immediately into the correct `.env`, config, docs, or placeholders
 
-The new MVP must follow these architectural decisions:
+## Source of Truth
 
-- `WSL Ubuntu + Docker Compose` as operational development model
-- `Prisma + PostgreSQL` for persistence
-- `TanStack Query` for server state
-- `Zustand` for local UI state
-- `Lucide React` for icon system
-- `RSS only` ingestion for MVP
-- `2-3 source verification`
-- `3-agent pipeline`
-- `website first, telegram second`
-- `Mini App reads the same published content source`
-- `local worker -> shared PostgreSQL -> Vercel reads`
-- `admin dashboard local`
-- `public website + mini app on Vercel`
+Read these first and treat them as the execution contract:
 
-## Your Main Objective
+- [docs/TASKS.md](/C:/Users/coder/Desktop/news-app/docs/TASKS.md)
+- [docs/MVP_END_TO_END_SPEC.md](/C:/Users/coder/Desktop/news-app/docs/MVP_END_TO_END_SPEC.md)
+- [docs/PHASES_OVERVIEW.md](/C:/Users/coder/Desktop/news-app/docs/PHASES_OVERVIEW.md)
+- [docs/PHASE_1_FOUNDATION_AND_ARCHITECTURE.md](/C:/Users/coder/Desktop/news-app/docs/PHASE_1_FOUNDATION_AND_ARCHITECTURE.md)
+- [docs/PHASE_2_DATA_AND_INGESTION.md](/C:/Users/coder/Desktop/news-app/docs/PHASE_2_DATA_AND_INGESTION.md)
+- [docs/PHASE_3_VERIFICATION_AND_AGENTS.md](/C:/Users/coder/Desktop/news-app/docs/PHASE_3_VERIFICATION_AND_AGENTS.md)
+- [docs/PHASE_4_PUBLISHING_AND_CLIENT_SURFACES.md](/C:/Users/coder/Desktop/news-app/docs/PHASE_4_PUBLISHING_AND_CLIENT_SURFACES.md)
+- [docs/PHASE_5_ADMIN_AND_OPERATIONS.md](/C:/Users/coder/Desktop/news-app/docs/PHASE_5_ADMIN_AND_OPERATIONS.md)
+- [docs/PROMPT_ENGINEERING_PIPELINE.md](/C:/Users/coder/Desktop/news-app/docs/PROMPT_ENGINEERING_PIPELINE.md)
+- [docs/STARTUP.md](/C:/Users/coder/Desktop/news-app/docs/STARTUP.md)
 
-Finish the remaining MVP tasks from the execution board in [docs/TASKS.md](/Users/coder/Desktop/news-app/docs/TASKS.md).
+Also inspect at minimum:
 
-You should treat the board as the execution backlog.
+- [package.json](/C:/Users/coder/Desktop/news-app/package.json)
+- [prisma/schema.prisma](/C:/Users/coder/Desktop/news-app/prisma/schema.prisma)
+- [prisma/migrations](/C:/Users/coder/Desktop/news-app/prisma/migrations)
+- [src/lib/validation/env.ts](/C:/Users/coder/Desktop/news-app/src/lib/validation/env.ts)
+- [src/lib/pipeline](/C:/Users/coder/Desktop/news-app/src/lib/pipeline)
+- [src/lib/verification](/C:/Users/coder/Desktop/news-app/src/lib/verification)
+- [src/lib/agents](/C:/Users/coder/Desktop/news-app/src/lib/agents)
+- [src/app/api](/C:/Users/coder/Desktop/news-app/src/app/api)
+- [src/app/admin](/C:/Users/coder/Desktop/news-app/src/app/admin)
+- [src/app/articles](/C:/Users/coder/Desktop/news-app/src/app/articles)
+- [src/app/tg](/C:/Users/coder/Desktop/news-app/src/app/tg)
 
-Whenever you complete a task, update `docs/TASKS.md`.
+## TASKS Board Discipline
 
-When you implement a major part, reflect that in the relevant docs if needed.
+`docs/TASKS.md` is mandatory and must remain a real execution board.
 
-## Execution Priority
+If it is weak, stale, or no longer reflects the repository, repair it before major implementation.
 
-You must complete work in this order unless repository context strongly requires a nearby reordering:
+Status rules:
 
-### 1. Runtime and Validation
+- `[x]` only for truly completed work
+- `[~]` for partial, blocked, or environment-limited work
+- `[ ]` for pending work
+- `[-]` only while actively in progress
 
-Finish the pieces required to make the project runnable:
+Update `docs/TASKS.md` during the pass, not only at the very end.
 
-- standardize API responses using the shared response helper
-- improve route-level error handling consistency
-- validate Prisma generate/migrate workflow
-- make sure the worker entrypoint is connected to orchestration
-- add cron trigger strategy
-- add lock/idempotency protection
-- add structured operational logs
+## Environment and Operations: Non-Negotiable
 
-### 2. Data and Verification Hardening
+The project intent is:
 
-Then finish the real MVP data path:
+- `WSL Ubuntu + Docker Compose`
+- `PostgreSQL + Prisma`
+- local worker plus app
+- public website and mini app reading shared published data
 
-- implement real `2-3 source` verification lookup logic
-- add verification confidence strategy
-- improve ingestion retry and timeout policy
-- add hold/reject persistence reasons on article records
-- validate real RSS fetch against live feeds if environment allows
+Before claiming the system is blocked, you must actively verify the runtime environment.
 
-### 3. Agent Runtime Completion
+### WSL and Docker procedure
 
-Then replace placeholder behavior where possible:
+You must check these in order:
 
-- replace placeholder agent logic with real CLI runtime execution if feasible in this environment
-- otherwise build a robust abstraction so agent execution can be swapped in cleanly
-- add JSON schema validation and retry enforcement around agent outputs
+1. Verify WSL availability from Windows:
+   - `wsl.exe -l -v`
+   - `wsl.exe --status`
+2. If Ubuntu exists, run commands inside Ubuntu explicitly:
+   - `wsl.exe -d Ubuntu bash -lc "pwd"`
+   - `wsl.exe -d Ubuntu bash -lc "which docker || command -v docker"`
+   - `wsl.exe -d Ubuntu bash -lc "docker --version"`
+   - `wsl.exe -d Ubuntu bash -lc "docker compose version"`
+3. If Docker is missing inside Ubuntu, attempt reasonable remediation:
+   - check whether Docker Desktop integration is expected
+   - check whether Docker daemon is reachable
+   - if the project standard is local Docker in WSL, install or fix Docker access if feasible in this environment
+4. If Ubuntu is missing entirely, state that clearly and tell the user exactly what must be installed or enabled
 
-If true CLI execution cannot be reliably completed in this environment, do the best complete implementation possible short of the external dependency, and document exactly what remains.
+Do not stop at "docker command not found" from Windows if WSL has not yet been checked properly.
 
-### 4. Admin Dashboard Completion
+If installation or repair is feasible, do it.
 
-Then make admin genuinely usable:
+If it is not feasible, document the exact failed checks and the smallest required user action.
 
-- add article detail admin view
-- add verification-to-article traceability in UI
-- improve table UX and actions
-- add loading and empty states polish
-- add source create/toggle flow polish
+### Database procedure
 
-### 5. Public and Mini App Completion
+You must not leave database validation as a theory-only claim if the environment can support it.
 
-Then improve the user-facing surfaces:
+If Docker or PostgreSQL becomes available, you must:
 
-- add better home page sections
-- add category pages
-- add SEO metadata per article
-- add source references block on article page
-- add Mini App category filter
-- add Mini App settings/preferences UI
-- add saved items behavior
+- create or update `.env`
+- run Prisma generate
+- run Prisma migrate
+- seed sources
+- validate at least one ingestion cycle
+- validate one worker cycle
 
-### 6. Professionalization
+If DB credentials are invalid, treat that as a blocker to surface early, not late.
 
-Then finish quality and architecture cleanup:
+## Current Repository Reality
 
-- add shared API response wrappers everywhere
-- add domain-level error classes
-- add safer HTML/content sanitization strategy
-- add article/source DTO typing cleanup
-- add code comments only where genuinely useful
+The repo already has meaningful progress. Do not start from zero.
 
-### 7. Testing
+Current notable implemented areas include:
 
-Then verify the system:
+- standardized route helper foundation
+- domain errors
+- pipeline lock and structured event logging
+- worker entrypoint in TypeScript
+- cron trigger route
+- verification confidence and multi-source matching scaffold
+- admin article detail view
+- category pages
+- SEO metadata on article pages
+- source references rendering
+- Mini App filters, preferences, and saved items behavior
+- Prisma migration SQL checked into repo
+
+You must inspect the current code before deciding what is still missing.
+
+## Main Objective
+
+Finish the remaining MVP work from [docs/TASKS.md](/C:/Users/coder/Desktop/news-app/docs/TASKS.md).
+
+You should behave like the owner of the remaining backlog, not like a partial implementer.
+
+## Execution Priorities
+
+Unless repo reality strongly forces a nearby reorder, proceed in this order:
+
+### 1. Resolve runtime blockers early
+
+- gather missing envs and tokens up front
+- verify WSL Ubuntu and Docker from terminal
+- install or repair Docker access if possible
+- bring up PostgreSQL or otherwise obtain a working DB
+- validate Prisma migrate and seed for real
+
+### 2. Complete real end-to-end runtime validation
 
 - run Prisma generate
-- run migration
-- seed sources
-- validate one RSS ingestion cycle
-- validate one full local pipeline cycle
+- run migration on a real database
+- run source seed
+- validate one real RSS ingestion cycle
+- validate one full worker orchestration cycle
 - validate website publish path
-- validate Telegram publish path if env allows
-- add initial unit tests
-- add initial integration tests
+- validate Telegram publish path if real credentials are provided
 
-## Non-Negotiable Implementation Rules
+### 3. Finish remaining backlog items honestly
 
-Follow these rules strictly.
+- agent runtime improvements that still depend on a real CLI command
+- Telegram formatting and failure recovery
+- admin loading and empty-state polish
+- tests that are still pending
+- any remaining docs drift
 
-### Completion Discipline
+## Quality Rules
 
-- Do not stop after creating scaffolds if you can implement the actual behavior.
-- Do not leave obvious placeholders if they can be completed in this pass.
-- Do not leave the worker disconnected if you can wire it now.
-- Do not leave APIs inconsistent if you can normalize them now.
-
-### Reporting Discipline
-
-- Do not give step-by-step progress reports.
-- Do not stop to summarize after each completed subtask.
-- Only provide one final response when the pass is complete.
-
-### Task Tracking Discipline
-
-- Update [docs/TASKS.md](/Users/coder/Desktop/news-app/docs/TASKS.md) continuously as you complete work.
-- Mark tasks honestly:
-  - `[x]` only if really implemented
-  - `[~]` if partial/scaffold only
-  - `[ ]` if still pending
-- Add new tasks only if they are truly needed.
-
-### Documentation Discipline
-
-- Keep docs aligned with actual implementation.
-- If architecture changes, update the corresponding docs.
-- Do not let docs drift from code.
-
-### Quality Discipline
-
-- Prefer clean, typed service boundaries.
 - Keep route handlers thin.
-- Put real logic into `src/lib`.
-- Use Prisma cleanly and consistently.
-- Keep public content read paths separate from admin mutations.
+- Put business logic in `src/lib`.
+- Keep DTO and response shapes consistent.
+- Prefer clean typed boundaries.
+- Do not claim validation you did not actually run.
+- Do not mark task items done if the environment prevented completion.
 
-## Files and Areas You Must Inspect Before Implementing
+## Reporting Rules
 
-At minimum, inspect these areas before large changes:
+Communication must stay low-noise.
 
-- [package.json](/Users/coder/Desktop/news-app/package.json)
-- [prisma/schema.prisma](/Users/coder/Desktop/news-app/prisma/schema.prisma)
-- [src/lib/db/prisma.ts](/Users/coder/Desktop/news-app/src/lib/db/prisma.ts)
-- [src/lib/validation/env.ts](/Users/coder/Desktop/news-app/src/lib/validation/env.ts)
-- [src/lib/rss](/Users/coder/Desktop/news-app/src/lib/rss)
-- [src/lib/verification](/Users/coder/Desktop/news-app/src/lib/verification)
-- [src/lib/agents](/Users/coder/Desktop/news-app/src/lib/agents)
-- [src/lib/pipeline](/Users/coder/Desktop/news-app/src/lib/pipeline)
-- [src/lib/publish](/Users/coder/Desktop/news-app/src/lib/publish)
-- [src/lib/telegram](/Users/coder/Desktop/news-app/src/lib/telegram)
-- [src/app/api](/Users/coder/Desktop/news-app/src/app/api)
-- [src/app/admin](/Users/coder/Desktop/news-app/src/app/admin)
-- [src/app/articles](/Users/coder/Desktop/news-app/src/app/articles)
-- [src/app/tg](/Users/coder/Desktop/news-app/src/app/tg)
-- [prompts](/Users/coder/Desktop/news-app/prompts)
+You may send only:
 
-## Expected End State
+- one short blocker-parameter request near the beginning
+- one blocker message later only if a true blocker remains
+- one final completion report at the end
 
-At the end of your pass, the repository should be significantly closer to a real runnable MVP, not just a scaffold set.
-
-The expected minimum end state is:
-
-- Prisma workflow is executable
-- source seeding is executable
-- worker can run orchestration
-- APIs are more consistent
-- admin can trigger and inspect pipeline
-- verification visibility is improved
-- public and Mini App surfaces are usable
-- tasks board reflects real current state
+Do not give step-by-step progress updates after each task.
 
 ## Final Report Format
 
-Only when all work for this pass is finished, give one final report.
-
-The report must contain:
+When the pass truly ends, report:
 
 ### 1. What Was Completed
 
-Summarize the major completed areas.
+### 2. What Was Validated
 
-### 2. What Was Updated
+### 3. What Remains and Why
 
-Reference the most important files changed.
+### 4. Which `docs/TASKS.md` items were updated
 
-### 3. Validation
+If blocked, include:
 
-State what was run and what was verified.
-
-### 4. Remaining Work
-
-List only genuine remaining blockers or deferred items.
-
-### 5. Task Board Status
-
-Mention that `docs/TASKS.md` was updated and reflects the current repo state.
+- the exact blocker
+- what you tried
+- the smallest user action needed to unblock the next pass
 
 ## Final Instruction
 
-Do the work in one continuous pass.
+First inspect.
 
-Do not stop after each subtask.
+Then ask once for all blocker parameters.
 
-Do not behave like an interactive progress reporter.
+Then write those values where they belong.
 
-Behave like an autonomous implementation agent that owns the remaining MVP work until the pass is fully complete.
+Then continue implementing and validating without stopping until the project is fully completed or a true blocker remains.
