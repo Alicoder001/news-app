@@ -1,0 +1,7 @@
+interface:
+  display_name: "Autonomous Delivery"
+  short_description: "Ultra strict one-pass project delivery"
+  default_prompt: "Use $autonomous-delivery to finish this project in ultra strict end-to-end mode with upfront blocker collection and only a final report."
+
+policy:
+  allow_implicit_invocation: true

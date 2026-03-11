@@ -1,0 +1,5 @@
+Using the normalized article and verification result, produce:
+- a short Telegram-ready post
+- a full website-ready article
+- category, slug, and tags
+Return strict JSON using the writer schema.

@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  RSS
+}
+
+enum VerificationStatus {
+  VERIFIED
+  PARTIAL
+  INSUFFICIENT
+}
+
+enum ArticleStatus {
+  DRAFT
+  APPROVED
+  HOLD
+  REJECTED
+}
+
+enum DeliveryChannel {
+  WEB
+  TELEGRAM
+  MINI_APP
+}
+
+enum DeliveryStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PipelineRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum PipelineStage {
+  INGEST
+  VERIFY
+  COLLECT
+  WRITE
+  REVIEW
+  PUBLISH_WEB
+  PUBLISH_TELEGRAM
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+}
+
+model Source {
+  id            String       @id @default(cuid())
+  name          String
+  url           String       @unique
+  type          SourceType   @default(RSS)
+  isActive      Boolean      @default(true)
+  lastFetchedAt DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  rawArticles   RawArticle[]
+}
+
+model RawArticle {
+  id                 String              @id @default(cuid())
+  sourceId           String
+  source             Source              @relation(fields: [sourceId], references: [id])
+  title              String
+  summary            String?
+  content            String?
+  canonicalUrl       String              @unique
+  imageUrl           String?
+  publishedAt        DateTime?
+  ingestedAt         DateTime            @default(now())
+  isDuplicate        Boolean             @default(false)
+  isProcessed        Boolean             @default(false)
+  processingState    ArticleStatus       @default(DRAFT)
+  holdReason         String?
+  rejectReason       String?
+  verificationRecord VerificationRecord?
+  article            Article?
+}
+
+model VerificationRecord {
+  id           String             @id @default(cuid())
+  rawArticleId String             @unique
+  rawArticle   RawArticle         @relation(fields: [rawArticleId], references: [id])
+  status       VerificationStatus
+  confidence   Float
+  notes        String?
+  sourceCount  Int
+  matchedSources Json?
+  createdAt    DateTime           @default(now())
+}
+
+model Article {
+  id                  String      @id @default(cuid())
+  rawArticleId        String      @unique
+  rawArticle          RawArticle  @relation(fields: [rawArticleId], references: [id])
+  slug                String      @unique
+  title               String
+  shortSummary        String?
+  shortPost           String?
+  fullArticle         String
+  category            String
+  tags                String[]
+  websitePublished    Boolean     @default(false)
+  websitePublishedAt  DateTime?
+  websiteUrl          String?
+  telegramPublished   Boolean     @default(false)
+  telegramPublishedAt DateTime?
+  telegramMessageId   String?
+  status              ArticleStatus @default(DRAFT)
+  holdReason          String?
+  rejectReason        String?
+  sourceReferences    Json?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  deliveries          Delivery[]
+}
+
+model Delivery {
+  id           String         @id @default(cuid())
+  articleId    String
+  article      Article        @relation(fields: [articleId], references: [id])
+  channel      DeliveryChannel
+  status       DeliveryStatus @default(PENDING)
+  externalId   String?
+  errorMessage String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model PipelineRun {
+  id                       String            @id @default(cuid())
+  status                   PipelineRunStatus @default(RUNNING)
+  startedAt                DateTime          @default(now())
+  finishedAt               DateTime?
+  articlesFound            Int               @default(0)
+  articlesVerified         Int               @default(0)
+  articlesProcessed        Int               @default(0)
+  articlesPublishedWeb     Int               @default(0)
+  articlesPublishedTelegram Int              @default(0)
+  errorsCount              Int               @default(0)
+  notes                    String?
+  events                   PipelineEvent[]
+  lock                     PipelineLock?
+}
+
+model PipelineEvent {
+  id            String        @id @default(cuid())
+  pipelineRunId String
+  pipelineRun   PipelineRun   @relation(fields: [pipelineRunId], references: [id])
+  stage         PipelineStage
+  level         LogLevel
+  message       String
+  meta          Json?
+  createdAt     DateTime      @default(now())
+}
+
+model PipelineLock {
+  key        String      @id
+  runId      String?     @unique
+  pipelineRun PipelineRun? @relation(fields: [runId], references: [id])
+  lockedAt   DateTime
+  expiresAt  DateTime
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}

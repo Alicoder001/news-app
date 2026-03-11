@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-shunos-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ai_shunos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: ai-shunos-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: ai-shunos-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

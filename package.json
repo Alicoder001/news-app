@@ -1,0 +1,37 @@
+{
+  "name": "ai-shunos",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "worker:dev": "tsx watch src/worker/index.ts",
+    "worker:run-once": "tsx src/worker/index.ts --run-once",
+    "sources:seed": "node scripts/seed-sources.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.6.0",
+    "@tanstack/react-query": "^5.66.0",
+    "lucide-react": "^0.511.0",
+    "next": "^15.2.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "rss-parser": "^3.13.0",
+    "zod": "^3.24.2",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "prisma": "^6.6.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

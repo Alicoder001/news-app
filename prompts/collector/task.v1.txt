@@ -1,0 +1,3 @@
+Normalize the provided RSS item.
+Keep only factual source data.
+Return strict JSON using the collector schema.

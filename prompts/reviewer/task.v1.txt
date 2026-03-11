@@ -1,0 +1,2 @@
+Review the draft article against the normalized source and verification data.
+Return APPROVE, REJECT, or HOLD with issues in strict JSON.
