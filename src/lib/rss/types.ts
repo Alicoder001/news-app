@@ -1,6 +1,7 @@
 export type RssSourceInput = {
   name: string;
   url: string;
+  isActive?: boolean;
 };
 
 export type ParsedRssItem = {

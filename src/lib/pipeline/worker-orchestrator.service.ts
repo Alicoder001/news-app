@@ -86,8 +86,22 @@ export async function runPipelineCycle() {
     });
 
     for (const source of activeSources) {
-      const ingestResult = await ingestSource(source, run.id);
-      found += ingestResult.createdCount;
+      try {
+        const ingestResult = await ingestSource(source, run.id);
+        found += ingestResult.createdCount;
+      } catch (error) {
+        await createPipelineEvent({
+          pipelineRunId: run.id,
+          stage: 'INGEST',
+          level: 'ERROR',
+          message: `Failed to ingest RSS source: ${source.name}`,
+          meta: {
+            sourceId: source.id,
+            sourceUrl: source.url,
+            error: error instanceof Error ? error.message : 'Unknown RSS error',
+          },
+        });
+      }
     }
 
     const rawArticles = await prisma.rawArticle.findMany({

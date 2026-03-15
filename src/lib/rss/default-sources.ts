@@ -1,8 +1,8 @@
 import type { RssSourceInput } from './types';
 
 export const DEFAULT_RSS_SOURCES: RssSourceInput[] = [
-  { name: 'OpenAI Blog', url: 'https://openai.com/blog/rss/' },
-  { name: 'Anthropic News', url: 'https://www.anthropic.com/news/rss' },
+  { name: 'OpenAI Blog', url: 'https://openai.com/blog/rss/', isActive: false },
+  { name: 'NVIDIA Developer Blog', url: 'https://developer.nvidia.com/blog/feed' },
   { name: 'Google DeepMind', url: 'https://deepmind.google/blog/rss.xml' },
   {
     name: 'TechCrunch AI',

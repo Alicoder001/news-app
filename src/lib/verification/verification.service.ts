@@ -5,7 +5,7 @@ import { toVerificationDto } from '@/lib/content/dto';
 
 export const TRUSTED_SOURCES: TrustedSource[] = [
   { name: 'OpenAI Blog', url: 'https://openai.com/blog/rss/', tier: 1 },
-  { name: 'Anthropic News', url: 'https://www.anthropic.com/news/rss', tier: 1 },
+  { name: 'NVIDIA Developer Blog', url: 'https://developer.nvidia.com/blog/feed', tier: 1 },
   { name: 'Google DeepMind', url: 'https://deepmind.google/blog/rss.xml', tier: 1 },
   { name: 'TechCrunch AI', url: 'https://techcrunch.com/category/artificial-intelligence/feed/', tier: 2 },
   { name: 'The Verge AI', url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', tier: 2 },

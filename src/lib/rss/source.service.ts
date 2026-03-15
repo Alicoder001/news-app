@@ -15,7 +15,7 @@ export async function createSource(input: RssSourceInput) {
       name: input.name,
       url: input.url,
       type: SourceType.RSS,
-      isActive: true,
+      isActive: input.isActive ?? true,
     },
   });
 }
