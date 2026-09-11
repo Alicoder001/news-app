@@ -1,4 +1,4 @@
-import { DeliveryStatus, PipelineRunStatus, VerificationStatus } from '@prisma/client';
+import { ArticleStatus, DeliveryStatus, PipelineRunStatus, VerificationStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { listSources } from '@/lib/rss/source.service';
 import { ingestSource } from '@/lib/rss/ingestion.service';
@@ -63,15 +63,12 @@ async function finalizeRun(
   });
 }
 
-export async function runPipelineCycle() {
+// Mode 1: RSS fetch loop only.
+export async function runIngestOnly() {
   const run = await createPipelineRun();
   await acquirePipelineLock(run.id);
 
   let found = 0;
-  let verified = 0;
-  let processed = 0;
-  let publishedWeb = 0;
-  let publishedTelegram = 0;
 
   try {
     const sources = await listSources();
@@ -81,7 +78,7 @@ export async function runPipelineCycle() {
       pipelineRunId: run.id,
       stage: 'INGEST',
       level: 'INFO',
-      message: 'Pipeline cycle started',
+      message: 'Ingest-only run started',
       meta: { activeSources: activeSources.length },
     });
 
@@ -104,6 +101,44 @@ export async function runPipelineCycle() {
       }
     }
 
+    await finalizeRun(run.id, {
+      status: PipelineRunStatus.COMPLETED,
+      found,
+      verified: 0,
+      processed: 0,
+      publishedWeb: 0,
+      publishedTelegram: 0,
+    });
+
+    return { runId: run.id, found };
+  } catch (error) {
+    await finalizeRun(run.id, {
+      status: PipelineRunStatus.FAILED,
+      found,
+      verified: 0,
+      processed: 0,
+      publishedWeb: 0,
+      publishedTelegram: 0,
+      notes: error instanceof Error ? error.message : 'Unknown ingest error',
+      errorsCount: 1,
+    });
+
+    throw error;
+  } finally {
+    await releasePipelineLock(run.id);
+  }
+}
+
+// Mode 2: verify + collector/writer/reviewer + createDraft + markApproved (WEB only, no Telegram).
+export async function runProcessBatch() {
+  const run = await createPipelineRun();
+  await acquirePipelineLock(run.id);
+
+  let verified = 0;
+  let processed = 0;
+  let publishedWeb = 0;
+
+  try {
     const rawArticles = await prisma.rawArticle.findMany({
       where: { isProcessed: false, isDuplicate: false },
       include: { source: true, verificationRecord: true, article: true },
@@ -198,52 +233,27 @@ export async function runPipelineCycle() {
         externalId: websiteUrl,
       });
       publishedWeb += 1;
-
-      const telegramResult = await publishTelegramPost({
-        articleId: draft.id,
-        text: `${writer.article.shortPost}\n\n${websiteUrl}`,
-      });
-
-      if (telegramResult.success) {
-        await markTelegramPublished(draft.id, telegramResult.messageId ?? 'pending');
-        publishedTelegram += 1;
-      } else {
-        await createPipelineEvent({
-          pipelineRunId: run.id,
-          stage: 'PUBLISH_TELEGRAM',
-          level: 'WARN',
-          message: `Telegram publish failed for article ${draft.id}`,
-          meta: { error: telegramResult.error },
-        });
-      }
     }
 
     await finalizeRun(run.id, {
       status: PipelineRunStatus.COMPLETED,
-      found,
+      found: 0,
       verified,
       processed,
       publishedWeb,
-      publishedTelegram,
+      publishedTelegram: 0,
     });
 
-    return {
-      runId: run.id,
-      found,
-      verified,
-      processed,
-      publishedWeb,
-      publishedTelegram,
-    };
+    return { runId: run.id, verified, processed, publishedWeb };
   } catch (error) {
     await finalizeRun(run.id, {
       status: PipelineRunStatus.FAILED,
-      found,
+      found: 0,
       verified,
       processed,
       publishedWeb,
-      publishedTelegram,
-      notes: error instanceof Error ? error.message : 'Unknown pipeline error',
+      publishedTelegram: 0,
+      notes: error instanceof Error ? error.message : 'Unknown process error',
       errorsCount: 1,
     });
 
@@ -251,4 +261,115 @@ export async function runPipelineCycle() {
   } finally {
     await releasePipelineLock(run.id);
   }
+}
+
+// Mode 3: drip-publish APPROVED articles with telegramPublished=false, oldest first.
+export async function runPublishDrip(maxPerRun?: number) {
+  const env = getEnv();
+  const limit = maxPerRun ?? env.PUBLISH_MAX_PER_RUN;
+  const run = await createPipelineRun();
+  await acquirePipelineLock(run.id);
+
+  let publishedTelegram = 0;
+
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const todayCount = await prisma.article.count({
+      where: {
+        telegramPublished: true,
+        telegramPublishedAt: { gte: startOfDay },
+      },
+    });
+
+    const remaining = env.PUBLISH_DAILY_CAP - todayCount;
+
+    if (remaining <= 0) {
+      await finalizeRun(run.id, {
+        status: PipelineRunStatus.COMPLETED,
+        found: 0,
+        verified: 0,
+        processed: 0,
+        publishedWeb: 0,
+        publishedTelegram: 0,
+        notes: 'Telegram daily cap reached, skipping publish',
+      });
+
+      return { runId: run.id, publishedTelegram: 0, capped: true };
+    }
+
+    const take = Math.min(limit, remaining);
+
+    const pending = await prisma.article.findMany({
+      where: { status: ArticleStatus.APPROVED, telegramPublished: false },
+      orderBy: { createdAt: 'asc' },
+      take,
+    });
+
+    for (const article of pending) {
+      const websiteUrl = article.websiteUrl ?? buildWebsiteUrl(article.slug);
+      const text = `${article.shortPost ?? article.title}\n\n${websiteUrl}`;
+
+      const telegramResult = await publishTelegramPost({
+        articleId: article.id,
+        text,
+      });
+
+      if (telegramResult.success) {
+        await markTelegramPublished(article.id, telegramResult.messageId ?? 'pending');
+        publishedTelegram += 1;
+      } else {
+        await createPipelineEvent({
+          pipelineRunId: run.id,
+          stage: 'PUBLISH_TELEGRAM',
+          level: 'WARN',
+          message: `Telegram publish failed for article ${article.id}`,
+          meta: { error: telegramResult.error },
+        });
+      }
+    }
+
+    await finalizeRun(run.id, {
+      status: PipelineRunStatus.COMPLETED,
+      found: 0,
+      verified: 0,
+      processed: 0,
+      publishedWeb: 0,
+      publishedTelegram,
+    });
+
+    return { runId: run.id, publishedTelegram, capped: false };
+  } catch (error) {
+    await finalizeRun(run.id, {
+      status: PipelineRunStatus.FAILED,
+      found: 0,
+      verified: 0,
+      processed: 0,
+      publishedWeb: 0,
+      publishedTelegram,
+      notes: error instanceof Error ? error.message : 'Unknown publish error',
+      errorsCount: 1,
+    });
+
+    throw error;
+  } finally {
+    await releasePipelineLock(run.id);
+  }
+}
+
+// Compat: full cycle = ingest + process + publish drip.
+export async function runPipelineCycle() {
+  const ingest = await runIngestOnly();
+  const processed = await runProcessBatch();
+  const published = await runPublishDrip();
+
+  return {
+    runId: processed.runId,
+    found: ingest.found,
+    verified: processed.verified,
+    processed: processed.processed,
+    publishedWeb: processed.publishedWeb,
+    publishedTelegram: published.publishedTelegram,
+  };
 }

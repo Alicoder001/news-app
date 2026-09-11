@@ -9,6 +9,8 @@ const envSchema = z.object({
   CRON_SECRET: z.string().min(1),
   AGENT_RUNTIME_MODE: z.string().min(1),
   WORKER_INTERVAL_MINUTES: z.coerce.number().int().positive().default(30),
+  PUBLISH_MAX_PER_RUN: z.coerce.number().int().positive().default(2),
+  PUBLISH_DAILY_CAP: z.coerce.number().int().positive().default(8),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
@@ -29,6 +31,8 @@ export function getEnv(): AppEnv {
     CRON_SECRET: process.env.CRON_SECRET,
     AGENT_RUNTIME_MODE: process.env.AGENT_RUNTIME_MODE,
     WORKER_INTERVAL_MINUTES: process.env.WORKER_INTERVAL_MINUTES ?? '30',
+    PUBLISH_MAX_PER_RUN: process.env.PUBLISH_MAX_PER_RUN ?? '2',
+    PUBLISH_DAILY_CAP: process.env.PUBLISH_DAILY_CAP ?? '8',
   });
 
   if (!parsed.success) {
