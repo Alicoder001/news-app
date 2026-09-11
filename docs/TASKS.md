@@ -184,7 +184,7 @@ Tamoyil:
 - [x] Validate one RSS ingestion cycle
 - [ ] Validate one full local pipeline cycle
 - [ ] Validate website publish path
-- [ ] Validate Telegram publish path
+- [x] Validate Telegram publish path
 - [ ] Add initial unit tests
 - [ ] Add initial integration tests
 
