@@ -133,6 +133,11 @@ export function formatTelegramPost(input: FormatTelegramPostInput): string {
       parts.push(bodySentences.map((sentence) => escapeTelegramHtml(sentence)).join(' '));
     }
 
+    if (websiteUrl) {
+      const safeUrl = websiteUrl;
+      parts.push(`🔗 <a href="${escapeUrlAttr(safeUrl)}">Batafsil o‘qish</a>`);
+    }
+
     if (validSources.length > 0) {
       const links = validSources.map((ref) => {
         const label = (ref.name ?? ref.label ?? ref.title ?? 'Manba').trim() || 'Manba';
@@ -143,11 +148,6 @@ export function formatTelegramPost(input: FormatTelegramPostInput): string {
 
     if (hashtags.length > 0) {
       parts.push(hashtags.join(' '));
-    }
-
-    if (websiteUrl) {
-      const safeUrl = websiteUrl;
-      parts.push(`🔗 <a href="${escapeUrlAttr(safeUrl)}">Batafsil o‘qish</a>`);
     }
 
     return parts.join('\n\n');
