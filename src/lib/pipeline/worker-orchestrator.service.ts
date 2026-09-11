@@ -26,12 +26,26 @@ function buildWebsiteUrl(slug: string) {
 
 function getReferenceSources(verification: { matchedSources?: unknown }, primarySource: { name: string; url: string }) {
   const matchedSources = Array.isArray(verification.matchedSources) ? verification.matchedSources : [];
-  return matchedSources.length > 0
+  const refs = matchedSources.length > 0
     ? matchedSources.map((source) => ({
         name: typeof source === 'object' && source && 'sourceName' in source ? String(source.sourceName) : primarySource.name,
-        url: typeof source === 'object' && source && 'sourceUrl' in source ? String(source.sourceUrl) : primarySource.url,
+        url:
+          typeof source === 'object' && source && 'canonicalUrl' in source && typeof source.canonicalUrl === 'string' && source.canonicalUrl.trim()
+            ? source.canonicalUrl.trim()
+            : typeof source === 'object' && source && 'sourceUrl' in source
+              ? String(source.sourceUrl)
+              : primarySource.url,
       }))
     : [{ name: primarySource.name, url: primarySource.url }];
+  const seen = new Set<string>();
+  return refs.filter((ref) => {
+    const key = ref.url.trim().toLowerCase();
+    if (!key || seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
 }
 
 async function finalizeRun(
