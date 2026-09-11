@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import { listPublishedArticles } from '@/lib/content/article.service';
 import { prisma } from '@/lib/db/prisma';
+import { CategoryNav } from '@/components/category-nav';
+import { HeroSection } from '@/components/hero-section';
+import { ArticleCard, estimateReadingTime } from '@/components/article-card';
 
 export default async function HomePage() {
   const [latestArticles, categories] = await Promise.all([
-    listPublishedArticles(6),
+    listPublishedArticles(12),
     prisma.article.groupBy({
       by: ['category'],
       where: { websitePublished: true },
@@ -13,53 +16,93 @@ export default async function HomePage() {
     }),
   ]);
 
+  const withReadingTime = latestArticles.map((article) => ({
+    ...article,
+    readingTime: estimateReadingTime(article.fullArticle),
+  }));
+
+  const featured = withReadingTime.slice(0, 3);
+  const featuredIds = new Set(featured.map((a) => a.id));
+  const regular = withReadingTime.filter((a) => !featuredIds.has(a.id));
+
   return (
-    <main style={{ padding: 32, display: 'grid', gap: 28 }}>
-      <section style={{ padding: 28, borderRadius: 24, background: 'linear-gradient(135deg, #ecfeff, #f8fafc 60%, #fef3c7)', border: '1px solid #dbeafe' }}>
-        <div style={{ maxWidth: 720 }}>
-          <div style={{ fontSize: 12, letterSpacing: 1.4, textTransform: 'uppercase', color: '#0f766e', marginBottom: 10 }}>AI news, verified</div>
-          <h1 style={{ fontSize: 42, marginBottom: 14 }}>ai_shunos daily pipeline for Uzbek tech coverage</h1>
-          <p style={{ maxWidth: 620, lineHeight: 1.7, color: '#374151', marginBottom: 18 }}>
-            Har bir maqola RSS orqali yig‘iladi, kamida 2 manba bilan solishtiriladi va website-first publish oqimi bilan chiqariladi.
-          </p>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Link href="/articles" style={{ padding: '10px 16px', background: '#111827', color: '#ffffff', borderRadius: 999, textDecoration: 'none' }}>Latest articles</Link>
-            <Link href="/tg" style={{ padding: '10px 16px', background: '#ffffff', color: '#111827', borderRadius: 999, textDecoration: 'none', border: '1px solid #d1d5db' }}>Mini App view</Link>
-          </div>
-        </div>
-      </section>
+    <div className="space-y-1">
+      <h1 className="sr-only">ai_shunos — AI news, verified. IT Yangiliklar, Sun&apos;iy Intellekt, Dasturlash, Texnologiya</h1>
 
-      <section>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h2 style={{ fontSize: 26 }}>Popular categories</h2>
-          <Link href="/articles">Browse all</Link>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-          {categories.map((category) => (
-            <Link key={category.category} href={`/categories/${category.category}`} style={{ padding: '10px 14px', borderRadius: 999, background: '#ffffff', border: '1px solid #e5e7eb', textDecoration: 'none', color: '#111827' }}>
-              {category.category} ({category._count.category})
-            </Link>
-          ))}
-        </div>
-      </section>
+      <CategoryNav categories={categories.map((c) => ({ name: c.category, count: c._count.category }))} />
 
-      <section>
-        <h2 style={{ fontSize: 26, marginBottom: 12 }}>Latest verified stories</h2>
-        <div style={{ display: 'grid', gap: 16 }}>
-          {latestArticles.map((article, index) => (
-            <article key={article.id} style={{ background: index === 0 ? '#111827' : '#ffffff', color: index === 0 ? '#ffffff' : '#111827', border: '1px solid #e5e7eb', borderRadius: 18, padding: 22 }}>
-              <div style={{ marginBottom: 8, fontSize: 12, opacity: 0.8 }}>{article.category}</div>
-              <h3 style={{ fontSize: 24, marginBottom: 10 }}>
-                <Link href={`/articles/${article.slug}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                  {article.title}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <main className="lg:col-span-9 space-y-4">
+          {featured.length > 0 && <HeroSection articles={featured} />}
+
+          <section className="space-y-6">
+            <div className="flex items-center justify-between border-b border-foreground/5 pb-3">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.3em] text-foreground/70">
+                <span className="sr-only">IT Yangiliklar va Texnologiya Tahlillari — </span>
+                Latest verified stories
+              </h2>
+              <Link href="/articles" className="text-xs font-bold uppercase tracking-widest text-accent hover:underline">
+                Browse all
+              </Link>
+            </div>
+
+            {regular.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-7">
+                {regular.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No published articles yet.</p>
+            )}
+          </section>
+        </main>
+
+        <aside className="lg:col-span-3 self-start sticky top-24 space-y-6">
+          <section className="glass-card p-4 rounded-2xl">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/70 mb-4">
+              Popular categories
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <Link
+                  key={category.category}
+                  href={'/categories/' + encodeURIComponent(category.category)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-foreground/5 border border-foreground/10 text-foreground/70 hover:text-foreground hover:border-foreground/20 transition-colors"
+                >
+                  {category.category}
+                  <span className="text-foreground/40">({category._count.category})</span>
                 </Link>
-              </h3>
-              {article.shortSummary && <p style={{ lineHeight: 1.7, color: index === 0 ? '#e5e7eb' : '#4b5563' }}>{article.shortSummary}</p>}
-            </article>
-          ))}
-          {latestArticles.length === 0 && <p>No published articles yet.</p>}
-        </div>
-      </section>
-    </main>
+              ))}
+              {categories.length === 0 && (
+                <p className="text-xs text-muted-foreground">No categories yet.</p>
+              )}
+            </div>
+          </section>
+
+          <section className="glass-card p-5 rounded-2xl space-y-3">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/70">About ai_shunos</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Har bir maqola RSS orqali yig&apos;iladi, kamida 2 manba bilan solishtiriladi va website-first
+              publish oqimi bilan chiqariladi.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Link
+                href="/articles"
+                className="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold bg-foreground text-background hover:opacity-85 transition-opacity"
+              >
+                Latest articles
+              </Link>
+              <Link
+                href="/tg"
+                className="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 transition-colors"
+              >
+                Mini App view
+              </Link>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
   );
 }
