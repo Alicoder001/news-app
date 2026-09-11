@@ -1,3 +1,9 @@
+try {
+  require('dotenv').config();
+} catch {
+  // dotenv not installed — environment must provide DATABASE_URL
+}
+
 const { PrismaClient, SourceType } = require('@prisma/client');
 
 const prisma = new PrismaClient();
