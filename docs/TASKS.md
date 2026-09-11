@@ -180,7 +180,7 @@ Tamoyil:
 
 - [x] Run Prisma generate successfully
 - [~] Run Prisma migration successfully
-- [ ] Seed sources successfully
+- [~] Seed sources successfully
 - [~] Validate one RSS ingestion cycle
 - [ ] Validate one full local pipeline cycle
 - [ ] Validate website publish path

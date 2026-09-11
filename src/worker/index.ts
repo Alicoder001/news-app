@@ -1,14 +1,41 @@
 import { getEnv } from '@/lib/validation/env';
 import { log } from '@/lib/logging/logger';
-import { runPipelineCycle } from '@/lib/pipeline/worker-orchestrator.service';
+import { runIngestOnly, runPipelineCycle, runProcessBatch, runPublishDrip } from '@/lib/pipeline/worker-orchestrator.service';
+
+function getArgValue(flag: string): string | undefined {
+  const index = process.argv.indexOf(flag);
+  if (index === -1) {
+    return undefined;
+  }
+  return process.argv[index + 1];
+}
 
 async function executeCycle() {
+  const mode = getArgValue('--mode') ?? 'full';
+  const maxPublishRaw = getArgValue('--max-publish');
+  const maxPublish = maxPublishRaw !== undefined ? Number(maxPublishRaw) : undefined;
+
   try {
-    const result = await runPipelineCycle();
+    let result: unknown;
+
+    if (mode === 'ingest') {
+      result = await runIngestOnly();
+    } else if (mode === 'process') {
+      result = await runProcessBatch();
+    } else if (mode === 'publish') {
+      result = await runPublishDrip(
+        maxPublish !== undefined && Number.isFinite(maxPublish) && maxPublish > 0 ? maxPublish : undefined,
+      );
+    } else if (mode === 'full') {
+      result = await runPipelineCycle();
+    } else {
+      throw new Error(`Invalid mode: ${mode}. Valid modes: ingest, process, publish, full`);
+    }
+
     log({
       level: 'INFO',
       message: 'Worker cycle finished',
-      context: result,
+      context: { mode, ...(typeof result === 'object' && result !== null ? result : { result }) },
     });
   } catch (error) {
     log({
