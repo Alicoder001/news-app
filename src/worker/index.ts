@@ -26,8 +26,10 @@ async function executeCycle() {
       result = await runPublishDrip(
         maxPublish !== undefined && Number.isFinite(maxPublish) && maxPublish > 0 ? maxPublish : undefined,
       );
-    } else {
+    } else if (mode === 'full') {
       result = await runPipelineCycle();
+    } else {
+      throw new Error(`Invalid mode: ${mode}. Valid modes: ingest, process, publish, full`);
     }
 
     log({

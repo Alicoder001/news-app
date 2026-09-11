@@ -266,7 +266,7 @@ export async function runProcessBatch() {
 // Mode 3: drip-publish APPROVED articles with telegramPublished=false, oldest first.
 export async function runPublishDrip(maxPerRun?: number) {
   const env = getEnv();
-  const limit = maxPerRun ?? env.PUBLISH_MAX_PER_RUN;
+  const limit = Math.floor(maxPerRun ?? env.PUBLISH_MAX_PER_RUN);
   const run = await createPipelineRun();
   await acquirePipelineLock(run.id);
 
@@ -274,7 +274,7 @@ export async function runPublishDrip(maxPerRun?: number) {
 
   try {
     const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setUTCHours(0, 0, 0, 0);
 
     const todayCount = await prisma.article.count({
       where: {
@@ -299,7 +299,7 @@ export async function runPublishDrip(maxPerRun?: number) {
       return { runId: run.id, publishedTelegram: 0, capped: true };
     }
 
-    const take = Math.min(limit, remaining);
+    const take = Math.floor(Math.min(limit, remaining));
 
     const pending = await prisma.article.findMany({
       where: { status: ArticleStatus.APPROVED, telegramPublished: false },

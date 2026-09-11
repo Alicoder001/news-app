@@ -16,28 +16,94 @@ const defaultSources = [
   },
 ];
 
-async function main() {
-  let created = 0;
-
-  for (const source of defaultSources) {
-    await prisma.source.upsert({
-      where: { url: source.url },
-      update: {
-        name: source.name,
-        isActive: source.isActive ?? true,
-      },
-      create: {
-        name: source.name,
-        url: source.url,
-        type: SourceType.RSS,
-        isActive: source.isActive ?? true,
-      },
-    });
-
-    created += 1;
+function isValidSourceUrl(value) {
+  if (typeof value !== 'string') {
+    return false;
   }
 
-  console.log(`Seeded or updated ${created} RSS sources.`);
+  const trimmed = value.trim();
+
+  if (trimmed.length === 0) {
+    return false;
+  }
+
+  let parsed;
+
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    return false;
+  }
+
+  return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+}
+
+function validateSource(source) {
+  if (!source || typeof source !== 'object') {
+    return { valid: false, reason: 'source entry is not an object' };
+  }
+
+  if (typeof source.name !== 'string' || source.name.trim().length === 0) {
+    return { valid: false, reason: 'missing or empty name' };
+  }
+
+  if (!isValidSourceUrl(source.url)) {
+    return { valid: false, reason: `invalid URL: ${String(source.url)}` };
+  }
+
+  return { valid: true };
+}
+
+async function main() {
+  let ok = 0;
+  let skipped = 0;
+  let failed = 0;
+
+  for (const source of defaultSources) {
+    const label = `${source && source.name ? source.name : '<unnamed>'} <${
+      source && source.url ? source.url : '<missing url>'
+    }>`;
+    const validation = validateSource(source);
+
+    if (!validation.valid) {
+      skipped += 1;
+      console.warn(`[SKIP] ${label} - ${validation.reason}`);
+      continue;
+    }
+
+    const url = source.url.trim();
+    const name = source.name.trim();
+
+    try {
+      // Idempotent: Source.url is @unique, so re-running the seed only updates.
+      await prisma.source.upsert({
+        where: { url },
+        update: {
+          name,
+          isActive: source.isActive ?? true,
+        },
+        create: {
+          name,
+          url,
+          type: SourceType.RSS,
+          isActive: source.isActive ?? true,
+        },
+      });
+
+      ok += 1;
+      console.log(`[OK] ${name} <${url}>`);
+    } catch (error) {
+      failed += 1;
+      console.error(`[FAIL] ${label} - ${error.message}`);
+    }
+  }
+
+  const total = defaultSources.length;
+  console.log(`Seed summary: OK=${ok} SKIP=${skipped} FAIL=${failed} total=${total}`);
+
+  if (failed > 0) {
+    throw new Error(`${failed} source(s) failed to seed`);
+  }
 }
 
 main()

@@ -1,6 +1,6 @@
 import { runIngestOnly, runPipelineCycle, runProcessBatch, runPublishDrip } from '@/lib/pipeline/worker-orchestrator.service';
 import { withRouteHandler } from '@/lib/api/response';
-import { UnauthorizedError } from '@/lib/errors/domain';
+import { UnauthorizedError, ValidationError } from '@/lib/errors/domain';
 import { getEnv } from '@/lib/validation/env';
 
 export async function POST(request: Request) {
@@ -29,6 +29,10 @@ export async function POST(request: Request) {
       return runPublishDrip(Number.isFinite(maxPerRun) && (maxPerRun as number) > 0 ? maxPerRun : undefined);
     }
 
-    return runPipelineCycle();
+    if (mode === 'full') {
+      return runPipelineCycle();
+    }
+
+    throw new ValidationError(`Invalid mode: ${mode}. Valid modes: ingest, process, publish, full`);
   });
 }
