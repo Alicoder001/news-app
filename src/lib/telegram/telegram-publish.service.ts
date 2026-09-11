@@ -26,6 +26,36 @@ export type TelegramPublishResult = {
   retryable: boolean;
 };
 
+export type TelegramDeleteResult = {
+  success: boolean;
+  error?: string | null;
+};
+
+export async function deleteTelegramPost(messageId: string): Promise<TelegramDeleteResult> {
+  const env = getEnv();
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/deleteMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: env.TELEGRAM_CHANNEL_ID,
+        message_id: Number(messageId),
+      }),
+    });
+
+    if (!response.ok) {
+      return { success: false, error: `Telegram API error: ${response.status}` };
+    }
+
+    return { success: true, error: null };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Telegram network request failed' };
+  }
+}
+
 type TelegramApiPayload = {
   ok?: boolean;
   result?: { message_id?: number };
