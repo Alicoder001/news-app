@@ -309,11 +309,20 @@ export async function runPublishDrip(maxPerRun?: number) {
 
     for (const article of pending) {
       const websiteUrl = article.websiteUrl ?? buildWebsiteUrl(article.slug);
-      const text = `${article.shortPost ?? article.title}\n\n${websiteUrl}`;
+      const sourceRefs = Array.isArray(article.sourceReferences)
+        ? (article.sourceReferences as Array<{ name?: unknown; url?: unknown }>)
+            .filter((ref) => typeof ref?.url === 'string')
+            .map((ref) => ({ name: typeof ref?.name === 'string' ? ref.name : 'Manba', url: ref.url as string }))
+        : null;
 
       const telegramResult = await publishTelegramPost({
         articleId: article.id,
-        text,
+        title: article.title,
+        shortSummary: article.shortSummary ?? article.shortPost ?? undefined,
+        websiteUrl,
+        category: article.category,
+        tags: article.tags,
+        sourceRefs,
       });
 
       if (telegramResult.success) {
