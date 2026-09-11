@@ -205,6 +205,14 @@ Tamoyil:
 - [x] Add article detail admin view
 - [x] Add verification-to-article traceability in UI
 
+## 15. Story Radar (kelajak, 6-faza)
+
+- [ ] Add Story model and migration
+- [ ] Add event calendar + KUTILMOQDA flow
+- [ ] Add burst detector (token velocity) + FAOL flow
+- [ ] Add Telegram update-thread + YAKUNLANDI recap
+- [ ] Hujjat: [STORY_RADAR_CONCEPT.md](/Users/coder/Desktop/news-app/docs/STORY_RADAR_CONCEPT.md)
+
 ## Reference Docs
 
 - [PHASES_OVERVIEW.md](/Users/coder/Desktop/news-app/docs/PHASES_OVERVIEW.md)
@@ -214,3 +222,4 @@ Tamoyil:
 - [PHASE_3_VERIFICATION_AND_AGENTS.md](/Users/coder/Desktop/news-app/docs/PHASE_3_VERIFICATION_AND_AGENTS.md)
 - [PHASE_4_PUBLISHING_AND_CLIENT_SURFACES.md](/Users/coder/Desktop/news-app/docs/PHASE_4_PUBLISHING_AND_CLIENT_SURFACES.md)
 - [PHASE_5_ADMIN_AND_OPERATIONS.md](/Users/coder/Desktop/news-app/docs/PHASE_5_ADMIN_AND_OPERATIONS.md)
+- [STORY_RADAR_CONCEPT.md](/Users/coder/Desktop/news-app/docs/STORY_RADAR_CONCEPT.md)
