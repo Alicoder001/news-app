@@ -78,10 +78,10 @@ function buildHashtags(category?: string | null, tags?: string[] | null): string
   }
 
   if (result.length < 2) {
-    push('News');
+    push('Yangiliklar');
   }
   if (result.length < 2) {
-    push('Daily');
+    push('AI');
   }
 
   return result.slice(0, 4);
@@ -110,8 +110,17 @@ export function formatTelegramPost(input: FormatTelegramPostInput): string {
   const sentences = splitSentences(summary);
   const initialBodySentences = sentences.length === 0 ? [] : sentences.slice(0, 5);
 
+  const seenUrls = new Set<string>();
   const validSources = sourceRefs
     .filter((ref) => ref && typeof ref.url === 'string' && ref.url.trim().length > 0)
+    .filter((ref) => {
+      const key = ref.url.trim().toLowerCase();
+      if (seenUrls.has(key)) {
+        return false;
+      }
+      seenUrls.add(key);
+      return true;
+    })
     .slice(0, 3);
 
   const hashtags = buildHashtags(input.category, input.tags);
@@ -126,10 +135,10 @@ export function formatTelegramPost(input: FormatTelegramPostInput): string {
 
     if (validSources.length > 0) {
       const links = validSources.map((ref) => {
-        const label = (ref.name ?? ref.label ?? ref.title ?? 'Source').trim() || 'Source';
+        const label = (ref.name ?? ref.label ?? ref.title ?? 'Manba').trim() || 'Manba';
         return `<a href="${escapeUrlAttr(ref.url.trim())}">${escapeTelegramHtml(label)}</a>`;
       });
-      parts.push(`📰 Sources: ${links.join(', ')}`);
+      parts.push(`📰 Manbalar: ${links.join(', ')}`);
     }
 
     if (hashtags.length > 0) {
@@ -138,7 +147,7 @@ export function formatTelegramPost(input: FormatTelegramPostInput): string {
 
     if (websiteUrl) {
       const safeUrl = websiteUrl;
-      parts.push(`🔗 <a href="${escapeUrlAttr(safeUrl)}">${escapeTelegramHtml(safeUrl)}</a>`);
+      parts.push(`🔗 <a href="${escapeUrlAttr(safeUrl)}">Batafsil o‘qish</a>`);
     }
 
     return parts.join('\n\n');
