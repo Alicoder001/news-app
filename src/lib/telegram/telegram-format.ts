@@ -111,14 +111,19 @@ export function formatTelegramPost(input: FormatTelegramPostInput): string {
   const initialBodySentences = sentences.length === 0 ? [] : sentences.slice(0, 5);
 
   const seenUrls = new Set<string>();
+  const seenNames = new Set<string>();
   const validSources = sourceRefs
     .filter((ref) => ref && typeof ref.url === 'string' && ref.url.trim().length > 0)
     .filter((ref) => {
-      const key = ref.url.trim().toLowerCase();
-      if (seenUrls.has(key)) {
+      const urlKey = ref.url.trim().toLowerCase();
+      const nameKey = (ref.name ?? ref.label ?? ref.title ?? '').trim().toLowerCase();
+      if (seenUrls.has(urlKey) || (nameKey && seenNames.has(nameKey))) {
         return false;
       }
-      seenUrls.add(key);
+      seenUrls.add(urlKey);
+      if (nameKey) {
+        seenNames.add(nameKey);
+      }
       return true;
     })
     .slice(0, 3);
